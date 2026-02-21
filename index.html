@@ -848,7 +848,7 @@
 
     #numpad {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 7px;
     }
 
@@ -1119,9 +1119,9 @@
         inset 0 1px 0 rgba(57,255,20,0.06);
     }
 
-    .np-spacer { grid-column: span 3; height: 3px; }
+    .np-spacer { grid-column: span 4; height: 3px; }
     .np.enter.full {
-      grid-column: span 3;
+      grid-column: span 4;
       height: 66px;
     }
 
@@ -1129,6 +1129,21 @@
       height: 54px;
       font-size: 16px;
       letter-spacing: 8px;
+    }
+
+    .np.enter.tall {
+      grid-row: span 3;
+      height: auto;
+    }
+    .np.enter.tall .key-face {
+      height: 100%;
+      font-size: 13px;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.6;
     }
 
     /* ENTER key in NEW GAME mode -- glowing pulse */
@@ -1673,17 +1688,15 @@
       <button class="np" data-digit="7"><span class="key-face">7</span></button>
       <button class="np" data-digit="8"><span class="key-face">8</span></button>
       <button class="np" data-digit="9"><span class="key-face">9</span></button>
+      <button class="np enter tall" id="guessBtn" data-action="enter" style="grid-row: span 3;"><span class="key-face">E<br>N<br>T<br>E<br>R</span></button>
       <button class="np" data-digit="4"><span class="key-face">4</span></button>
       <button class="np" data-digit="5"><span class="key-face">5</span></button>
       <button class="np" data-digit="6"><span class="key-face">6</span></button>
       <button class="np" data-digit="1"><span class="key-face">1</span></button>
       <button class="np" data-digit="2"><span class="key-face">2</span></button>
       <button class="np" data-digit="3"><span class="key-face">3</span></button>
-      <button class="np" data-digit="0"><span class="key-face">0</span></button>
-      <button class="np np-decimal" data-action="decimal"><span class="key-face">.</span></button>
+      <button class="np" data-digit="0" style="grid-column: span 2;"><span class="key-face">0</span></button>
       <button class="np" data-action="backspace"><span class="key-face">⌫</span></button>
-      <div class="np-spacer"></div>
-      <button class="np enter full" id="guessBtn" data-action="enter"><span class="key-face">ENTER</span></button>
     </div>
   </div>
 
