@@ -75,14 +75,12 @@
     .housing {
       position: relative;
       border-radius: 22px;
-      /* Padding maps UI elements into the correct zones of the photo:
-         top=8% of image height, sides=13% of image width, bottom=5% */
-      padding: 80px 74px 50px;
+      width: 560px;
+      height: 933px;
       transform-style: preserve-3d;
-      background-image: url('assets/images/housing.jpg');
+      background-image: url('assets/images/housing.png');
       background-size: 100% 100%;
       background-repeat: no-repeat;
-      background-position: center center;
       border: none;
       box-shadow:
         0 0 80px rgba(57,255,20,0.04),
@@ -260,8 +258,12 @@
        CRT SCREEN -- recessed into housing
        ========================================== */
     .screen-bezel {
-      position: relative;
-      border-radius: 8px;
+      position: absolute;
+      top: 58px;
+      left: 73px;
+      right: 147px;
+      height: 436px;
+      border-radius: 6px;
       padding: 10px;
       background:
         linear-gradient(160deg,
@@ -274,16 +276,12 @@
       border-right: 1px solid rgba(0,0,0,0.6);
       border-bottom: 1px solid rgba(0,0,0,0.6);
       box-shadow:
-        /* Inset shadow on inner face -- depth without crushing corners */
         inset 0 4px 12px rgba(0,0,0,0.8),
         inset 4px 0 10px rgba(0,0,0,0.5),
         inset -4px 0 10px rgba(0,0,0,0.5),
         inset 0 -2px 8px rgba(0,0,0,0.4),
-        /* Subtle green ambient from screen */
         0 0 20px rgba(57,255,20,0.06),
-        /* Outer shadow pressing it into the housing */
         0 2px 8px rgba(0,0,0,0.7);
-      margin-bottom: 16px;
       overflow: hidden;
     }
 
@@ -310,38 +308,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      /* Idle dim transition */
-      transition: filter 1.5s ease, opacity 1.5s ease;
-    }
-
-    /* IDLE SCREEN DIMMING */
-    .terminal.idle-dim {
-      filter: brightness(0.55) saturate(0.6);
-      opacity: 0.85;
-    }
-
-    /* Phosphor drift when idle */
-    .terminal.idle-dim::after {
-      animation: phosphorDrift 8s ease-in-out infinite;
-    }
-
-    @keyframes phosphorDrift {
-      0%, 100% {
-        background:
-          radial-gradient(ellipse at 50% 40%, rgba(57,255,20,0.03) 0%, transparent 70%);
-      }
-      25% {
-        background:
-          radial-gradient(ellipse at 40% 55%, rgba(57,255,20,0.04) 0%, transparent 65%);
-      }
-      50% {
-        background:
-          radial-gradient(ellipse at 60% 35%, rgba(57,255,20,0.05) 0%, transparent 60%);
-      }
-      75% {
-        background:
-          radial-gradient(ellipse at 45% 50%, rgba(57,255,20,0.035) 0%, transparent 68%);
-      }
+      /* Idle dim removed */
     }
 
     /* CRT SCANLINE + NOISE -- now handled by <canvas id="crtCanvas"> */
@@ -417,7 +384,7 @@
 
     .terminal-bar {
       background: linear-gradient(180deg, #1a2e1a 0%, #0f1f0f 100%);
-      padding: 8px 14px;
+      padding: 5px 8px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -539,7 +506,7 @@
     }
 
     .log-line {
-      font-size: 14px;
+      font-size: 18px;
       line-height: 1.6;
       padding: 2px 0;
       animation: fadeIn 0.2s ease;
@@ -857,24 +824,16 @@
        ========================================== */
 
     .keypad-well {
-      background:
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 2px,
-          rgba(0,0,0,0.03) 2px,
-          rgba(0,0,0,0.03) 3px
-        ),
-        linear-gradient(180deg, #100e0a 0%, #141210 50%, #100e0a 100%);
+      position: absolute;
+      top: 496px;
+      left: 73px;
+      right: 147px;
+      bottom: 58px;
+      background: transparent;
       border-radius: 6px;
-      padding: 16px;
-      border: 1px solid rgba(0,0,0,0.6);
-      box-shadow:
-        inset 0 4px 10px rgba(0,0,0,0.9),
-        inset 0 -1px 0 rgba(255,255,255,0.03),
-        inset 3px 0 8px rgba(0,0,0,0.6),
-        inset -3px 0 8px rgba(0,0,0,0.6),
-        0 1px 0 rgba(255,255,255,0.06);
+      padding: 10px;
+      border: none;
+      box-shadow: none;
     }
 
     .keypad-label {
@@ -1459,6 +1418,10 @@
       color: var(--green);
       opacity: 1;
       animation: promptPulse 1.0s ease-in-out infinite;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
     .splash-ready.hidden-prompt {
@@ -1513,16 +1476,23 @@
       }
       .device:hover { transform: none !important; }
       .housing {
-        border-radius: 18px;
-        padding: 8% 13% 5%;
-        min-height: auto;
+        width: 100vw;
+        height: calc(100vw * 933 / 560);
+        border-radius: 0;
         background-size: 100% 100%;
       }
-      /* Kill 3D depth faces -- invisible without tilt, just add overflow */
-      .housing::before, .housing::after { display: none; }
-      .vents { display: none; }
-      /* Bottom screws serve no purpose on full-bleed mobile */
-      .screw-bl, .screw-br { display: none; }
+      .screen-bezel {
+        top: 6.2%;
+        left: 13.0%;
+        right: 26.3%;
+        height: 46.7%;
+      }
+      .keypad-well {
+        top: 53.2%;
+        left: 13.0%;
+        right: 26.3%;
+        bottom: 6.2%;
+      }
       .screw { width: 10px; height: 10px; }
       .screw::before, .screw::after { width: 6px; }
       .screw-tl { top: 8px; left: 8px; }
@@ -1559,7 +1529,7 @@
 
     /* Tighter fit for shorter phones (iPhone SE, older 4.7") */
     @media (max-width: 500px) and (max-height: 750px) {
-      .housing { padding: 8% 13% 5%; background-size: 100% 100%; }
+      .housing { padding: 26px 10px 12px; }
       .terminal-bar { padding: 4px 8px; }
       .terminal-body { padding: 8px 10px 10px; }
       h1 { font-size: 14px; margin-bottom: 2px; }
@@ -1588,8 +1558,9 @@
       .np.enter.full .key-face { height: 38px; font-size: 12px; letter-spacing: 5px; }
     }
 
-    /* Photo housing -- hide CSS-generated chrome elements */
-    .screw, .vents, .vent-slit, .housing-wear { display: none !important; }
+    /* Photo housing — hide CSS chrome */
+    .screw, .vents, .vent-slit, .housing-wear,
+    .housing-divider, .bulb-strip { display: none !important; }
   </style>
 </head>
 <body>
@@ -1638,12 +1609,14 @@
       <div class="crt-reflection"></div>
 
       <div class="terminal-bar">
-        <span class="terminal-title">guess.exe</span>
+        
       </div>
 
       <div class="terminal-body">
-        <h1>GUESS</h1>
-        <div class="subtitle">// number guessing protocol v4.9.3</div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
+          <h1 style="margin-bottom:0;">GUESS</h1>
+          <div class="subtitle" style="margin-bottom:0;">// number guessing protocol v4.9.3</div>
+        </div>
 
         <div class="stat-row">
           <div class="stat">
@@ -1785,7 +1758,7 @@
     updateBestDisplay();
     updatePlayedDisplay();
     resetGame();
-    if (window._startIdleTimer) window._startIdleTimer();
+
   }
 
   function initLayout() {
@@ -2530,36 +2503,6 @@
 
     // Start the loop
     requestAnimationFrame(render);
-  })();
-
-  // IDLE SCREEN DIMMING
-  (function() {
-    var IDLE_MS = 10000;
-    var idleTimer = null;
-    var terminal = document.querySelector('.terminal');
-    var started = false;
-
-    function goDim() {
-      terminal.classList.add('idle-dim');
-    }
-
-    function wakeUp() {
-      if (!started) return;
-      terminal.classList.remove('idle-dim');
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(goDim, IDLE_MS);
-    }
-
-    // Expose a start function so we can kick it off after splash
-    window._startIdleTimer = function() {
-      started = true;
-      idleTimer = setTimeout(goDim, IDLE_MS);
-    };
-
-    // Any interaction resets
-    ['click', 'keydown', 'pointerdown', 'touchstart', 'mousemove'].forEach(function(evt) {
-      document.addEventListener(evt, wakeUp, { passive: true });
-    });
   })();
 </script>
 
