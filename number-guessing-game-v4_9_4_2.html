@@ -1,0 +1,2604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Guess the Number</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a08;
+      --panel: #0d140d;
+      --panel-light: #162016;
+      --border: #1e3a1e;
+      --green: #39ff14;
+      --green-dim: #1a7a00;
+      --amber: #ffb700;
+      --red: #ff4040;
+      --text: #c8f5c8;
+      --muted: #4a7a4a;
+
+      /* Housing / device shell */
+      --screw-slot: #1a1910;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      /* perspective intentionally NOT set here -- it creates a stacking context
+         that traps position:fixed children (the splash). Set on .device instead. */
+      overflow-y: auto;
+      background-image:
+        radial-gradient(ellipse at 50% 80%, rgba(40,38,30,0.3) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 0%, rgba(57,255,20,0.03) 0%, transparent 50%),
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 4px,
+          rgba(255,255,255,0.003) 4px,
+          rgba(255,255,255,0.003) 5px
+        ),
+        repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 4px,
+          rgba(255,255,255,0.003) 4px,
+          rgba(255,255,255,0.003) 5px
+        );
+    }
+
+    /* ==========================================
+       DEVICE HOUSING
+       ========================================== */
+    .device {
+      width: 560px;
+      max-width: calc(100vw - 30px);
+      perspective: 1200px;
+      transform-style: preserve-3d;
+      transform: rotateX(3deg) rotateY(-1.5deg);
+      transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      filter: drop-shadow(0 50px 80px rgba(0,0,0,0.9));
+    }
+
+    .device:hover {
+      transform: rotateX(1.5deg) rotateY(0deg);
+    }
+
+    .housing {
+      position: relative;
+      border-radius: 8px;
+      padding: 28px 26px 26px;
+      transform-style: preserve-3d;
+      background:
+        repeating-linear-gradient(
+          87deg,
+          transparent,
+          transparent 3px,
+          rgba(255,255,255,0.008) 3px,
+          rgba(255,255,255,0.008) 4px
+        ),
+        linear-gradient(
+          175deg,
+          #3a3830 0%,
+          #2e2c24 15%,
+          #262420 40%,
+          #201e18 70%,
+          #1a1810 100%
+        );
+      border: 1px solid #4a4840;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.12),
+        inset 0 2px 0 rgba(255,255,255,0.05),
+        inset 1px 0 0 rgba(255,255,255,0.08),
+        inset 0 -2px 0 rgba(0,0,0,0.4),
+        inset 0 -1px 0 rgba(0,0,0,0.2),
+        inset -1px 0 0 rgba(0,0,0,0.3),
+        inset 0 0 40px rgba(0,0,0,0.3),
+        0 0 80px rgba(57,255,20,0.04),
+        0 0 120px rgba(57,255,20,0.02),
+        6px 16px 30px rgba(0,0,0,0.8),
+        0 40px 80px rgba(0,0,0,0.5);
+    }
+
+    .housing::after {
+      content: '';
+      position: absolute;
+      top: 6px; right: -12px; bottom: -6px;
+      width: 12px;
+      background: linear-gradient(to right, #1a1810, #0e0d08);
+      transform: rotateY(90deg);
+      transform-origin: left center;
+      border-radius: 0 4px 4px 0;
+      pointer-events: none;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .housing::before {
+      content: '';
+      position: absolute;
+      left: 6px; right: -6px; bottom: -12px;
+      height: 12px;
+      background: linear-gradient(to bottom, #161410, #0a0908);
+      transform: rotateX(-90deg);
+      transform-origin: top center;
+      border-radius: 0 0 4px 4px;
+      pointer-events: none;
+    }
+
+    /* CORNER SCREWS */
+    .screw {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 40% 35%,
+          #706e62 0%,
+          #555248 30%,
+          #3a3830 60%,
+          #2a2820 100%
+        );
+      border: 1px solid rgba(0,0,0,0.5);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.2),
+        inset 0 -1px 0 rgba(0,0,0,0.3),
+        0 1px 3px rgba(0,0,0,0.6);
+      z-index: 20;
+    }
+
+    .screw::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 8px; height: 1.5px;
+      background: var(--screw-slot);
+      transform: translate(-50%, -50%) rotate(35deg);
+      border-radius: 1px;
+    }
+    .screw::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 8px; height: 1.5px;
+      background: var(--screw-slot);
+      transform: translate(-50%, -50%) rotate(-55deg);
+      border-radius: 1px;
+    }
+
+    .screw-tl { top: 10px; left: 10px; cursor: pointer; transform: rotate(12deg); }
+    .screw-tr { top: 10px; right: 10px; transform: rotate(-25deg); }
+    .screw-bl { bottom: 10px; left: 10px; transform: rotate(45deg); }
+    .screw-br { bottom: 10px; right: 10px; transform: rotate(8deg); }
+
+    /* VENT SLITS */
+    .vents {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 5;
+      opacity: 0.5;
+    }
+
+    .vent-slit {
+      width: 3px;
+      height: 14px;
+      background: #0a0908;
+      border-radius: 1px;
+      box-shadow:
+        inset 0 1px 0 rgba(0,0,0,0.8),
+        0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    /* POWER LED */
+    .power-led {
+      position: absolute;
+      top: 14px;
+      right: 36px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow:
+        0 0 4px var(--green),
+        0 0 10px rgba(57,255,20,0.4),
+        0 0 20px rgba(57,255,20,0.15),
+        inset 0 -1px 1px rgba(0,0,0,0.3);
+      z-index: 20;
+      animation: ledPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes ledPulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--green), 0 0 10px rgba(57,255,20,0.4); }
+      50%      { opacity: 0.7; box-shadow: 0 0 3px var(--green), 0 0 6px rgba(57,255,20,0.3); }
+    }
+
+    @keyframes ledPulseAmber {
+      0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--amber), 0 0 12px rgba(255,183,0,0.5); }
+      50%      { opacity: 0.5; box-shadow: 0 0 2px var(--amber), 0 0 4px rgba(255,183,0,0.2); }
+    }
+
+    @keyframes ledPulseRed {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--red), 0 0 16px rgba(255,64,64,0.7), 0 0 30px rgba(255,64,64,0.3); }
+      50%      { opacity: 0.3; box-shadow: 0 0 2px var(--red), 0 0 4px rgba(255,64,64,0.2); }
+    }
+
+    /* HOUSING WEAR MARKS -- decades of bunker life */
+    .housing-wear {
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    /* Scratch cluster -- long diagonal surface scratches */
+    .housing-wear::before {
+      content: '';
+      position: absolute;
+      top: 18%;
+      right: 8%;
+      width: 90px;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255,255,255,0.07) 20%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.06) 80%,
+        transparent 100%
+      );
+      transform: rotate(-22deg);
+      box-shadow:
+        /* Second scratch nearby */
+        -20px 6px 0 0 rgba(255,255,255,0.05),
+        -15px 8px 0 0 rgba(255,255,255,0.04),
+        /* Faint parallel scratch */
+        4px 12px 0 0 rgba(255,255,255,0.03),
+        /* Small nick lower-left area */
+        -280px 220px 0 0 rgba(255,255,255,0.06),
+        -275px 218px 0 0 rgba(0,0,0,0.15);
+    }
+
+    /* Paint chips and dents */
+    .housing-wear::after {
+      content: '';
+      position: absolute;
+      bottom: 14%;
+      left: 6%;
+      width: 8px;
+      height: 4px;
+      border-radius: 40% 60% 50% 30%;
+      background: rgba(0,0,0,0.2);
+      box-shadow:
+        0 -1px 0 rgba(255,255,255,0.08),
+        1px 0 0 rgba(255,255,255,0.05),
+        /* Smaller chip near top-left */
+        40px -320px 0 -1px rgba(0,0,0,0.18),
+        41px -321px 0 -1px rgba(255,255,255,0.06),
+        /* Tiny dent mid-right */
+        350px -180px 0 -1px rgba(0,0,0,0.12),
+        350px -181px 0 -1px rgba(255,255,255,0.04),
+        /* Scuff marks bottom-right */
+        300px -20px 0 0 rgba(255,255,255,0.03),
+        305px -18px 0 0 rgba(255,255,255,0.04),
+        310px -22px 0 0 rgba(255,255,255,0.02);
+    }
+
+    /* ==========================================
+       CRT SCREEN -- recessed into housing
+       ========================================== */
+    .screen-bezel {
+      position: relative;
+      border-radius: 8px;
+      padding: 10px;
+      background:
+        linear-gradient(160deg,
+          #232018 0%,
+          #1a1814 40%,
+          #141210 100%
+        );
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-left: 1px solid rgba(255,255,255,0.05);
+      border-right: 1px solid rgba(0,0,0,0.6);
+      border-bottom: 1px solid rgba(0,0,0,0.6);
+      box-shadow:
+        /* Inset shadow on inner face -- depth without crushing corners */
+        inset 0 4px 12px rgba(0,0,0,0.8),
+        inset 4px 0 10px rgba(0,0,0,0.5),
+        inset -4px 0 10px rgba(0,0,0,0.5),
+        inset 0 -2px 8px rgba(0,0,0,0.4),
+        /* Subtle green ambient from screen */
+        0 0 20px rgba(57,255,20,0.06),
+        /* Outer shadow pressing it into the housing */
+        0 2px 8px rgba(0,0,0,0.7);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    /* Inner recess ring */
+    .screen-bezel::before {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      border-radius: 4px;
+      box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.9),
+        inset 2px 0 6px rgba(0,0,0,0.6),
+        inset -2px 0 6px rgba(0,0,0,0.6),
+        inset 0 -1px 4px rgba(0,0,0,0.5);
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    .terminal {
+      width: 100%;
+      border-radius: 4px / 6px;
+      background: var(--panel);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      /* Idle dim transition */
+      transition: filter 1.5s ease, opacity 1.5s ease;
+    }
+
+    /* IDLE SCREEN DIMMING */
+    .terminal.idle-dim {
+      filter: brightness(0.55) saturate(0.6);
+      opacity: 0.85;
+    }
+
+    /* Phosphor drift when idle */
+    .terminal.idle-dim::after {
+      animation: phosphorDrift 8s ease-in-out infinite;
+    }
+
+    @keyframes phosphorDrift {
+      0%, 100% {
+        background:
+          radial-gradient(ellipse at 50% 40%, rgba(57,255,20,0.03) 0%, transparent 70%);
+      }
+      25% {
+        background:
+          radial-gradient(ellipse at 40% 55%, rgba(57,255,20,0.04) 0%, transparent 65%);
+      }
+      50% {
+        background:
+          radial-gradient(ellipse at 60% 35%, rgba(57,255,20,0.05) 0%, transparent 60%);
+      }
+      75% {
+        background:
+          radial-gradient(ellipse at 45% 50%, rgba(57,255,20,0.035) 0%, transparent 68%);
+      }
+    }
+
+    /* CRT SCANLINE + NOISE -- now handled by <canvas id="crtCanvas"> */
+
+    #crtCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      border-radius: 3px;
+    }
+
+    /* CRT PHOSPHOR GLOW -- emissive center warmth */
+    .terminal::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          ellipse at 50% 35%,
+          rgba(57,255,20,0.04) 0%,
+          transparent 65%
+        );
+      pointer-events: none;
+      z-index: 51;
+      border-radius: 3px;
+    }
+
+    .crt-vignette {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      background:
+        radial-gradient(
+          ellipse at 50% 50%,
+          transparent 55%,
+          rgba(0,0,0,0.12) 70%,
+          rgba(0,0,0,0.3) 85%,
+          rgba(0,0,0,0.5) 100%
+        );
+      pointer-events: none;
+      z-index: 52;
+    }
+
+    /* crt-flicker removed -- now driven by canvas */
+
+    .crt-reflection {
+      position: absolute;
+      top: -5%;
+      left: 10%;
+      width: 80%;
+      height: 50%;
+      background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.04) 0%,
+        rgba(255,255,255,0.01) 40%,
+        transparent 100%
+      );
+      border-radius: 50% 50% 0 0;
+      pointer-events: none;
+      z-index: 54;
+      transform: scaleX(1.1);
+    }
+
+    .terminal-body {
+      padding: 16px 20px 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .terminal-bar {
+      background: linear-gradient(180deg, #1a2e1a 0%, #0f1f0f 100%);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--green-dim);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .cheat-value {
+      position: absolute;
+      top: 10px;
+      left: 30px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      color: #ffffff;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+      user-select: none;
+      z-index: 25;
+      text-shadow: 0 0 6px rgba(255,255,255,0.4);
+    }
+
+    .cheat-value.visible { opacity: 1; }
+
+    .terminal-title {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+
+    h1 {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--green);
+      text-shadow: 0 0 20px var(--green), 0 0 40px rgba(57,255,20,0.3);
+      letter-spacing: 3px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, var(--panel-light) 0%, var(--panel) 100%);
+      border: 1px solid var(--border);
+      box-shadow:
+        inset 0 1px 0 rgba(57,255,20,0.08),
+        inset 0 -2px 4px rgba(0,0,0,0.4),
+        0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #8aba8a;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-family: 'Courier New', Courier, monospace;
+      color: var(--green);
+      text-shadow: 0 0 10px rgba(57,255,20,0.5);
+    }
+
+    .range-display {
+      font-size: 14px;
+      color: #8aba8a;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+      padding: 6px 12px;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    .range-display span {
+      color: var(--green);
+      text-shadow: 0 0 10px rgba(57,255,20,0.5);
+      font-size: 16px;
+      letter-spacing: 3px;
+    }
+
+    #log {
+      overflow-y: auto;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      height: 120px;
+      max-height: 120px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 3px;
+      border: 1px solid rgba(30,58,30,0.5);
+      box-shadow: inset 0 2px 12px rgba(0,0,0,0.6);
+    }
+
+    .log-line {
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 2px 0;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-line.system { color: var(--green); text-shadow: 0 0 10px rgba(57,255,20,0.6); }
+    .log-line.guess  { color: var(--text); }
+    .log-line.hint   { color: var(--amber); }
+    .log-line.win    { color: var(--green); text-shadow: 0 0 10px var(--green); }
+
+    .log-line.typing::after {
+      content: '▋';
+      color: var(--green);
+      animation: cursorBlink 1.1s step-end infinite;
+      margin-left: 1px;
+      text-shadow: 0 0 8px rgba(57,255,20,0.8);
+    }
+
+    /* Blinking cursor in display when idle */
+    #display-row.idle::after {
+      content: '▋';
+      color: var(--green);
+      animation: cursorBlink 1.1s step-end infinite;
+      margin-left: 2px;
+      font-size: 22px;
+      vertical-align: middle;
+      text-shadow: 0 0 8px rgba(57,255,20,0.8);
+    }
+
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* DISPLAY SCREEN (input readout -- still on CRT) */
+    #display-row {
+      border-radius: 4px;
+      padding: 0 16px;
+      text-align: right;
+      font-size: 28px;
+      color: var(--green);
+      letter-spacing: 4px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      text-shadow: 0 0 16px var(--green), 0 0 4px var(--green);
+      background: linear-gradient(180deg, #030803 0%, #050d05 100%);
+      border: 1px solid var(--green-dim);
+      box-shadow:
+        inset 0 2px 16px rgba(0,0,0,0.9),
+        inset 0 0 30px rgba(57,255,20,0.04),
+        0 2px 0 rgba(57,255,20,0.1);
+      transition: border-color 0.15s ease;
+    }
+
+    /* GUESS FLASH FEEDBACK */
+    #display-row.flash-correct {
+      animation: flashCorrect 0.6s ease forwards;
+      border-color: var(--green);
+    }
+    #display-row.flash-close {
+      animation: flashClose 0.45s ease forwards;
+      border-color: var(--amber);
+    }
+    #display-row.flash-far {
+      animation: flashFar 0.4s ease forwards;
+      border-color: var(--red);
+    }
+
+    @keyframes flashCorrect {
+      0%   { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
+             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), inset 0 0 30px rgba(57,255,20,0.04), 0 2px 0 rgba(57,255,20,0.1); }
+      20%  { background: linear-gradient(180deg, #0a3d00 0%, #0a3d00 100%);
+             box-shadow: inset 0 0 40px rgba(57,255,20,0.3), 0 0 30px rgba(57,255,20,0.4), 0 0 60px rgba(57,255,20,0.2); }
+      50%  { background: linear-gradient(180deg, #072e00 0%, #072e00 100%);
+             box-shadow: inset 0 0 30px rgba(57,255,20,0.2), 0 0 20px rgba(57,255,20,0.3); }
+      100% { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
+             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), inset 0 0 30px rgba(57,255,20,0.04), 0 2px 0 rgba(57,255,20,0.1); }
+    }
+
+    @keyframes flashClose {
+      0%   { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
+             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), 0 2px 0 rgba(57,255,20,0.1); }
+      25%  { background: linear-gradient(180deg, #2e2200 0%, #1e1600 100%);
+             box-shadow: inset 0 0 30px rgba(255,183,0,0.2), 0 0 20px rgba(255,183,0,0.3); }
+      100% { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
+             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), 0 2px 0 rgba(57,255,20,0.1); }
+    }
+
+    @keyframes flashFar {
+      0%   { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
+             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), 0 2px 0 rgba(57,255,20,0.1); }
+      25%  { background: linear-gradient(180deg, #2e0800 0%, #1e0500 100%);
+             box-shadow: inset 0 0 30px rgba(255,64,64,0.2), 0 0 20px rgba(255,64,64,0.25); }
+      100% { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
+             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), 0 2px 0 rgba(57,255,20,0.1); }
+    }
+
+    /* ==========================================
+       POWER INDICATOR BULBS -- on housing surface
+       Recessed jewel pilot lights drilled into metal
+       ========================================== */
+    .bulb-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px 0 14px;
+    }
+
+    .bulb-strip-label {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 7px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #4a4838;
+      user-select: none;
+    }
+
+    .bulb-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Each bulb: a recessed circular socket drilled into the housing */
+    .bulb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      position: relative;
+      /* Socket recess: dark pit with metallic rim */
+      background:
+        radial-gradient(circle at 50% 55%,
+          #0a0908 0%,
+          #0e0d0a 60%,
+          #1a1810 100%
+        );
+      border: 1.5px solid #2a2820;
+      box-shadow:
+        /* Inset shadow: drilled hole depth */
+        inset 0 2px 4px rgba(0,0,0,0.9),
+        inset 0 -1px 2px rgba(0,0,0,0.5),
+        inset 1px 0 2px rgba(0,0,0,0.4),
+        inset -1px 0 2px rgba(0,0,0,0.4),
+        /* Outer rim catch light */
+        0 1px 0 rgba(255,255,255,0.06),
+        0 -1px 0 rgba(0,0,0,0.4);
+    }
+
+    /* The glass lens dome sitting inside the socket */
+    .bulb .bulb-lens {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border-radius: 50%;
+      /* Dark unlit lens by default */
+      background:
+        radial-gradient(circle at 40% 35%,
+          rgba(255,255,255,0.06) 0%,
+          transparent 50%
+        ),
+        radial-gradient(circle at 50% 50%,
+          #1a1a14 0%,
+          #111110 100%
+        );
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* ---- Active lit states ---- */
+    .bulb.active.tier-green .bulb-lens {
+      background:
+        radial-gradient(circle at 40% 35%,
+          rgba(255,255,255,0.5) 0%,
+          rgba(180,255,160,0.3) 20%,
+          transparent 55%
+        ),
+        radial-gradient(circle at 50% 50%,
+          #44ee18 0%,
+          #2ab808 40%,
+          #1a8800 80%,
+          #0e5500 100%
+        );
+      box-shadow:
+        0 0 4px rgba(57,255,20,0.5),
+        0 0 10px rgba(57,255,20,0.25),
+        inset 0 -1px 2px rgba(0,0,0,0.3);
+    }
+
+    .bulb.active.tier-amber .bulb-lens {
+      background:
+        radial-gradient(circle at 40% 35%,
+          rgba(255,255,255,0.5) 0%,
+          rgba(255,230,160,0.3) 20%,
+          transparent 55%
+        ),
+        radial-gradient(circle at 50% 50%,
+          #ffcc20 0%,
+          #dd9e00 40%,
+          #aa7800 80%,
+          #775200 100%
+        );
+      box-shadow:
+        0 0 4px rgba(255,183,0,0.5),
+        0 0 10px rgba(255,183,0,0.25),
+        inset 0 -1px 2px rgba(0,0,0,0.3);
+      animation: bulbAmberPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes bulbAmberPulse {
+      0%, 100% {
+        opacity: 1;
+        box-shadow:
+          0 0 5px rgba(255,183,0,0.6),
+          0 0 12px rgba(255,183,0,0.3),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+      50% {
+        opacity: 0.8;
+        box-shadow:
+          0 0 3px rgba(255,183,0,0.35),
+          0 0 6px rgba(255,183,0,0.12),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+    }
+
+    .bulb.active.tier-red .bulb-lens {
+      background:
+        radial-gradient(circle at 40% 35%,
+          rgba(255,255,255,0.5) 0%,
+          rgba(255,180,160,0.3) 20%,
+          transparent 55%
+        ),
+        radial-gradient(circle at 50% 50%,
+          #ff4444 0%,
+          #cc2020 40%,
+          #991010 80%,
+          #660808 100%
+        );
+      animation: bulbFlicker 0.4s ease-in-out infinite;
+    }
+
+    /* Drain animation: bulb fades out like a filament cooling */
+    .bulb.draining .bulb-lens {
+      animation: bulbDrain 0.5s ease forwards;
+    }
+
+    @keyframes bulbDrain {
+      0%   { opacity: 1; }
+      30%  { opacity: 0.6; }
+      100% {
+        opacity: 1;
+        background:
+          radial-gradient(circle at 40% 35%,
+            rgba(255,255,255,0.06) 0%,
+            transparent 50%
+          ),
+          radial-gradient(circle at 50% 50%,
+            #1a1a14 0%,
+            #111110 100%
+          );
+        box-shadow: none;
+      }
+    }
+
+    /* Last bulb standing: rapid strobe */
+    .bulb.active.tier-red.last-bulb .bulb-lens {
+      animation: bulbCritical 0.12s linear infinite;
+    }
+
+    @keyframes bulbFlicker {
+      0%, 100% {
+        opacity: 1;
+        box-shadow:
+          0 0 6px rgba(255,64,64,0.7),
+          0 0 14px rgba(255,64,64,0.35),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+      50% {
+        opacity: 0.65;
+        box-shadow:
+          0 0 3px rgba(255,64,64,0.4),
+          0 0 6px rgba(255,64,64,0.15),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+    }
+
+    @keyframes bulbCritical {
+      0%, 100% {
+        opacity: 1;
+        box-shadow:
+          0 0 8px rgba(255,64,64,0.9),
+          0 0 20px rgba(255,64,64,0.5),
+          0 0 32px rgba(255,64,64,0.2),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+      50% {
+        opacity: 0.25;
+        box-shadow:
+          0 0 2px rgba(255,64,64,0.3),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+    }
+
+    /* ==========================================
+       PHYSICAL KEYPAD -- on the housing surface
+       ========================================== */
+
+    .keypad-well {
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 2px,
+          rgba(0,0,0,0.03) 2px,
+          rgba(0,0,0,0.03) 3px
+        ),
+        linear-gradient(180deg, #100e0a 0%, #141210 50%, #100e0a 100%);
+      border-radius: 6px;
+      padding: 16px;
+      border: 1px solid rgba(0,0,0,0.6);
+      box-shadow:
+        inset 0 4px 10px rgba(0,0,0,0.9),
+        inset 0 -1px 0 rgba(255,255,255,0.03),
+        inset 3px 0 8px rgba(0,0,0,0.6),
+        inset -3px 0 8px rgba(0,0,0,0.6),
+        0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .keypad-label {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 8px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #5a5848;
+      margin-bottom: 12px;
+      padding-left: 2px;
+    }
+
+    #numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+
+    /* MECHANICAL KEYCAP CONTAINER */
+    .np {
+      position: relative;
+      font-family: 'Courier New', Courier, monospace;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      padding: 0;
+      outline: none;
+      white-space: nowrap;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      /* Must be tall enough to contain cap + full side wall travel */
+      height: 62px;
+    }
+
+    /* ---- KEYCAP ----
+     * The whole cap is .key-face.
+     * Side walls = thick box-shadow stack (8px deep).
+     * Top dish = ::before (concave scoop).
+     * Wear texture = ::after.
+     * Numbers are large, centered, and stamped in with inset text-shadow.
+     */
+    .np .key-face {
+      position: absolute;
+      left: 0; right: 0;
+      top: 0;
+      height: 50px;
+      border-radius: 6px;
+
+      /* Cap surface -- lighter top edge fading darker toward base */
+      background: linear-gradient(180deg,
+        #5c5a52 0%,
+        #53514a 5%,
+        #4a4840 12%,
+        #42403a 40%,
+        #3a3832 70%,
+        #32302c 100%
+      );
+      border: 1px solid #64625a;
+      border-bottom: 1px solid #2a2824;
+
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+      transform: translateY(0px);
+      overflow: hidden;
+
+      /* Big centered engraved number */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: rgba(57,255,20,0.9);
+      text-shadow:
+        /* carved-in: dark above, light below */
+        0 -1px 1px rgba(0,0,0,0.8),
+        0 1px 0 rgba(255,255,255,0.1),
+        /* subtle glow */
+        0 0 10px rgba(57,255,20,0.3);
+
+      /* 8px side wall built from stacked shadows */
+      box-shadow:
+        /* ---- bottom wall (8 steps) ---- */
+        0 1px 0 0 #4a4840,
+        0 2px 0 0 #42403a,
+        0 3px 0 0 #3a3832,
+        0 4px 0 0 #32302c,
+        0 5px 0 0 #2a2826,
+        0 6px 0 0 #222220,
+        0 7px 0 0 #1c1a18,
+        0 8px 0 0 #161412,
+        /* ---- left wall ---- */
+        -1px 2px 0 0 #46443e,
+        -2px 4px 0 0 #3a3832,
+        -2px 6px 0 0 #2a2826,
+        /* ---- right wall ---- */
+        1px 2px 0 0 #42403a,
+        2px 4px 0 0 #363430,
+        2px 6px 0 0 #262422,
+        /* ---- ground shadow ---- */
+        0 10px 6px -2px rgba(0,0,0,0.6),
+        0 12px 18px -4px rgba(0,0,0,0.4),
+        1px 9px 3px -1px rgba(0,0,0,0.3),
+        -1px 9px 3px -1px rgba(0,0,0,0.3),
+        /* ---- top surface highlights ---- */
+        inset 0 1px 0 rgba(255,255,255,0.2),
+        inset 1px 0 0 rgba(255,255,255,0.08),
+        inset -1px 0 0 rgba(0,0,0,0.15);
+    }
+
+    /* CONCAVE DISH -- scooped top */
+    .np .key-face::before {
+      content: '';
+      position: absolute;
+      top: 4px; left: 5px; right: 5px;
+      height: 55%;
+      border-radius: 3px 3px 10px 10px;
+      background: linear-gradient(180deg,
+        rgba(0,0,0,0.15) 0%,
+        rgba(0,0,0,0.06) 30%,
+        rgba(255,255,255,0.03) 100%
+      );
+      pointer-events: none;
+    }
+
+    /* Inner lip / edge detail */
+    .np .key-face::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 4px; right: 4px;
+      height: 60%;
+      border-radius: 4px 4px 8px 8px;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-top-color: rgba(0,0,0,0.18);
+      border-bottom-color: rgba(255,255,255,0.04);
+      pointer-events: none;
+    }
+
+    /* HOVER -- cap lifts, shadow extends */
+    .np:hover .key-face {
+      transform: translateY(-2px);
+      background: linear-gradient(180deg,
+        #66645c 0%,
+        #5c5a52 5%,
+        #52504a 12%,
+        #4a4842 40%,
+        #42403a 70%,
+        #3a3834 100%
+      );
+      box-shadow:
+        0 1px 0 0 #4e4c46,
+        0 2px 0 0 #46443e,
+        0 3px 0 0 #3e3c36,
+        0 4px 0 0 #363430,
+        0 5px 0 0 #302e2a,
+        0 6px 0 0 #2a2826,
+        0 7px 0 0 #242220,
+        0 8px 0 0 #1e1c1a,
+        0 9px 0 0 #181614,
+        0 10px 0 0 #141210,
+        -2px 5px 0 0 #3a3832,
+        -3px 7px 0 0 #2a2826,
+        2px 5px 0 0 #363430,
+        3px 7px 0 0 #262422,
+        0 12px 8px -2px rgba(0,0,0,0.6),
+        0 16px 22px -4px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.25),
+        inset 1px 0 0 rgba(255,255,255,0.1);
+    }
+
+    /* PRESSED -- cap bottoms out, wall collapses */
+    .np:active .key-face,
+    .np.pressed .key-face {
+      transform: translateY(6px);
+      background: linear-gradient(180deg,
+        #4a4842 0%,
+        #42403a 5%,
+        #3a3834 12%,
+        #34322c 40%,
+        #2e2c28 70%,
+        #282624 100%
+      );
+      box-shadow:
+        0 1px 0 0 #2e2c28,
+        0 2px 0 0 #242220,
+        -1px 1px 0 0 #2e2c28,
+        1px 1px 0 0 #282624,
+        0 3px 3px rgba(0,0,0,0.5),
+        inset 0 2px 8px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .np:disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+
+    /* ENTER -- olive/green tinted cap */
+    .np.enter .key-face {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      background: linear-gradient(180deg,
+        #4c5c44 0%,
+        #44543c 5%,
+        #3c4c34 12%,
+        #344430 40%,
+        #2c3c28 70%,
+        #263424 100%
+      );
+      border-color: #586850;
+      border-bottom-color: #1e2c16;
+      text-shadow:
+        0 -1px 1px rgba(0,0,0,0.8),
+        0 1px 0 rgba(100,255,80,0.1),
+        0 0 14px rgba(57,255,20,0.45);
+      box-shadow:
+        0 1px 0 0 #3c4a34,
+        0 2px 0 0 #34422e,
+        0 3px 0 0 #2e3a28,
+        0 4px 0 0 #283222,
+        0 5px 0 0 #222c1e,
+        0 6px 0 0 #1c2618,
+        0 7px 0 0 #182014,
+        0 8px 0 0 #121a10,
+        -1px 2px 0 0 #384630,
+        -2px 4px 0 0 #2e3a28,
+        -2px 6px 0 0 #222c1e,
+        1px 2px 0 0 #34422e,
+        2px 4px 0 0 #2a3626,
+        2px 6px 0 0 #1e281a,
+        0 10px 6px -2px rgba(0,0,0,0.6),
+        0 12px 18px -4px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(57,255,20,0.12),
+        inset 1px 0 0 rgba(57,255,20,0.05);
+    }
+
+    .np.enter:hover .key-face {
+      transform: translateY(-2px);
+      background: linear-gradient(180deg,
+        #566650 0%,
+        #4e5e46 5%,
+        #46563e 12%,
+        #3e4e38 40%,
+        #364630 70%,
+        #2e3e2a 100%
+      );
+      box-shadow:
+        0 1px 0 0 #404e38,
+        0 2px 0 0 #384632,
+        0 3px 0 0 #323e2c,
+        0 4px 0 0 #2c3826,
+        0 5px 0 0 #263220,
+        0 6px 0 0 #202c1c,
+        0 7px 0 0 #1c2618,
+        0 8px 0 0 #182014,
+        0 9px 0 0 #141c10,
+        0 10px 0 0 #10180e,
+        -2px 5px 0 0 #2e3a28,
+        -3px 7px 0 0 #222c1e,
+        2px 5px 0 0 #2a3626,
+        3px 7px 0 0 #1e281a,
+        0 12px 8px -2px rgba(0,0,0,0.6),
+        0 16px 22px -4px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(57,255,20,0.18),
+        0 0 14px rgba(57,255,20,0.06);
+    }
+
+    .np.enter:active .key-face,
+    .np.enter.pressed .key-face {
+      transform: translateY(6px);
+      background: linear-gradient(180deg,
+        #3a4832 0%,
+        #32402c 5%,
+        #2c3826 12%,
+        #263222 40%,
+        #202c1c 70%,
+        #1c2618 100%
+      );
+      box-shadow:
+        0 1px 0 0 #222c1e,
+        0 2px 0 0 #1c2618,
+        -1px 1px 0 0 #222c1e,
+        1px 1px 0 0 #1e281a,
+        0 3px 3px rgba(0,0,0,0.5),
+        inset 0 2px 8px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(57,255,20,0.06);
+    }
+
+    .np-spacer { grid-column: span 3; height: 3px; }
+    .np.enter.full {
+      grid-column: span 3;
+      height: 66px;
+    }
+
+    .np.enter.full .key-face {
+      height: 54px;
+      font-size: 16px;
+      letter-spacing: 8px;
+    }
+
+    /* ENTER key in NEW GAME mode -- glowing pulse */
+    .np.enter.new-game .key-face {
+      background: linear-gradient(180deg,
+        #4c5c44 0%,
+        #44543c 5%,
+        #3c4c34 12%,
+        #344430 40%,
+        #2c3c28 70%,
+        #263424 100%
+      );
+      text-shadow:
+        0 -1px 1px rgba(0,0,0,0.8),
+        0 1px 0 rgba(100,255,80,0.1),
+        0 0 18px rgba(57,255,20,0.6);
+      animation: pulseEnter 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseEnter {
+      0%, 100% {
+        box-shadow:
+          0 2px 0 0 #2a3820, 0 4px 0 0 #223018, 0 6px 0 0 #1a2812,
+          0 7px 0 0 #14200e, 0 8px 0 0 #10180a,
+          -1px 4px 0 0 #223018, -2px 3px 0 0 #2a3820,
+          1px 4px 0 0 #1a2812, 2px 3px 0 0 #243220,
+          0 10px 6px -2px rgba(0,0,0,0.6), 0 12px 18px -4px rgba(0,0,0,0.4),
+          inset 0 1px 0 rgba(57,255,20,0.15),
+          0 0 16px rgba(57,255,20,0.15);
+      }
+      50% {
+        box-shadow:
+          0 2px 0 0 #2a3820, 0 4px 0 0 #223018, 0 6px 0 0 #1a2812,
+          0 7px 0 0 #14200e, 0 8px 0 0 #10180a,
+          -1px 4px 0 0 #223018, -2px 3px 0 0 #2a3820,
+          1px 4px 0 0 #1a2812, 2px 3px 0 0 #243220,
+          0 10px 6px -2px rgba(0,0,0,0.6), 0 12px 18px -4px rgba(0,0,0,0.4),
+          inset 0 1px 0 rgba(57,255,20,0.25),
+          0 0 30px rgba(57,255,20,0.3), 0 0 50px rgba(57,255,20,0.1);
+      }
+    }
+
+    /* Divider line etched into housing between screen and keypad */
+    .housing-divider {
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(0,0,0,0.4) 15%,
+        rgba(0,0,0,0.5) 50%,
+        rgba(0,0,0,0.4) 85%,
+        transparent 100%
+      );
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .housing-divider::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255,255,255,0.04) 15%,
+        rgba(255,255,255,0.06) 50%,
+        rgba(255,255,255,0.04) 85%,
+        transparent 100%
+      );
+    }
+
+    /* ==========================================
+       SPLASH SCREEN
+       ========================================== */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      transition: opacity 0.8s ease;
+    }
+
+    #splash.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #splash-content {
+      text-align: center;
+    }
+
+    .splash-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .splash-title {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 64px;
+      font-weight: 700;
+      color: var(--green);
+      text-shadow: 0 0 40px var(--green), 0 0 80px rgba(57,255,20,0.3);
+      letter-spacing: 12px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    /* Post-tap: title drifts in from deep back, matching the bass attack */
+    #splash-content.post-tap .splash-title {
+      animation: titleRiseFromBack 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes titleRiseFromBack {
+      0%   {
+        opacity: 0;
+        transform: scale(0.18) translateZ(0);
+        text-shadow: 0 0 120px var(--green), 0 0 200px rgba(57,255,20,0.6);
+        filter: blur(8px);
+        letter-spacing: 2px;
+      }
+      30%  {
+        opacity: 0.4;
+        filter: blur(3px);
+      }
+      65%  {
+        opacity: 0.85;
+        transform: scale(1.04) translateZ(0);
+        text-shadow: 0 0 60px var(--green), 0 0 120px rgba(57,255,20,0.4);
+        filter: blur(0.5px);
+        letter-spacing: 10px;
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateZ(0);
+        text-shadow: 0 0 40px var(--green), 0 0 80px rgba(57,255,20,0.3);
+        filter: blur(0px);
+        letter-spacing: 12px;
+      }
+    }
+
+    .splash-sub {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      margin-bottom: 32px;
+    }
+
+    .splash-bar-wrap {
+      width: 200px;
+      height: 2px;
+      background: var(--border);
+      margin: 0 auto 20px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .splash-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      /* animation triggered by JS on tap, not at page load */
+    }
+
+    @keyframes loadBar {
+      0%   { width: 0%; }
+      60%  { width: 80%; }
+      100% { width: 100%; }
+    }
+
+    .glitch-letter {
+      display: inline-block;
+      transition: color 0.1s;
+    }
+
+    .glitch-letter.scrambling {
+      color: var(--green);
+      text-shadow:
+        0 0 10px var(--green),
+        0 0 30px var(--green),
+        0 0 60px rgba(57,255,20,0.8),
+        2px 0 8px rgba(255,0,0,0.6),
+        -2px 0 8px rgba(0,200,255,0.6);
+      animation: glitchShake 0.05s infinite;
+    }
+
+    .glitch-letter.settled {
+      color: var(--muted);
+      text-shadow: none;
+      animation: none;
+    }
+
+    @keyframes glitchShake {
+      0%   { transform: translate(0,0) skewX(0deg); opacity: 1; }
+      10%  { transform: translate(-4px, 2px) skewX(-8deg); opacity: 0.8; }
+      20%  { transform: translate(4px,-2px) skewX(6deg); opacity: 1; }
+      30%  { transform: translate(-3px, 3px) skewX(0deg); opacity: 0.6; }
+      40%  { transform: translate(3px,-1px) skewX(-4deg); opacity: 1; }
+      50%  { transform: translate(0, 0) skewX(10deg); opacity: 0.7; }
+      60%  { transform: translate(-5px, 1px) skewX(-6deg); opacity: 1; }
+      70%  { transform: translate(5px, 2px) skewX(4deg); opacity: 0.5; }
+      80%  { transform: translate(-2px,-3px) skewX(0deg); opacity: 1; }
+      90%  { transform: translate(2px, 0px) skewX(-8deg); opacity: 0.8; }
+      100% { transform: translate(0,0) skewX(0deg); opacity: 1; }
+    }
+
+    .splash-title.glitching::before,
+    .splash-title.glitching::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      font-size: 64px;
+      font-weight: 700;
+      letter-spacing: 12px;
+      pointer-events: none;
+    }
+
+    .splash-title.glitching::before {
+      color: rgba(255, 0, 80, 0.5);
+      animation: rgbLeft 0.08s infinite;
+      clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+    }
+
+    .splash-title.glitching::after {
+      color: rgba(0, 255, 255, 0.5);
+      animation: rgbRight 0.06s infinite;
+      clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
+    }
+
+    @keyframes rgbLeft {
+      0%   { transform: translate(-6px, 0); opacity: 1; }
+      50%  { transform: translate(4px, -2px); opacity: 0.6; }
+      100% { transform: translate(-6px, 0); opacity: 1; }
+    }
+
+    @keyframes rgbRight {
+      0%   { transform: translate(6px, 0); opacity: 1; }
+      50%  { transform: translate(-4px, 2px); opacity: 0.6; }
+      100% { transform: translate(6px, 0); opacity: 1; }
+    }
+
+    #splash.glitch-active::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,255,0,0.03) 3px,
+        rgba(0,255,0,0.03) 4px
+      );
+      animation: scanFlicker 0.1s infinite;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    @keyframes scanFlicker {
+      0%   { opacity: 1; transform: translateY(0); }
+      50%  { opacity: 0.5; transform: translateY(-2px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes tear {
+      0%   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+      10%  { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 47%); }
+      11%  { clip-path: polygon(0 47%, 100% 45%, 100% 100%, 0 100%); }
+      20%  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+      80%  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+      90%  { clip-path: polygon(0 0, 100% 0, 100% 70%, 0 72%); }
+      91%  { clip-path: polygon(0 72%, 100% 70%, 100% 100%, 0 100%); }
+      100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+    }
+
+    #splash-content.tearing {
+      animation: tear 0.3s infinite;
+    }
+
+    /* TAP prompt -- visible immediately, pulses to invite tap */
+    .splash-ready {
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: var(--green);
+      opacity: 1;
+      animation: promptPulse 1.0s ease-in-out infinite;
+    }
+
+    .splash-ready.hidden-prompt {
+      opacity: 0;
+      animation: none;
+      transition: opacity 0.15s;
+    }
+
+    /* Before tap: hide everything except the prompt */
+    #splash-content.pre-tap .splash-label,
+    #splash-content.pre-tap .splash-title,
+    #splash-content.pre-tap .splash-sub,
+    #splash-content.pre-tap .splash-bar-wrap {
+      opacity: 0;
+    }
+
+    /* After tap: label/sub/bar fade in normally */
+    #splash-content.post-tap .splash-label,
+    #splash-content.post-tap .splash-sub,
+    #splash-content.post-tap .splash-bar-wrap {
+      animation: blinkIn 0.4s ease forwards;
+    }
+    /* Title gets its own deep-zoom animation (defined above) */
+
+    @keyframes promptPulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
+    }
+
+    @keyframes blinkIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ==========================================
+       MOBILE -- all phones (max-width: 500px)
+       Key rule: perspective stays on .device.
+       We kill the tilt so perspective is inert.
+       Body padding zeroed, device goes full-bleed.
+       ========================================== */
+    @media (max-width: 500px) {
+      body {
+        padding: 0;
+        align-items: flex-start;
+      }
+      .device {
+        width: 100%;
+        max-width: 100%;
+        /* Kill tilt -- frees up space, perspective on .device stays harmless */
+        transform: none !important;
+        filter: none;
+      }
+      .device:hover { transform: none !important; }
+      .housing {
+        border-radius: 0;
+        padding: 30px 12px 16px;
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+      /* Kill 3D depth faces -- invisible without tilt, just add overflow */
+      .housing::before, .housing::after { display: none; }
+      .vents { display: none; }
+      /* Bottom screws serve no purpose on full-bleed mobile */
+      .screw-bl, .screw-br { display: none; }
+      .screw { width: 10px; height: 10px; }
+      .screw::before, .screw::after { width: 6px; }
+      .screw-tl { top: 8px; left: 8px; }
+      #cheatValue { top: 8px; left: 24px; font-size: 10px; }
+      .screw-tr { top: 8px; right: 8px; }
+      .power-led { top: 11px; right: 28px; width: 5px; height: 5px; }
+      .terminal-bar { padding: 6px 10px; }
+      .terminal-body { padding: 12px 12px 14px; }
+      h1 { font-size: 16px; letter-spacing: 2px; margin-bottom: 4px; }
+      .subtitle { font-size: 10px; margin-bottom: 10px; }
+      .stat-row { gap: 8px; margin-bottom: 10px; }
+      .stat { padding: 6px 8px; }
+      .stat-label { font-size: 9px; }
+      .stat-value { font-size: 18px; }
+      .range-display { font-size: 12px; padding: 5px 10px; margin-bottom: 8px; }
+      .range-display span { font-size: 14px; }
+      .bulb-strip { padding: 6px 0 10px; gap: 6px; }
+      .bulb-row { gap: 5px; }
+      .bulb { width: 15px; height: 15px; }
+      .bulb-strip-label { font-size: 6px; letter-spacing: 2px; }
+      #log { height: 100px; max-height: 100px; padding: 6px 8px; margin-bottom: 8px; }
+      .log-line { font-size: 12px; }
+      #display-row { font-size: 22px; padding: 0 12px; height: 44px; margin-bottom: 8px; }
+      .screen-bezel { margin-bottom: 12px; }
+      .housing-divider { margin-bottom: 10px; }
+      .keypad-well { padding: 12px; }
+      .keypad-label { margin-bottom: 8px; }
+      #numpad { gap: 5px; }
+      .np { height: 54px; }
+      .np .key-face { height: 44px; font-size: 22px; }
+      .np.enter.full { height: 58px; }
+      .np.enter.full .key-face { height: 46px; font-size: 14px; letter-spacing: 6px; }
+    }
+
+    /* Tighter fit for shorter phones (iPhone SE, older 4.7") */
+    @media (max-width: 500px) and (max-height: 750px) {
+      .housing { padding: 26px 10px 12px; }
+      .terminal-bar { padding: 4px 8px; }
+      .terminal-body { padding: 8px 10px 10px; }
+      h1 { font-size: 14px; margin-bottom: 2px; }
+      .subtitle { font-size: 9px; margin-bottom: 6px; }
+      .stat-row { gap: 6px; margin-bottom: 6px; }
+      .stat { padding: 4px 6px; }
+      .stat-label { font-size: 8px; }
+      .stat-value { font-size: 15px; }
+      .range-display { font-size: 11px; padding: 4px 8px; margin-bottom: 6px; }
+      .range-display span { font-size: 13px; }
+      #log { height: 68px; max-height: 68px; padding: 4px 6px; margin-bottom: 6px; }
+      .log-line { font-size: 11px; line-height: 1.4; }
+      #display-row { font-size: 20px; padding: 0 10px; height: 38px; margin-bottom: 6px; }
+      .screen-bezel { margin-bottom: 8px; }
+      .housing-divider { margin-bottom: 8px; }
+      .bulb-strip { padding: 4px 0 8px; gap: 4px; }
+      .bulb-row { gap: 4px; }
+      .bulb { width: 13px; height: 13px; }
+      .bulb-strip-label { font-size: 5px; letter-spacing: 1.5px; }
+      .keypad-well { padding: 8px; }
+      .keypad-label { font-size: 7px; margin-bottom: 6px; }
+      #numpad { gap: 4px; }
+      .np { height: 44px; }
+      .np .key-face { height: 36px; font-size: 18px; }
+      .np.enter.full { height: 48px; }
+      .np.enter.full .key-face { height: 38px; font-size: 12px; letter-spacing: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div id="splash-content" class="pre-tap">
+    <div class="splash-label">INITIALIZING</div>
+    <h1 class="splash-title">
+      <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
+    </h1>
+    <div class="splash-sub">// number guessing protocol v4.9.3</div>
+    <div class="splash-bar-wrap"><div class="splash-bar-fill"></div></div>
+    <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
+  </div>
+</div>
+
+<!-- DEVICE HOUSING -->
+<div class="device">
+<div class="housing">
+
+  <!-- Hardware details -->
+  <div class="screw screw-tl" id="cheatDot"></div>
+  <span id="cheatValue" class="cheat-value"></span>
+  <div class="screw screw-tr"></div>
+  <div class="screw screw-bl"></div>
+  <div class="screw screw-br"></div>
+
+  <div class="vents">
+    <div class="vent-slit"></div>
+    <div class="vent-slit"></div>
+    <div class="vent-slit"></div>
+    <div class="vent-slit"></div>
+    <div class="vent-slit"></div>
+    <div class="vent-slit"></div>
+  </div>
+
+  <div class="power-led"></div>
+  <div class="housing-wear"></div>
+
+  <!-- CRT Screen -->
+  <div class="screen-bezel">
+    <div class="terminal">
+      <canvas id="crtCanvas"></canvas>
+      <div class="crt-vignette"></div>
+      <div class="crt-reflection"></div>
+
+      <div class="terminal-bar">
+        <span class="terminal-title">guess.exe</span>
+      </div>
+
+      <div class="terminal-body">
+        <h1>GUESS</h1>
+        <div class="subtitle">// number guessing protocol v4.9.3</div>
+
+        <div class="stat-row">
+          <div class="stat">
+            <div class="stat-label">Attempts</div>
+            <div class="stat-value" id="attempts">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Best</div>
+            <div class="stat-value" id="best">--</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Played</div>
+            <div class="stat-value" id="played">0</div>
+          </div>
+        </div>
+
+        <div class="range-display">
+          Search range: <span id="rangeDisplay">1 &mdash; 100</span>
+        </div>
+
+        <div id="log"></div>
+
+        <div id="display-row" class="idle">
+          <span id="displayValue"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Etched divider between screen and keypad -->
+  <div class="housing-divider"></div>
+
+  <!-- Power cells: recessed indicator bulbs on housing surface -->
+  <div class="bulb-strip">
+    <span class="bulb-strip-label">POWER</span>
+    <div class="bulb-row" id="batteryCells">
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+    </div>
+    <span class="bulb-strip-label">DRAIN</span>
+  </div>
+
+  <!-- Physical keypad on housing surface -->
+  <div class="keypad-well">
+    <div class="keypad-label">Data Input</div>
+    <div id="numpad">
+      <button class="np" data-digit="7"><span class="key-face">7</span></button>
+      <button class="np" data-digit="8"><span class="key-face">8</span></button>
+      <button class="np" data-digit="9"><span class="key-face">9</span></button>
+      <button class="np" data-digit="4"><span class="key-face">4</span></button>
+      <button class="np" data-digit="5"><span class="key-face">5</span></button>
+      <button class="np" data-digit="6"><span class="key-face">6</span></button>
+      <button class="np" data-digit="1"><span class="key-face">1</span></button>
+      <button class="np" data-digit="2"><span class="key-face">2</span></button>
+      <button class="np" data-digit="3"><span class="key-face">3</span></button>
+      <button class="np" data-digit="0"><span class="key-face">0</span></button>
+      <button class="np np-decimal" data-action="decimal"><span class="key-face">.</span></button>
+      <button class="np" data-action="backspace"><span class="key-face">⌫</span></button>
+      <div class="np-spacer"></div>
+      <button class="np enter full" id="guessBtn" data-action="enter"><span class="key-face">ENTER</span></button>
+    </div>
+  </div>
+
+
+</div>
+</div>
+
+<script>
+  // GAME STATE
+  let secretNumber;
+  let attempts;
+  let bestScore;
+  let gamesPlayed;
+  let low;
+  let high;
+  let gameOver;
+
+  const MAX_GUESSES = 7;
+
+  function storageGet(key) {
+    try { return localStorage.getItem(key); } catch(e) { return null; }
+  }
+  function storageSet(key, val) {
+    try { localStorage.setItem(key, val); } catch(e) {}
+  }
+
+  // NUMPAD STATE
+  let npBuffer = '';
+
+  function npPress(digit) {
+    if (gameOver) return;
+    if (npBuffer.length >= 3) return;
+    npBuffer += digit;
+    updateDisplay();
+  }
+
+  function npBackspace() {
+    if (gameOver) return;
+    npBuffer = npBuffer.slice(0, -1);
+    updateDisplay();
+  }
+
+  function npDecimal() {}
+
+  function updateDisplay() {
+    const el = document.getElementById('display-row');
+    const span = el.querySelector('span');
+    if (npBuffer) {
+      el.classList.remove('idle');
+      span.textContent = npBuffer;
+    } else {
+      span.textContent = '';
+      el.classList.add('idle');
+    }
+  }
+
+  function setIdleCursor(on) {
+    const el = document.getElementById('display-row');
+    if (on) el.classList.add('idle');
+    else el.classList.remove('idle');
+  }
+
+  function setNumpadDisabled(disabled) {
+    document.querySelectorAll('.np').forEach(function(b) {
+      // Keep enter key enabled (it becomes NEW GAME when gameOver)
+      if (b.dataset.action === 'enter') return;
+      b.disabled = disabled;
+    });
+  }
+
+  function init() {
+    bestScore   = parseInt(storageGet('bestScore')) || null;
+    gamesPlayed = parseInt(storageGet('gamesPlayed')) || 0;
+    updateBestDisplay();
+    updatePlayedDisplay();
+    resetGame();
+    if (window._startIdleTimer) window._startIdleTimer();
+  }
+
+  function initLayout() {
+    document.getElementById('attempts').textContent = '0';
+    resetBattery();
+    document.getElementById('displayValue').textContent = '';
+    document.getElementById('display-row').classList.add('idle');
+    document.getElementById('rangeDisplay').textContent = '1 \u2014 100';
+    updateBestDisplay();
+    updatePlayedDisplay();
+    setNumpadDisabled(true);
+  }
+
+  function resetGame() {
+    secretNumber = Math.floor(Math.random() * 100) + 1;
+    attempts     = 0;
+    low          = 1;
+    high         = 100;
+    gameOver     = false;
+    npBuffer     = '';
+
+    gamesPlayed = (parseInt(storageGet('gamesPlayed')) || 0) + 1;
+    storageSet('gamesPlayed', gamesPlayed);
+    updatePlayedDisplay();
+
+    // Restore enter key to normal mode
+    var enterBtn = document.getElementById('guessBtn');
+    enterBtn.querySelector('.key-face').textContent = 'ENTER';
+    enterBtn.classList.remove('new-game');
+
+    document.getElementById('cheatValue').classList.remove('visible');
+    document.getElementById('attempts').textContent = '0';
+    resetBattery();
+    setNumpadDisabled(false);
+    updateDisplay();
+    updateRangeDisplay();
+    clearLog();
+    typeLog('system', '> system initialized. pick a number between 1 and 100.');
+  }
+
+  function flashDisplay(type) {
+    var el = document.getElementById('display-row');
+    el.classList.remove('flash-correct', 'flash-close', 'flash-far');
+    void el.offsetWidth;
+    el.classList.add('flash-' + type);
+    el.addEventListener('animationend', function handler() {
+      el.classList.remove('flash-correct', 'flash-close', 'flash-far');
+      el.removeEventListener('animationend', handler);
+    });
+  }
+
+  function makeGuess() {
+    if (gameOver) return;
+
+    const guess = parseInt(npBuffer);
+
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+      log('hint', '> enter a valid number between 1 and 100.');
+      npBuffer = '';
+      updateDisplay();
+      return;
+    }
+
+    attempts++;
+    document.getElementById('attempts').textContent = attempts;
+
+    updateBattery(attempts);
+
+    log('guess', `> you guessed: ${guess}`);
+
+    if (guess === secretNumber) {
+      flashDisplay('correct');
+      handleWin();
+    } else if (attempts >= MAX_GUESSES) {
+      flashDisplay('far');
+      handleLoss();
+    } else {
+      const distance = Math.abs(guess - secretNumber);
+      flashDisplay(distance <= 15 ? 'close' : 'far');
+
+      if (guess < secretNumber) {
+        low = Math.max(low, guess + 1);
+        const warmthLow = (secretNumber - guess) <= 20 ? ' 🔥 getting warmer!' : '';
+        log('hint', `> too low. go higher.${warmthLow}`);
+      } else {
+        high = Math.min(high, guess - 1);
+        const warmthHigh = (guess - secretNumber) <= 20 ? ' 🔥 getting warmer!' : '';
+        log('hint', `> too high. go lower.${warmthHigh}`);
+      }
+      updateRangeDisplay();
+    }
+
+    npBuffer = '';
+    updateDisplay();
+  }
+
+  function endGame() {
+    gameOver = true;
+    setNumpadDisabled(true);
+    setIdleCursor(false);
+    var enterBtn = document.getElementById('guessBtn');
+    enterBtn.querySelector('.key-face').textContent = 'NEW GAME';
+    enterBtn.classList.add('new-game');
+  }
+
+  function handleWin() {
+    endGame();
+    log('win', `> ✓ correct! ${secretNumber} found in ${attempts} attempt${attempts === 1 ? '' : 's'}.`);
+
+    if (!bestScore || attempts < bestScore) {
+      bestScore = attempts;
+      storageSet('bestScore', bestScore);
+      log('win', `> new best score: ${bestScore}`);
+    }
+
+    updateBestDisplay();
+  }
+
+  function handleLoss() {
+    endGame();
+    log('hint', `> out of attempts. the number was ${secretNumber}.`);
+  }
+
+  function log(type, message) {
+    const el = document.createElement('div');
+    el.className = `log-line ${type}`;
+    el.textContent = message;
+    const logEl = document.getElementById('log');
+    logEl.appendChild(el);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function typeLog(type, message, speed) {
+    speed = speed || 38;
+    const el = document.createElement('div');
+    el.className = `log-line ${type} typing`;
+    el.textContent = '';
+    const logEl = document.getElementById('log');
+    logEl.appendChild(el);
+
+    let i = 0;
+    function tick() {
+      if (i < message.length) {
+        el.textContent += message[i];
+        i++;
+        logEl.scrollTop = logEl.scrollHeight;
+        setTimeout(tick, speed);
+      } else {
+        el.classList.remove('typing');
+      }
+    }
+    tick();
+  }
+
+  function clearLog() {
+    document.getElementById('log').innerHTML = '';
+  }
+
+  function updateRangeDisplay() {
+    document.getElementById('rangeDisplay').textContent = `${low} \u2014 ${high}`;
+  }
+
+  function updateBattery(attemptsUsed) {
+    var remaining = MAX_GUESSES - attemptsUsed;
+    var cells = document.querySelectorAll('.bulb');
+    cells.forEach(function(cell, i) {
+      cell.classList.remove('active', 'draining', 'tier-green', 'tier-amber', 'tier-red', 'last-bulb');
+      var tier;
+      if (remaining <= 2)      tier = 'tier-red';
+      else if (remaining <= 4) tier = 'tier-amber';
+      else                     tier = 'tier-green';
+      cell.classList.add(tier);
+
+      if (i < remaining) {
+        cell.classList.add('active');
+      } else if (i === remaining && attemptsUsed > 0) {
+        cell.classList.add('draining');
+      }
+    });
+
+    // Mark the sole surviving bulb for critical strobe
+    if (remaining === 1) {
+      cells[0].classList.add('last-bulb');
+    }
+
+    // Update power LED pulse rate: faster and redder as attempts run low
+    var led = document.querySelector('.power-led');
+    if (remaining <= 2) {
+      led.style.background = 'var(--red)';
+      led.style.boxShadow = '0 0 4px var(--red), 0 0 10px rgba(255,64,64,0.6), 0 0 20px rgba(255,64,64,0.25)';
+      led.style.animation = 'ledPulseRed 0.35s ease-in-out infinite';
+    } else if (remaining <= 4) {
+      led.style.background = 'var(--amber)';
+      led.style.boxShadow = '0 0 4px var(--amber), 0 0 10px rgba(255,183,0,0.5), 0 0 20px rgba(255,183,0,0.2)';
+      led.style.animation = 'ledPulseAmber 0.8s ease-in-out infinite';
+    } else {
+      led.style.background = '';
+      led.style.boxShadow = '';
+      led.style.animation = '';
+    }
+  }
+
+  function resetBattery() {
+    var cells = document.querySelectorAll('.bulb');
+    cells.forEach(function(cell) {
+      cell.classList.remove('draining', 'last-bulb');
+      cell.classList.add('active', 'tier-green');
+      cell.classList.remove('tier-amber', 'tier-red');
+    });
+    var led = document.querySelector('.power-led');
+    led.style.background = '';
+    led.style.boxShadow = '';
+    led.style.animation = '';
+  }
+
+  function updateBestDisplay() {
+    document.getElementById('best').textContent = bestScore || '--';
+  }
+
+  function updatePlayedDisplay() {
+    document.getElementById('played').textContent = gamesPlayed || 0;
+  }
+
+  // ==========================================
+  // AUDIO -- mechanical key click (synthesized)
+  // ==========================================
+  var audioCtx = null;
+
+  function getAudioCtx() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e) { return null; }
+    }
+    return audioCtx;
+  }
+
+  function playClick(type) {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+      var bufSize = ctx.sampleRate * 0.025;
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = type === 'enter' ? 5000 : 7000;
+      bp.Q.value = type === 'enter' ? 2.0 : 3.0;
+
+      var hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = type === 'enter' ? 2800 : 3500;
+
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(type === 'enter' ? 0.4 : 0.3, now + 0.001);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + (type === 'enter' ? 0.018 : 0.012));
+
+      noise.connect(bp);
+      bp.connect(hp);
+      hp.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.04);
+
+      var osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(type === 'enter' ? 900 : 1400, now);
+      osc.frequency.exponentialRampToValueAtTime(type === 'enter' ? 450 : 700, now + 0.015);
+
+      var oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(type === 'enter' ? 0.06 : 0.04, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.012);
+
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.015);
+    });
+  }
+
+  // EVENT DELEGATION
+  (function() {
+    var numpad = document.getElementById('numpad');
+
+    numpad.addEventListener('click', function(e) {
+      var btn = e.target.closest('.np');
+      if (!btn || btn.disabled) return;
+
+      if (btn.dataset.digit)           npPress(btn.dataset.digit);
+      else if (btn.dataset.action === 'backspace') npBackspace();
+      else if (btn.dataset.action === 'decimal')   npDecimal();
+      else if (btn.dataset.action === 'enter') {
+        if (gameOver) resetGame();
+        else makeGuess();
+      }
+    });
+
+    numpad.addEventListener('pointerdown', function(e) {
+      var btn = e.target.closest('.np');
+      if (!btn) return;
+      btn.classList.add('pressed');
+      if (!btn.disabled) {
+        var type = btn.dataset.action === 'enter' ? 'enter'
+                 : btn.dataset.action === 'backspace' ? 'backspace'
+                 : 'key';
+        playClick(type);
+      }
+    });
+    numpad.addEventListener('pointerup', function(e) {
+      var btn = e.target.closest('.np');
+      if (btn) setTimeout(function() { btn.classList.remove('pressed'); }, 100);
+    });
+    numpad.addEventListener('pointerleave', function(e) {
+      var btn = e.target.closest('.np');
+      if (btn) btn.classList.remove('pressed');
+    }, true);
+  })();
+
+  // Cheat dot
+  document.getElementById('cheatDot').addEventListener('click', function() {
+    var el = document.getElementById('cheatValue');
+    if (el.classList.contains('visible')) {
+      el.classList.remove('visible');
+    } else {
+      el.textContent = secretNumber;
+      el.classList.add('visible');
+    }
+  });
+
+  // Keyboard input
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      playClick('enter');
+      if (gameOver) resetGame();
+      else makeGuess();
+      return;
+    }
+    if (gameOver) return;
+    if (e.key >= '0' && e.key <= '9') { playClick('key'); npPress(e.key); }
+    if (e.key === 'Backspace') { playClick('backspace'); npBackspace(); }
+  });
+
+  // Glitch characters
+  const GLITCH_CHARS = '0123456789!@#$%^&*<>?/\\|[]{}01ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ';
+
+  // ---- SPLASH AUDIO ----
+
+  // Bass nodes pre-built at page load -- oscillators NOT started yet.
+  // triggerSplashBass() calls .start() and sets gain envelope simultaneously.
+  var _bassNodes = []; // { osc, gain, peak }
+  var _bassNoise = null;
+  var _bassNoiseGain = null;
+  var _bassReady = false;
+
+  function preBuildBass() {
+    try {
+      var ctx = getAudioCtx();
+      var freqs = [52, 54.5, 104];
+      var peaks = [0.38, 0.32, 0.09];
+
+      freqs.forEach(function(freq, i) {
+        var osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+
+        var ws = ctx.createWaveShaper();
+        var curve = new Float32Array(256);
+        for (var k = 0; k < 256; k++) {
+          var x = (k * 2) / 256 - 1;
+          curve[k] = (Math.PI + 180) * x / (Math.PI + 180 * Math.abs(x));
+        }
+        ws.curve = curve;
+
+        var g = ctx.createGain();
+        g.gain.value = 0;
+
+        osc.connect(ws); ws.connect(g); g.connect(ctx.destination);
+        // NOT calling osc.start() yet
+
+        _bassNodes.push({ osc: osc, gain: g, peak: peaks[i] });
+      });
+
+      // Pre-build noise buffer
+      var bufSize = Math.floor(ctx.sampleRate * 4.0);
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+
+      var lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 90; lp.Q.value = 1.2;
+
+      var ng = ctx.createGain();
+      ng.gain.value = 0;
+
+      noise.connect(lp); lp.connect(ng); ng.connect(ctx.destination);
+      // NOT calling noise.start() yet
+
+      _bassNoise = noise;
+      _bassNoiseGain = ng;
+      _bassReady = true;
+    } catch(e) {}
+  }
+
+  function triggerSplashBass() {
+    if (!_bassReady) return;
+    try {
+      var ctx = getAudioCtx();
+      var now = ctx.currentTime;
+
+      _bassNodes.forEach(function(item) {
+        item.osc.start(now);
+        item.osc.stop(now + 3.5);
+        item.gain.gain.setValueAtTime(0, now);
+        item.gain.gain.linearRampToValueAtTime(item.peak, now + 0.6);
+        item.gain.gain.setValueAtTime(item.peak, now + 1.6);
+        item.gain.gain.exponentialRampToValueAtTime(0.001, now + 2.8);
+      });
+
+      _bassNoise.start(now);
+      _bassNoise.stop(now + 3.5);
+      _bassNoiseGain.gain.setValueAtTime(0, now);
+      _bassNoiseGain.gain.linearRampToValueAtTime(0.12, now + 0.8);
+      _bassNoiseGain.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
+    } catch(e) {}
+  }
+
+  function playSplashTick() {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+      var bufSize = Math.floor(ctx.sampleRate * 0.018);
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 4200 + Math.random() * 1800;
+      bp.Q.value = 4.0;
+
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.18, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.016);
+
+      noise.connect(bp);
+      bp.connect(g);
+      g.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.02);
+
+      var osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1800 + Math.random() * 600, now);
+      osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+
+      var og = ctx.createGain();
+      og.gain.setValueAtTime(0.07, now);
+      og.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+      osc.connect(og);
+      og.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    });
+  }
+
+  function glitchLetter(id, finalChar, callback) {
+    const el = document.getElementById(id);
+    el.classList.add('scrambling');
+    let cycles = 0;
+    const maxCycles = 18;
+    let delay = 90;
+
+    function tick() {
+      el.textContent = GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
+      el.style.fontSize = (56 + Math.random() * 24) + 'px';
+      el.style.opacity = 0.4 + Math.random() * 0.6;
+      playSplashTick();
+      cycles++;
+      delay = Math.max(30, delay - 4);
+      if (cycles >= maxCycles) {
+        el.textContent = finalChar;
+        el.style.fontSize = '';
+        el.style.opacity = '';
+        el.classList.remove('scrambling');
+        el.classList.add('settled');
+        if (callback) callback();
+      } else {
+        setTimeout(tick, delay);
+      }
+    }
+    tick();
+  }
+
+  // withAudio: creates nodes immediately (scheduled against currentTime),
+  // then ensures context is running. Works whether ctx is suspended or not --
+  // scheduled nodes play as soon as ctx resumes.
+  function withAudio(fn) {
+    var ctx = getAudioCtx();
+    fn(ctx);
+    if (ctx.state === 'suspended') ctx.resume();
+  }
+
+  // Splash sequence
+  (function() {
+    var splashEl  = document.getElementById('splash');
+    var contentEl = document.getElementById('splash-content');
+    var prompt    = document.getElementById('splash-prompt');
+    var started   = false;
+
+    function startSequence() {
+      if (started) return;
+      started = true;
+
+      // Hide prompt immediately (visual feedback on tap)
+      if (prompt) prompt.classList.add('hidden-prompt');
+
+      // Build bass nodes now (not at page load) so we don't waste memory
+      // if the user never taps
+      preBuildBass();
+
+      var ctx = getAudioCtx();
+      var bassFired = false;
+      function safeBass() {
+        if (bassFired) return;
+        bassFired = true;
+        triggerSplashBass();
+      }
+
+      function go() {
+        contentEl.classList.remove('pre-tap');
+        contentEl.classList.add('post-tap');
+
+        // Start the load bar animation now (not at page load)
+        var barFill = document.querySelector('.splash-bar-fill');
+        if (barFill) barFill.style.animation = 'loadBar 1.8s ease forwards';
+
+        setTimeout(function() {
+          var titleEl = document.querySelector('.splash-title');
+          var digits  = '0123456789';
+          var rand    = function() { return digits[Math.floor(Math.random() * digits.length)]; };
+
+          splashEl.classList.add('glitch-active');
+          titleEl.setAttribute('data-text', 'GUESS');
+          titleEl.classList.add('glitching');
+          contentEl.classList.add('tearing');
+
+          var letters = [
+            { id: 'gl0', delay: 0 },
+            { id: 'gl1', delay: 150 },
+            { id: 'gl2', delay: 280 },
+            { id: 'gl3', delay: 420 },
+            { id: 'gl4', delay: 560 },
+          ];
+
+          letters.forEach(function(l, i) {
+            setTimeout(function() {
+              var isLast = i === letters.length - 1;
+              glitchLetter(l.id, rand(), isLast ? function() {
+                setTimeout(function() {
+                  titleEl.classList.remove('glitching');
+                  contentEl.classList.remove('tearing');
+                  splashEl.classList.remove('glitch-active');
+                  setTimeout(function() {
+                    splashEl.classList.add('hidden');
+                    // Init game when splash actually exits, not on a fixed timer
+                    init();
+                    setTimeout(function() { splashEl.remove(); }, 900);
+                  }, 300);
+                }, 200);
+              } : null);
+            }, l.delay);
+          });
+        }, 1800);
+      }
+
+      var goFired = false;
+      function safeGo() {
+        if (goFired) return;
+        goFired = true;
+        go();
+      }
+
+      if (ctx.state === 'running') {
+        safeBass();
+        safeGo();
+      } else {
+        ctx.resume().then(function() {
+          safeBass();
+          safeGo();
+        }).catch(function() {
+          safeBass();
+          safeGo();
+        });
+        setTimeout(function() {
+          safeBass();
+          safeGo();
+        }, 200);
+      }
+    }
+
+    splashEl.addEventListener('pointerdown', startSequence, { once: true });
+    splashEl.addEventListener('keydown',     startSequence, { once: true });
+  })();
+
+  initLayout();
+
+  // ==========================================
+  // CANVAS CRT EFFECTS
+  // Replaces CSS scanlines + flicker with a
+  // real-time render loop. This is the hybrid
+  // approach: DOM stays for layout/interaction,
+  // Canvas handles per-pixel visual effects.
+  // ==========================================
+  (function() {
+    var canvas = document.getElementById('crtCanvas');
+    var ctx = canvas.getContext('2d');
+    var terminal = document.querySelector('.terminal');
+    var w = 0, h = 0;
+    var frameCount = 0;
+
+    // Pre-allocate an ImageData buffer for noise.
+    // We write RGBA values directly into this pixel array
+    // every frame, which is much faster than individual
+    // fillRect calls for thousands of tiny dots.
+    var noiseData = null;
+
+    // Flicker state: random full-screen brightness bursts
+    var flickerAlpha = 0;
+    var nextFlickerFrame = randomInt(180, 400);
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Resize canvas to match its container.
+    // Canvas pixel dimensions must equal its CSS display
+    // size, or everything draws blurry/stretched.
+    function resize() {
+      var rect = terminal.getBoundingClientRect();
+      // Using 1:1 pixels for a chunky CRT look (no devicePixelRatio scaling)
+      w = Math.floor(rect.width);
+      h = Math.floor(rect.height);
+      canvas.width = w;
+      canvas.height = h;
+      // Create a fresh pixel buffer at the new size
+      noiseData = ctx.createImageData(w, h);
+    }
+
+    // Call resize on load and when the window changes (debounced)
+    resize();
+    var resizeTimer = null;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 100);
+    });
+
+    // ---- THE RENDER LOOP ----
+    // requestAnimationFrame calls this ~60fps.
+    // Each frame we clear the canvas and redraw
+    // all effects from scratch. This is the core
+    // pattern for any Canvas animation.
+    function render() {
+      frameCount++;
+
+      // Clear the entire canvas (transparent)
+      ctx.clearRect(0, 0, w, h);
+
+      // EFFECT 1: SCANLINES
+      // Horizontal dark bars every 4px, just like a CRT
+      // electron gun skipping every other line.
+      // We offset them by a tiny crawl so they drift slowly.
+      var scanOffset = (frameCount * 0.3) % 4;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.13)';
+      for (var y = scanOffset; y < h; y += 4) {
+        ctx.fillRect(0, Math.floor(y), w, 2);
+      }
+
+      // EFFECT 2: STATIC NOISE
+      // Random bright/dark pixels scattered across the
+      // screen. We write directly into the ImageData pixel
+      // buffer for speed. Each pixel is 4 array slots: R,G,B,A.
+      var data = noiseData.data;
+      var len = data.length;
+      // Zero out the buffer using a 32-bit view (4x faster than byte-by-byte)
+      new Uint32Array(noiseData.data.buffer).fill(0);
+      // Sprinkle noise: ~3% of pixels get a random green-tinted dot
+      var pixelCount = w * h;
+      var noiseAmount = Math.floor(pixelCount * 0.03);
+      for (var n = 0; n < noiseAmount; n++) {
+        var px = Math.floor(Math.random() * pixelCount);
+        var idx = px * 4;
+        var brightness = Math.floor(Math.random() * 40);
+        data[idx]     = Math.floor(brightness * 0.4);  // R (dim)
+        data[idx + 1] = brightness;                      // G (dominant, CRT green)
+        data[idx + 2] = Math.floor(brightness * 0.2);  // B (very dim)
+        data[idx + 3] = Math.floor(Math.random() * 50) + 15; // A (semi-transparent)
+      }
+      ctx.putImageData(noiseData, 0, 0);
+
+      // EFFECT 3: SCREEN FLICKER
+      // Every few hundred frames, flash a faint green wash
+      // across the whole screen for 2-3 frames, simulating
+      // the CRT capacitor discharge flutter.
+      if (frameCount >= nextFlickerFrame) {
+        flickerAlpha = 0.04 + Math.random() * 0.03;
+        nextFlickerFrame = frameCount + randomInt(200, 500);
+      }
+      if (flickerAlpha > 0) {
+        ctx.fillStyle = 'rgba(57, 255, 20, ' + flickerAlpha + ')';
+        ctx.fillRect(0, 0, w, h);
+        flickerAlpha -= 0.015;
+        if (flickerAlpha < 0) flickerAlpha = 0;
+      }
+
+      // EFFECT 4: HORIZONTAL TEAR LINE
+      // A rare single-pixel bright bar that zips across
+      // the screen vertically, like a sync glitch.
+      if (Math.random() < 0.005) {
+        var tearY = Math.floor(Math.random() * h);
+        ctx.fillStyle = 'rgba(57, 255, 20, 0.08)';
+        ctx.fillRect(0, tearY, w, 1);
+        // Slight offset band below it
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.fillRect(0, tearY + 1, w, 2);
+      }
+
+      // Schedule next frame
+      requestAnimationFrame(render);
+    }
+
+    // Start the loop
+    requestAnimationFrame(render);
+  })();
+
+  // IDLE SCREEN DIMMING
+  (function() {
+    var IDLE_MS = 10000;
+    var idleTimer = null;
+    var terminal = document.querySelector('.terminal');
+    var started = false;
+
+    function goDim() {
+      terminal.classList.add('idle-dim');
+    }
+
+    function wakeUp() {
+      if (!started) return;
+      terminal.classList.remove('idle-dim');
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(goDim, IDLE_MS);
+    }
+
+    // Expose a start function so we can kick it off after splash
+    window._startIdleTimer = function() {
+      started = true;
+      idleTimer = setTimeout(goDim, IDLE_MS);
+    };
+
+    // Any interaction resets
+    ['click', 'keydown', 'pointerdown', 'touchstart', 'mousemove'].forEach(function(evt) {
+      document.addEventListener(evt, wakeUp, { passive: true });
+    });
+  })();
+</script>
+
+</body>
+</html>
