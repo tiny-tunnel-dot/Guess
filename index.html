@@ -1465,11 +1465,13 @@
     @media (max-width: 500px) {
       body {
         padding: 0;
-        align-items: flex-start;
+        display: block;
+        overflow-x: hidden;
       }
       .device {
-        width: 100%;
-        max-width: 100%;
+        width: 100vw;
+        max-width: 100vw;
+        margin: 0 auto;
         /* Kill tilt -- frees up space, perspective on .device stays harmless */
         transform: none !important;
         filter: none;
@@ -1615,7 +1617,7 @@
       <div class="terminal-body">
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
           <h1 style="margin-bottom:0;">GUESS</h1>
-          <div class="subtitle" style="margin-bottom:0;">// number guessing protocol v4.9.3</div>
+          <div class="subtitle" style="margin-bottom:0;">// protocol v4.9.3</div>
         </div>
 
         <div class="stat-row">
