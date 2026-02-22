@@ -1547,7 +1547,7 @@
       background:
         radial-gradient(circle at 40% 35%, rgba(255,255,255,0.5) 0%, rgba(255,180,160,0.3) 20%, transparent 55%),
         radial-gradient(circle at 50% 50%, #ff4444 0%, #cc2020 40%, #991010 80%, #660808 100%);
-      box-shadow: 0 0 5px rgba(255,64,64,0.7), 0 0 12px rgba(255,64,64,0.4), 0 0 24px rgba(255,64,64,0.2), inset 0 -1px 2px rgba(0,0,0,0.3);
+      box-shadow: 0 0 4px rgba(255,64,64,0.5), 0 0 10px rgba(255,64,64,0.25), inset 0 -1px 2px rgba(0,0,0,0.3);
       animation: sbFlickerRed 0.45s ease-in-out infinite;
     }
 
@@ -1555,7 +1555,7 @@
       background:
         radial-gradient(circle at 40% 35%, rgba(255,255,255,0.5) 0%, rgba(255,230,160,0.3) 20%, transparent 55%),
         radial-gradient(circle at 50% 50%, #ffcc20 0%, #dd9e00 40%, #aa7800 80%, #775200 100%);
-      box-shadow: 0 0 5px rgba(255,183,0,0.6), 0 0 12px rgba(255,183,0,0.3), 0 0 24px rgba(255,183,0,0.15), inset 0 -1px 2px rgba(0,0,0,0.3);
+      box-shadow: 0 0 4px rgba(255,183,0,0.5), 0 0 10px rgba(255,183,0,0.25), inset 0 -1px 2px rgba(0,0,0,0.3);
       animation: sbFlickerAmber 0.6s ease-in-out infinite;
     }
 
@@ -1563,7 +1563,7 @@
       background:
         radial-gradient(circle at 40% 35%, rgba(255,255,255,0.5) 0%, rgba(180,255,160,0.3) 20%, transparent 55%),
         radial-gradient(circle at 50% 50%, #44ee18 0%, #2ab808 40%, #1a8800 80%, #0e5500 100%);
-      box-shadow: 0 0 5px rgba(57,255,20,0.6), 0 0 12px rgba(57,255,20,0.3), 0 0 24px rgba(57,255,20,0.15), inset 0 -1px 2px rgba(0,0,0,0.3);
+      box-shadow: 0 0 4px rgba(57,255,20,0.5), 0 0 10px rgba(57,255,20,0.25), inset 0 -1px 2px rgba(0,0,0,0.3);
     }
 
     .sb-bulb.hitch .sb-lens {
@@ -2483,6 +2483,17 @@
           }
         });
 
+        // All bulbs flip to green once the last one lights
+        setTimeout(function() {
+          for (var j = 0; j < 7; j++) {
+            var b = document.getElementById('sb' + j);
+            if (b) {
+              b.classList.remove('lit-red', 'lit-amber', 'hitch');
+              b.classList.add('lit-green');
+            }
+          }
+        }, 4500);
+
         // Glitch fires after last bulb fully lights (1820 + 650 = 2470ms), plus 300ms beat
         setTimeout(function() {
           var titleEl = document.querySelector('.splash-title');
@@ -2512,7 +2523,7 @@
                   splashEl.classList.remove('glitch-active');
                   setTimeout(function() {
                     splashEl.classList.add('hidden');
-                    document.getElementById('splashBulbs').remove();
+                    setTimeout(function() { document.getElementById('splashBulbs').remove(); }, 800);
                     // Init game when splash actually exits, not on a fixed timer
                     init();
                     setTimeout(function() { splashEl.remove(); }, 900);
