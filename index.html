@@ -2111,6 +2111,63 @@
     if (window._startCRT) window._startCRT();
   }
 
+  // Split-flap tick and settle sounds
+  function playSfFlap(isFinal) {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+      // Noise burst -- the mechanical flap impact
+      var bufSize = Math.floor(ctx.sampleRate * (isFinal ? 0.04 : 0.018));
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+
+      // Bandpass: final settle is lower/thicker, cycle ticks are higher/thinner
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = isFinal
+        ? 1400 + Math.random() * 300
+        : 2200 + Math.random() * 600;
+      bp.Q.value = isFinal ? 1.5 : 2.5;
+
+      var hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = isFinal ? 600 : 900;
+
+      var gain = ctx.createGain();
+      var peak = isFinal ? 0.28 : 0.12;
+      var decay = isFinal ? 0.055 : 0.022;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(peak, now + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + decay);
+
+      noise.connect(bp);
+      bp.connect(hp);
+      hp.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + decay + 0.01);
+
+      // Subtle tonal body -- gives it a slight woody "clack"
+      var osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isFinal ? 320 : 320, now);
+      osc.frequency.exponentialRampToValueAtTime(isFinal ? 160 : 140, now + (isFinal ? 0.05 : 0.02));
+
+      var oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(isFinal ? 0.06 : 0.025, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + (isFinal ? 0.05 : 0.018));
+
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.06);
+    });
+  }
+
   // Animates the split-flap tiles to land on the callsign letters
   function splitFlapDisplay(callsign) {
     var CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -2133,10 +2190,12 @@
           if (cycles < maxCycles) {
             el.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
             cycles++;
+            playSfFlap(false);
             setTimeout(flip, delay + cycles * 8);
           } else {
             el.textContent = target;
             tile.classList.remove('flipping');
+            playSfFlap(true);
           }
         }
 
