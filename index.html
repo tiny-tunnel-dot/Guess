@@ -1648,6 +1648,32 @@
         padding: 16px 12px 8px;
         min-height: 100vh;
         min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+      }
+      .screen-bezel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .terminal {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .terminal-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      #log {
+        flex: 1;
+        height: auto;
+        max-height: none;
+        min-height: 60px;
       }
       /* Kill 3D depth faces -- invisible without tilt, just add overflow */
       .housing::before, .housing::after { display: none; }
@@ -1667,7 +1693,7 @@
       .stat-value { font-size: 16px; }
       .range-display { font-size: 11px; padding: 4px 10px; margin-bottom: 6px; }
       .range-display span { font-size: 13px; }
-      #log { height: 80px; max-height: 80px; padding: 5px 8px; margin-bottom: 6px; }
+      #log { padding: 5px 8px; margin-bottom: 6px; }
       .log-line { font-size: 11px; }
       #display-row { font-size: 22px; padding: 0 12px; height: 38px; margin-bottom: 6px; }
       .screen-bezel { margin-bottom: 8px; }
@@ -1697,7 +1723,7 @@
       .stat-value { font-size: 15px; }
       .range-display { font-size: 11px; padding: 4px 8px; margin-bottom: 6px; }
       .range-display span { font-size: 13px; }
-      #log { height: 68px; max-height: 68px; padding: 4px 6px; margin-bottom: 6px; }
+      #log { padding: 4px 6px; margin-bottom: 6px; }
       .log-line { font-size: 11px; line-height: 1.4; }
       #display-row { font-size: 20px; padding: 0 10px; height: 38px; margin-bottom: 6px; }
       .screen-bezel { margin-bottom: 8px; }
@@ -1711,6 +1737,10 @@
       .np .key-face { height: 36px; font-size: 18px; }
       .np.enter.full { height: 48px; }
       .np.enter.full .key-face { height: 38px; font-size: 12px; letter-spacing: 5px; }
+    }
+    /* Landscape mobile -- cap log so it doesn't dominate */
+    @media (max-width: 900px) and (orientation: landscape) {
+      #log { flex: none; height: 60px; max-height: 60px; }
     }
   </style>
 </head>
