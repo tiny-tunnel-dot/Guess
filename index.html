@@ -409,12 +409,8 @@
       position: relative;
     }
 
-    /* BATTERY LIVES -- top-right of terminal bar */
+    /* BATTERY LIVES -- left of power bulb strip */
     .battery-lives {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
       display: flex;
       align-items: center;
       gap: 5px;
@@ -740,6 +736,21 @@
       gap: 6px;
       padding: 8px 0 14px;
       position: relative;
+    }
+
+    .bulb-strip-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Battery anchored to left of the bulb strip, vertically centered */
+    .bulb-strip .battery-lives {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     .bulb-strip-label {
@@ -2275,16 +2286,6 @@
       <div class="terminal-bar">
         <span class="terminal-title">guess.exe</span>
         <span class="terminal-title">// number protocol v5.6.0</span>
-        <div class="battery-lives" id="batteryLives">
-          <div class="battery-shell">
-            <div class="battery-body">
-              <div class="battery-seg active seg-green" id="bseg0"></div>
-              <div class="battery-seg active seg-green" id="bseg1"></div>
-              <div class="battery-seg active seg-green" id="bseg2"></div>
-            </div>
-            <div class="battery-nub"></div>
-          </div>
-        </div>
       </div>
 
       <div class="terminal-body">
@@ -2332,15 +2333,27 @@
         <div class="sf-tile"><div class="sf-char" id="sf2">&nbsp;</div></div>
       </div>
     </div>
-    <div class="bulb-strip-label">P O W E R</div>
-    <div class="bulb-row" id="batteryCells">
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+    <div class="battery-lives" id="batteryLives">
+      <div class="battery-shell">
+        <div class="battery-body">
+          <div class="battery-seg active seg-green" id="bseg0"></div>
+          <div class="battery-seg active seg-green" id="bseg1"></div>
+          <div class="battery-seg active seg-green" id="bseg2"></div>
+        </div>
+        <div class="battery-nub"></div>
+      </div>
+    </div>
+    <div class="bulb-strip-center">
+      <div class="bulb-strip-label">P O W E R</div>
+      <div class="bulb-row" id="batteryCells">
+        <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+        <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+        <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+        <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+        <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+        <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+        <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      </div>
     </div>
   </div>
 
