@@ -2736,13 +2736,16 @@
     input.style.height = '1px';
     body.appendChild(input);
 
-    // Focus the hidden input to trigger native keyboard
-    setTimeout(function() { input.focus(); }, 80);
-
-    // Tap on screen re-focuses input (in case it lost focus)
-    screen.addEventListener('pointerdown', function() {
+    // Focus the hidden input to trigger native keyboard.
+    // Must happen synchronously inside a user gesture for iOS/Android to honor it.
+    // We attach to pointerdown on the screen itself as the gesture anchor.
+    screen.addEventListener('pointerdown', function(e) {
+      e.preventDefault();
       input.focus();
     });
+
+    // Also attempt focus immediately — works on desktop and some Android
+    input.focus();
 
     function renderSlots() {
       for (var i = 0; i < 3; i++) {
