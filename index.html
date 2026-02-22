@@ -1822,6 +1822,7 @@
     updateBestDisplay();
     updatePlayedDisplay();
     resetGame();
+    if (window._startCRT) window._startCRT();
     if (window._startIdleTimer) window._startIdleTimer();
   }
 
@@ -2565,8 +2566,11 @@
       requestAnimationFrame(render);
     }
 
-    // Start the loop
-    requestAnimationFrame(render);
+    // Expose start function -- called from init() after splash exits
+    window._startCRT = function() {
+      resize();
+      requestAnimationFrame(render);
+    };
   })();
 
   // IDLE SCREEN DIMMING
