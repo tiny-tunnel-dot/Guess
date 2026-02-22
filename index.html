@@ -2052,6 +2052,126 @@
     .sf-tile.flipping .sf-char {
       animation: sfFlip 0.12s ease-in-out forwards;
     }
+    /* STATS PANEL */
+    #stats-handle {
+      position: absolute;
+      top: 50%;
+      left: -16px;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 56px;
+      background: linear-gradient(180deg, #1a2e1a 0%, #0f1f0f 100%);
+      border: 1px solid rgba(57,255,20,0.25);
+      border-right: none;
+      border-radius: 6px 0 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 80;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.6);
+      transition: background 0.15s, border-color 0.15s;
+      pointer-events: all;
+    }
+    #stats-handle:hover {
+      background: linear-gradient(180deg, #243824 0%, #162416 100%);
+      border-color: rgba(57,255,20,0.5);
+    }
+    .stats-handle-arrow {
+      font-size: 16px;
+      color: #39ff14;
+      opacity: 0.6;
+      transition: transform 0.3s, opacity 0.15s;
+      user-select: none;
+      line-height: 1;
+    }
+    #stats-handle.open .stats-handle-arrow {
+      transform: scaleX(-1);
+      opacity: 1;
+    }
+    #stats-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 190px;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 79;
+      pointer-events: none;
+      overflow: visible;
+      visibility: hidden;
+    }
+    #stats-panel.open {
+      transform: translateX(0);
+      pointer-events: all;
+    }
+    #stats-panel-inner {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, #0d1a0d 0%, #080f08 100%);
+      border-left: 1px solid rgba(57,255,20,0.15);
+      box-shadow: -8px 0 30px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px 16px;
+    }
+    #stats-panel-inner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+    }
+    .stats-panel-callsign {
+      font-family: 'Courier New', monospace;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      color: #39ff14;
+      text-shadow: 0 0 20px rgba(57,255,20,0.7), 0 0 40px rgba(57,255,20,0.3);
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+    }
+    .stats-panel-divider {
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(57,255,20,0.3), transparent);
+      position: relative;
+      z-index: 1;
+    }
+    .stats-panel-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+    .stats-panel-label {
+      font-family: 'Courier New', monospace;
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: rgba(57,255,20,0.4);
+      text-transform: uppercase;
+    }
+    .stats-panel-value {
+      font-family: 'Courier New', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      color: #39ff14;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(57,255,20,0.5);
+    }
+
   </style>
 </head>
 <body>
@@ -2095,6 +2215,22 @@
   <!-- CRT Screen -->
   <div class="screen-bezel">
     <div class="terminal">
+      <div id="stats-panel">
+        <div id="stats-handle"><div class="stats-handle-arrow">&#8249;</div></div>
+        <div id="stats-panel-inner">
+          <div class="stats-panel-callsign" id="stats-callsign">---</div>
+          <div class="stats-panel-divider"></div>
+          <div class="stats-panel-row">
+            <div class="stats-panel-label">BEST SCORE</div>
+            <div class="stats-panel-value" id="stats-best">--</div>
+          </div>
+          <div class="stats-panel-row">
+            <div class="stats-panel-label">GAMES PLAYED</div>
+            <div class="stats-panel-value" id="stats-played">0</div>
+          </div>
+        </div>
+      </div>
+
       <canvas id="crtCanvas"></canvas>
       <div class="crt-vignette"></div>
       <div class="crt-reflection"></div>
@@ -2283,6 +2419,8 @@
     updateBatteryLives();
     resetGame();
     if (window._startCRT) window._startCRT();
+    if (window.refreshStatsPanel) window.refreshStatsPanel();
+    document.getElementById('stats-panel').style.visibility = 'visible';
   }
 
   // Split-flap tick and settle sounds
@@ -2588,6 +2726,7 @@
     }
 
     updateBestDisplay();
+    if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
 
   function handleLoss() {
@@ -2784,6 +2923,84 @@
   })();
 
   // Cheat dot
+  // Stats panel
+  (function() {
+    var panel  = document.getElementById('stats-panel');
+    var handle = document.getElementById('stats-handle');
+    var isOpen = false;
+
+    function openPanel() {
+      panel.classList.add('open');
+      handle.classList.add('open');
+      isOpen = true;
+      updateStatsPanel();
+    }
+    function closePanel() {
+      panel.classList.remove('open');
+      handle.classList.remove('open');
+      isOpen = false;
+    }
+    function updateStatsPanel() {
+      document.getElementById('stats-callsign').textContent = currentUser || '---';
+      document.getElementById('stats-best').textContent =
+        currentUser ? (storageGet(userKey('bestScore')) || '--') : '--';
+      document.getElementById('stats-played').textContent =
+        currentUser ? (storageGet(userKey('gamesPlayed')) || '0') : '0';
+    }
+
+    handle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      isOpen ? closePanel() : openPanel();
+    });
+
+    // Drag to open/close
+    var dragStartX = 0;
+    var dragStartOpen = false;
+    var dragging = false;
+    var panelWidth = 190;
+
+    handle.addEventListener('pointerdown', function(e) {
+      dragStartX = e.clientX;
+      dragStartOpen = isOpen;
+      dragging = false;
+      handle.setPointerCapture(e.pointerId);
+      panel.style.transition = 'none';
+    });
+
+    handle.addEventListener('pointermove', function(e) {
+      var dx = e.clientX - dragStartX;
+      if (Math.abs(dx) > 4) dragging = true;
+      if (!dragging) return;
+      var base = dragStartOpen ? 0 : panelWidth;
+      var offset = Math.max(0, Math.min(panelWidth, base + dx));
+      panel.style.transform = 'translateX(' + offset + 'px)';
+    });
+
+    handle.addEventListener('pointerup', function(e) {
+      panel.style.transition = '';
+      if (!dragging) return;
+      var dx = e.clientX - dragStartX;
+      if (dragStartOpen) {
+        dx > 40 ? closePanel() : openPanel();
+      } else {
+        dx < -40 ? openPanel() : closePanel();
+      }
+      dragging = false;
+    });
+
+    document.addEventListener('click', function(e) {
+      if (isOpen && !panel.contains(e.target)) closePanel();
+    });
+
+    var swipeStartX = 0;
+    panel.addEventListener('pointerdown', function(e) { swipeStartX = e.clientX; });
+    panel.addEventListener('pointerup', function(e) {
+      if (e.clientX - swipeStartX > 40) closePanel();
+    });
+
+    window.refreshStatsPanel = updateStatsPanel;
+  })();
+
   document.getElementById('cheatDot').addEventListener('click', function() {
     var el = document.getElementById('cheatValue');
     if (el.classList.contains('visible')) {
@@ -3428,6 +3645,7 @@
 
 
 </script>
+
 
 </body>
 </html>
