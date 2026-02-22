@@ -612,214 +612,6 @@
     }
 
     /* ==========================================
-       POWER INDICATOR BULBS -- on housing surface
-       Recessed jewel pilot lights drilled into metal
-       ========================================== */
-    .bulb-strip {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 10px 0 14px;
-    }
-
-    .bulb-strip-label {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 7px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #4a4838;
-      user-select: none;
-    }
-
-    .bulb-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    /* Each bulb: a recessed circular socket drilled into the housing */
-    .bulb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      position: relative;
-      /* Socket recess: dark pit with metallic rim */
-      background:
-        radial-gradient(circle at 50% 55%,
-          #0a0908 0%,
-          #0e0d0a 60%,
-          #1a1810 100%
-        );
-      border: 1.5px solid #2a2820;
-      box-shadow:
-        /* Inset shadow: drilled hole depth */
-        inset 0 2px 4px rgba(0,0,0,0.9),
-        inset 0 -1px 2px rgba(0,0,0,0.5),
-        inset 1px 0 2px rgba(0,0,0,0.4),
-        inset -1px 0 2px rgba(0,0,0,0.4),
-        /* Outer rim catch light */
-        0 1px 0 rgba(255,255,255,0.06),
-        0 -1px 0 rgba(0,0,0,0.4);
-    }
-
-    /* The glass lens dome sitting inside the socket */
-    .bulb .bulb-lens {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      right: 3px;
-      bottom: 3px;
-      border-radius: 50%;
-      /* Dark unlit lens by default */
-      background:
-        radial-gradient(circle at 40% 35%,
-          rgba(255,255,255,0.06) 0%,
-          transparent 50%
-        ),
-        radial-gradient(circle at 50% 50%,
-          #1a1a14 0%,
-          #111110 100%
-        );
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    /* ---- Active lit states ---- */
-    .bulb.active.tier-green .bulb-lens {
-      background:
-        radial-gradient(circle at 40% 35%,
-          rgba(255,255,255,0.5) 0%,
-          rgba(180,255,160,0.3) 20%,
-          transparent 55%
-        ),
-        radial-gradient(circle at 50% 50%,
-          #44ee18 0%,
-          #2ab808 40%,
-          #1a8800 80%,
-          #0e5500 100%
-        );
-      box-shadow:
-        0 0 4px rgba(57,255,20,0.5),
-        0 0 10px rgba(57,255,20,0.25),
-        inset 0 -1px 2px rgba(0,0,0,0.3);
-    }
-
-    .bulb.active.tier-amber .bulb-lens {
-      background:
-        radial-gradient(circle at 40% 35%,
-          rgba(255,255,255,0.5) 0%,
-          rgba(255,230,160,0.3) 20%,
-          transparent 55%
-        ),
-        radial-gradient(circle at 50% 50%,
-          #ffcc20 0%,
-          #dd9e00 40%,
-          #aa7800 80%,
-          #775200 100%
-        );
-      box-shadow:
-        0 0 4px rgba(255,183,0,0.5),
-        0 0 10px rgba(255,183,0,0.25),
-        inset 0 -1px 2px rgba(0,0,0,0.3);
-      animation: bulbAmberPulse 1.6s ease-in-out infinite;
-    }
-
-    @keyframes bulbAmberPulse {
-      0%, 100% {
-        opacity: 1;
-        box-shadow:
-          0 0 5px rgba(255,183,0,0.6),
-          0 0 12px rgba(255,183,0,0.3),
-          inset 0 -1px 2px rgba(0,0,0,0.3);
-      }
-      50% {
-        opacity: 0.8;
-        box-shadow:
-          0 0 3px rgba(255,183,0,0.35),
-          0 0 6px rgba(255,183,0,0.12),
-          inset 0 -1px 2px rgba(0,0,0,0.3);
-      }
-    }
-
-    .bulb.active.tier-red .bulb-lens {
-      background:
-        radial-gradient(circle at 40% 35%,
-          rgba(255,255,255,0.5) 0%,
-          rgba(255,180,160,0.3) 20%,
-          transparent 55%
-        ),
-        radial-gradient(circle at 50% 50%,
-          #ff4444 0%,
-          #cc2020 40%,
-          #991010 80%,
-          #660808 100%
-        );
-      animation: bulbFlicker 0.4s ease-in-out infinite;
-    }
-
-    /* Drain animation: bulb fades out like a filament cooling */
-    .bulb.draining .bulb-lens {
-      animation: bulbDrain 0.5s ease forwards;
-    }
-
-    @keyframes bulbDrain {
-      0%   { opacity: 1; }
-      30%  { opacity: 0.6; }
-      100% {
-        opacity: 1;
-        background:
-          radial-gradient(circle at 40% 35%,
-            rgba(255,255,255,0.06) 0%,
-            transparent 50%
-          ),
-          radial-gradient(circle at 50% 50%,
-            #1a1a14 0%,
-            #111110 100%
-          );
-        box-shadow: none;
-      }
-    }
-
-    /* Last bulb standing: rapid strobe */
-    .bulb.active.tier-red.last-bulb .bulb-lens {
-      animation: bulbCritical 0.12s linear infinite;
-    }
-
-    @keyframes bulbFlicker {
-      0%, 100% {
-        opacity: 1;
-        box-shadow:
-          0 0 6px rgba(255,64,64,0.7),
-          0 0 14px rgba(255,64,64,0.35),
-          inset 0 -1px 2px rgba(0,0,0,0.3);
-      }
-      50% {
-        opacity: 0.65;
-        box-shadow:
-          0 0 3px rgba(255,64,64,0.4),
-          0 0 6px rgba(255,64,64,0.15),
-          inset 0 -1px 2px rgba(0,0,0,0.3);
-      }
-    }
-
-    @keyframes bulbCritical {
-      0%, 100% {
-        opacity: 1;
-        box-shadow:
-          0 0 8px rgba(255,64,64,0.9),
-          0 0 20px rgba(255,64,64,0.5),
-          0 0 32px rgba(255,64,64,0.2),
-          inset 0 -1px 2px rgba(0,0,0,0.3);
-      }
-      50% {
-        opacity: 0.25;
-        box-shadow:
-          0 0 2px rgba(255,64,64,0.3),
-          inset 0 -1px 2px rgba(0,0,0,0.3);
-      }
-    }
-
-    /* ==========================================
        PHYSICAL KEYPAD -- on the housing surface
        ========================================== */
 
@@ -1516,10 +1308,6 @@
       .stat-value { font-size: 18px; }
       .range-display { font-size: 12px; padding: 5px 10px; margin-bottom: 8px; }
       .range-display span { font-size: 14px; }
-      .bulb-strip { padding: 6px 0 10px; gap: 6px; }
-      .bulb-row { gap: 5px; }
-      .bulb { width: 15px; height: 15px; }
-      .bulb-strip-label { font-size: 6px; letter-spacing: 2px; }
       #log { height: 100px; max-height: 100px; padding: 6px 8px; margin-bottom: 8px; }
       .log-line { font-size: 12px; }
       #display-row { font-size: 22px; padding: 0 12px; height: 44px; margin-bottom: 8px; }
@@ -1552,10 +1340,6 @@
       #display-row { font-size: 20px; padding: 0 10px; height: 38px; margin-bottom: 6px; }
       .screen-bezel { margin-bottom: 8px; }
       .housing-divider { margin-bottom: 8px; }
-      .bulb-strip { padding: 4px 0 8px; gap: 4px; }
-      .bulb-row { gap: 4px; }
-      .bulb { width: 13px; height: 13px; }
-      .bulb-strip-label { font-size: 5px; letter-spacing: 1.5px; }
       .keypad-well { padding: 8px; }
       .keypad-label { font-size: 7px; margin-bottom: 6px; }
       #numpad { gap: 4px; }
@@ -1567,7 +1351,7 @@
 
     /* Photo housing — hide CSS chrome */
     .screw, .vents, .vent-slit, .housing-wear,
-    .housing-divider, .bulb-strip { display: none !important; }
+    .housing-divider { display: none !important; }
   </style>
 </head>
 <body>
@@ -1655,21 +1439,6 @@
 
   <!-- Etched divider between screen and keypad -->
   <div class="housing-divider"></div>
-
-  <!-- Power cells: recessed indicator bulbs on housing surface -->
-  <div class="bulb-strip">
-    <span class="bulb-strip-label">POWER</span>
-    <div class="bulb-row" id="batteryCells">
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
-    </div>
-    <span class="bulb-strip-label">DRAIN</span>
-  </div>
 
   <!-- Physical keypad on housing surface -->
   <div class="keypad-well">
@@ -1767,7 +1536,6 @@
 
   function initLayout() {
     document.getElementById('attempts').textContent = '0';
-    resetBattery();
     document.getElementById('displayValue').textContent = '';
     document.getElementById('display-row').classList.add('idle');
     document.getElementById('rangeDisplay').textContent = '1 \u2014 100';
@@ -1795,7 +1563,6 @@
 
     document.getElementById('cheatValue').classList.remove('visible');
     document.getElementById('attempts').textContent = '0';
-    resetBattery();
     setNumpadDisabled(false);
     updateDisplay();
     updateRangeDisplay();
@@ -1828,8 +1595,6 @@
 
     attempts++;
     document.getElementById('attempts').textContent = attempts;
-
-    updateBattery(attempts);
 
     log('guess', `> you guessed: ${guess}`);
 
@@ -1923,59 +1688,6 @@
 
   function updateRangeDisplay() {
     document.getElementById('rangeDisplay').textContent = `${low} \u2014 ${high}`;
-  }
-
-  function updateBattery(attemptsUsed) {
-    var remaining = MAX_GUESSES - attemptsUsed;
-    var cells = document.querySelectorAll('.bulb');
-    cells.forEach(function(cell, i) {
-      cell.classList.remove('active', 'draining', 'tier-green', 'tier-amber', 'tier-red', 'last-bulb');
-      var tier;
-      if (remaining <= 2)      tier = 'tier-red';
-      else if (remaining <= 4) tier = 'tier-amber';
-      else                     tier = 'tier-green';
-      cell.classList.add(tier);
-
-      if (i < remaining) {
-        cell.classList.add('active');
-      } else if (i === remaining && attemptsUsed > 0) {
-        cell.classList.add('draining');
-      }
-    });
-
-    // Mark the sole surviving bulb for critical strobe
-    if (remaining === 1) {
-      cells[0].classList.add('last-bulb');
-    }
-
-    // Update power LED pulse rate: faster and redder as attempts run low
-    var led = document.querySelector('.power-led');
-    if (remaining <= 2) {
-      led.style.background = 'var(--red)';
-      led.style.boxShadow = '0 0 4px var(--red), 0 0 10px rgba(255,64,64,0.6), 0 0 20px rgba(255,64,64,0.25)';
-      led.style.animation = 'ledPulseRed 0.35s ease-in-out infinite';
-    } else if (remaining <= 4) {
-      led.style.background = 'var(--amber)';
-      led.style.boxShadow = '0 0 4px var(--amber), 0 0 10px rgba(255,183,0,0.5), 0 0 20px rgba(255,183,0,0.2)';
-      led.style.animation = 'ledPulseAmber 0.8s ease-in-out infinite';
-    } else {
-      led.style.background = '';
-      led.style.boxShadow = '';
-      led.style.animation = '';
-    }
-  }
-
-  function resetBattery() {
-    var cells = document.querySelectorAll('.bulb');
-    cells.forEach(function(cell) {
-      cell.classList.remove('draining', 'last-bulb');
-      cell.classList.add('active', 'tier-green');
-      cell.classList.remove('tier-amber', 'tier-red');
-    });
-    var led = document.querySelector('.power-led');
-    led.style.background = '';
-    led.style.boxShadow = '';
-    led.style.animation = '';
   }
 
   function updateBestDisplay() {
