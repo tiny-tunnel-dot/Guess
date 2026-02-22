@@ -202,38 +202,6 @@
     }
 
     /* POWER LED */
-    .power-led {
-      position: absolute;
-      top: 14px;
-      right: 36px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow:
-        0 0 4px var(--green),
-        0 0 10px rgba(57,255,20,0.4),
-        0 0 20px rgba(57,255,20,0.15),
-        inset 0 -1px 1px rgba(0,0,0,0.3);
-      z-index: 20;
-      animation: ledPulse 3s ease-in-out infinite;
-    }
-
-    @keyframes ledPulse {
-      0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--green), 0 0 10px rgba(57,255,20,0.4); }
-      50%      { opacity: 0.7; box-shadow: 0 0 3px var(--green), 0 0 6px rgba(57,255,20,0.3); }
-    }
-
-    @keyframes ledPulseAmber {
-      0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--amber), 0 0 12px rgba(255,183,0,0.5); }
-      50%      { opacity: 0.5; box-shadow: 0 0 2px var(--amber), 0 0 4px rgba(255,183,0,0.2); }
-    }
-
-    @keyframes ledPulseRed {
-      0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--red), 0 0 16px rgba(255,64,64,0.7), 0 0 30px rgba(255,64,64,0.3); }
-      50%      { opacity: 0.3; box-shadow: 0 0 2px var(--red), 0 0 4px rgba(255,64,64,0.2); }
-    }
-
     /* HOUSING WEAR MARKS -- decades of bunker life */
     .housing-wear {
       position: absolute;
@@ -355,35 +323,6 @@
     }
 
     /* IDLE SCREEN DIMMING */
-    .terminal.idle-dim {
-      filter: brightness(0.55) saturate(0.6);
-      opacity: 0.85;
-    }
-
-    /* Phosphor drift when idle */
-    .terminal.idle-dim::after {
-      animation: phosphorDrift 8s ease-in-out infinite;
-    }
-
-    @keyframes phosphorDrift {
-      0%, 100% {
-        background:
-          radial-gradient(ellipse at 50% 40%, rgba(57,255,20,0.03) 0%, transparent 70%);
-      }
-      25% {
-        background:
-          radial-gradient(ellipse at 40% 55%, rgba(57,255,20,0.04) 0%, transparent 65%);
-      }
-      50% {
-        background:
-          radial-gradient(ellipse at 60% 35%, rgba(57,255,20,0.05) 0%, transparent 60%);
-      }
-      75% {
-        background:
-          radial-gradient(ellipse at 45% 50%, rgba(57,255,20,0.035) 0%, transparent 68%);
-      }
-    }
-
     /* CRT SCANLINE + NOISE -- now handled by <canvas id="crtCanvas"> */
 
     #crtCanvas {
@@ -465,6 +404,91 @@
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.05),
         0 2px 8px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    /* BATTERY LIVES -- top-right of terminal bar */
+    .battery-lives {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .battery-shell {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      position: relative;
+    }
+
+    .battery-body {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 2px 3px;
+      border: 1.5px solid #3a4a3a;
+      border-radius: 2px;
+      background: #080e08;
+      box-shadow:
+        inset 0 1px 3px rgba(0,0,0,0.8),
+        0 0 6px rgba(57,255,20,0.05);
+    }
+
+    .battery-nub {
+      width: 3px;
+      height: 7px;
+      background: #3a4a3a;
+      border-radius: 0 1px 1px 0;
+      margin-left: 1px;
+    }
+
+    .battery-seg {
+      width: 10px;
+      height: 12px;
+      border-radius: 1px;
+      background: #111a11;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Segment active states -- match bulb color scheme */
+    .battery-seg.active.seg-green {
+      background: #2ab808;
+      box-shadow: 0 0 4px rgba(57,255,20,0.6), 0 0 8px rgba(57,255,20,0.2);
+    }
+
+    .battery-seg.active.seg-amber {
+      background: #cc8800;
+      box-shadow: 0 0 4px rgba(255,183,0,0.6), 0 0 8px rgba(255,183,0,0.2);
+    }
+
+    .battery-seg.active.seg-red {
+      background: #cc2020;
+      box-shadow: 0 0 4px rgba(255,64,64,0.7), 0 0 8px rgba(255,64,64,0.25);
+      animation: batteryRedPulse 0.6s ease-in-out infinite;
+    }
+
+    @keyframes batteryRedPulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+
+    @keyframes batteryShake {
+      0%   { transform: translateY(-50%) translateX(0); }
+      15%  { transform: translateY(-50%) translateX(-3px); }
+      30%  { transform: translateY(-50%) translateX(3px); }
+      45%  { transform: translateY(-50%) translateX(-3px); }
+      60%  { transform: translateY(-50%) translateX(3px); }
+      75%  { transform: translateY(-50%) translateX(-2px); }
+      90%  { transform: translateY(-50%) translateX(2px); }
+      100% { transform: translateY(-50%) translateX(0); }
+    }
+
+    .battery-lives.shake {
+      animation: batteryShake 0.4s ease;
     }
 
     .cheat-value {
@@ -1327,7 +1351,7 @@
       color: var(--green);
       text-shadow: 0 0 40px var(--green), 0 0 80px rgba(57,255,20,0.3);
       letter-spacing: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 60px;
       position: relative;
     }
 
@@ -1368,6 +1392,7 @@
       font-size: 12px;
       color: var(--muted);
       letter-spacing: 2px;
+      margin-top: 60px;
       margin-bottom: 32px;
     }
 
@@ -1644,7 +1669,6 @@
       .screw-tl { top: 8px; left: 8px; }
       #cheatValue { top: 8px; left: 24px; font-size: 10px; }
       .screw-tr { top: 8px; right: 8px; }
-      .power-led { top: 11px; right: 28px; width: 5px; height: 5px; }
       .terminal-bar { padding: 6px 10px; }
       .terminal-body { padding: 12px 12px 14px; }
       h1 { font-size: 16px; letter-spacing: 2px; margin-bottom: 4px; }
@@ -1712,7 +1736,7 @@
     <h1 class="splash-title">
       <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
     </h1>
-    <div class="splash-sub">// number guessing protocol v4.9.4</div>
+    <div class="splash-sub">// number protocol v4.9.4</div>
 
     <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
   </div>
@@ -1749,7 +1773,6 @@
     <div class="vent-slit"></div>
   </div>
 
-  <div class="power-led"></div>
   <div class="housing-wear"></div>
 
   <!-- CRT Screen -->
@@ -1761,12 +1784,20 @@
 
       <div class="terminal-bar">
         <span class="terminal-title">guess.exe</span>
+        <span class="terminal-title">// number protocol v4.9.4</span>
+        <div class="battery-lives" id="batteryLives">
+          <div class="battery-shell">
+            <div class="battery-body">
+              <div class="battery-seg active seg-green" id="bseg0"></div>
+              <div class="battery-seg active seg-green" id="bseg1"></div>
+              <div class="battery-seg active seg-green" id="bseg2"></div>
+            </div>
+            <div class="battery-nub"></div>
+          </div>
+        </div>
       </div>
 
       <div class="terminal-body">
-        <h1>GUESS</h1>
-        <div class="subtitle">// number guessing protocol v4.9.4</div>
-
         <div class="stat-row">
           <div class="stat">
             <div class="stat-label">Attempts</div>
@@ -1843,6 +1874,7 @@
   let attempts;
   let bestScore;
   let gamesPlayed;
+  let batteryLives;
   let low;
   let high;
   let gameOver;
@@ -1902,13 +1934,42 @@
   }
 
   function init() {
-    bestScore   = parseInt(storageGet('bestScore')) || null;
-    gamesPlayed = parseInt(storageGet('gamesPlayed')) || 0;
+    bestScore    = parseInt(storageGet('bestScore')) || null;
+    gamesPlayed  = parseInt(storageGet('gamesPlayed')) || 0;
+    batteryLives = parseInt(storageGet('batteryLives'));
+    if (isNaN(batteryLives) || batteryLives < 0 || batteryLives > 3) batteryLives = 3;
     updateBestDisplay();
     updatePlayedDisplay();
+    updateBatteryLives();
     resetGame();
     if (window._startCRT) window._startCRT();
-    if (window._startIdleTimer) window._startIdleTimer();
+  }
+
+  function updateBatteryLives() {
+    var segs = ['bseg0', 'bseg1', 'bseg2'];
+    var color = batteryLives === 3 ? 'seg-green' : batteryLives === 2 ? 'seg-amber' : 'seg-red';
+    segs.forEach(function(id, i) {
+      var seg = document.getElementById(id);
+      seg.classList.remove('active', 'seg-green', 'seg-amber', 'seg-red');
+      // Segments fill left to right, drain right to left
+      // seg index 0=left, 1=mid, 2=right
+      // at 3 lives: all active. at 2: 0,1 active. at 1: only 0 active.
+      if (i < batteryLives) {
+        seg.classList.add('active', color);
+      }
+    });
+    storageSet('batteryLives', batteryLives);
+  }
+
+  function shakeBattery() {
+    var el = document.getElementById('batteryLives');
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+    el.addEventListener('animationend', function handler() {
+      el.classList.remove('shake');
+      el.removeEventListener('animationend', handler);
+    });
   }
 
   function initLayout() {
@@ -1929,6 +1990,12 @@
     high         = 100;
     gameOver     = false;
     npBuffer     = '';
+
+    // Reset battery to 3 only if fully depleted
+    if (batteryLives === 0) {
+      batteryLives = 3;
+      updateBatteryLives();
+    }
 
     gamesPlayed = (parseInt(storageGet('gamesPlayed')) || 0) + 1;
     storageSet('gamesPlayed', gamesPlayed);
@@ -2024,12 +2091,26 @@
       log('win', `> new best score: ${bestScore}`);
     }
 
+    if (batteryLives === 3) {
+      shakeBattery();
+    } else {
+      batteryLives = Math.min(3, batteryLives + 1);
+      updateBatteryLives();
+    }
+
     updateBestDisplay();
   }
 
   function handleLoss() {
+    batteryLives = Math.max(0, batteryLives - 1);
+    updateBatteryLives();
     endGame();
-    log('hint', `> out of attempts. the number was ${secretNumber}.`);
+    if (batteryLives === 0) {
+      log('hint', `> out of attempts. the number was ${secretNumber}.`);
+      log('hint', `> battery depleted. system failure.`);
+    } else {
+      log('hint', `> out of attempts. the number was ${secretNumber}.`);
+    }
   }
 
   function log(type, message) {
@@ -2094,21 +2175,6 @@
       cells[0].classList.add('last-bulb');
     }
 
-    // Update power LED pulse rate: faster and redder as attempts run low
-    var led = document.querySelector('.power-led');
-    if (remaining <= 2) {
-      led.style.background = 'var(--red)';
-      led.style.boxShadow = '0 0 4px var(--red), 0 0 10px rgba(255,64,64,0.6), 0 0 20px rgba(255,64,64,0.25)';
-      led.style.animation = 'ledPulseRed 0.35s ease-in-out infinite';
-    } else if (remaining <= 4) {
-      led.style.background = 'var(--amber)';
-      led.style.boxShadow = '0 0 4px var(--amber), 0 0 10px rgba(255,183,0,0.5), 0 0 20px rgba(255,183,0,0.2)';
-      led.style.animation = 'ledPulseAmber 0.8s ease-in-out infinite';
-    } else {
-      led.style.background = '';
-      led.style.boxShadow = '';
-      led.style.animation = '';
-    }
   }
 
   function resetBattery() {
@@ -2118,10 +2184,6 @@
       cell.classList.add('active', 'tier-green');
       cell.classList.remove('tier-amber', 'tier-red');
     });
-    var led = document.querySelector('.power-led');
-    led.style.background = '';
-    led.style.boxShadow = '';
-    led.style.animation = '';
   }
 
   function updateBestDisplay() {
@@ -2697,35 +2759,7 @@
     };
   })();
 
-  // IDLE SCREEN DIMMING
-  (function() {
-    var IDLE_MS = 10000;
-    var idleTimer = null;
-    var terminal = document.querySelector('.terminal');
-    var started = false;
 
-    function goDim() {
-      terminal.classList.add('idle-dim');
-    }
-
-    function wakeUp() {
-      if (!started) return;
-      terminal.classList.remove('idle-dim');
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(goDim, IDLE_MS);
-    }
-
-    // Expose a start function so we can kick it off after splash
-    window._startIdleTimer = function() {
-      started = true;
-      idleTimer = setTimeout(goDim, IDLE_MS);
-    };
-
-    // Any interaction resets
-    ['click', 'keydown', 'pointerdown', 'touchstart', 'mousemove'].forEach(function(evt) {
-      document.addEventListener(evt, wakeUp, { passive: true });
-    });
-  })();
 </script>
 
 </body>
