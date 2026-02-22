@@ -392,6 +392,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      position: relative;
     }
 
     .terminal-bar {
@@ -663,6 +664,7 @@
         inset 0 0 30px rgba(57,255,20,0.04),
         0 2px 0 rgba(57,255,20,0.1);
       transition: border-color 0.15s ease;
+      position: relative;
     }
 
     /* GUESS FLASH FEEDBACK */
@@ -1656,6 +1658,130 @@
     @media (max-width: 900px) and (orientation: landscape) {
       #log { flex: none; height: 60px; max-height: 60px; }
     }
+
+    /* ==========================================
+       USER SYSTEM SCREENS
+       ========================================== */
+
+    #game-ui {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* Shared screen wrapper -- absolute overlay inside terminal-body.
+       Height is always driven by #game-ui; these screens just sit on top. */
+    .user-screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 10px 0;
+      background: var(--panel);
+      z-index: 10;
+    }
+
+    .user-screen-label {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .user-screen-title {
+      font-size: 13px;
+      color: var(--green);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(57,255,20,0.5);
+    }
+
+    /* Callsign display -- the "> [A__]" line */
+    .callsign-display {
+      font-size: 28px;
+      color: var(--green);
+      letter-spacing: 6px;
+      text-shadow: 0 0 16px rgba(57,255,20,0.6);
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .callsign-prompt-char {
+      color: var(--muted);
+    }
+
+    .callsign-char {
+      display: inline-block;
+      width: 22px;
+      text-align: center;
+      border-bottom: 2px solid var(--green-dim);
+      padding-bottom: 2px;
+      transition: border-color 0.15s ease;
+    }
+
+    .callsign-char.filled {
+      border-color: var(--green);
+      text-shadow: 0 0 12px rgba(57,255,20,0.7);
+    }
+
+    /* Blinking cursor on the active (next empty) slot */
+    .callsign-char.cursor {
+      border-color: var(--green);
+      animation: callsignBlink 0.8s step-end infinite;
+    }
+
+    @keyframes callsignBlink {
+      0%, 100% { border-color: var(--green); }
+      50%       { border-color: transparent; }
+    }
+
+    .user-screen-hint {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    /* Welcome back callsign display */
+    .welcome-callsign {
+      font-size: 36px;
+      font-family: 'Courier New', Courier, monospace;
+      color: var(--green);
+      letter-spacing: 8px;
+      text-shadow: 0 0 20px rgba(57,255,20,0.6), 0 0 40px rgba(57,255,20,0.2);
+      text-transform: uppercase;
+    }
+
+    /* Hidden native input that captures keyboard on mobile */
+    #callsign-input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 1px;
+    }
+
+    #user-tag {
+      position: absolute;
+      bottom: 5px;
+      left: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--green);
+      text-shadow: 0 0 8px rgba(57,255,20,0.6), 0 0 16px rgba(57,255,20,0.2);
+      text-transform: uppercase;
+      opacity: 0.6;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -1718,29 +1844,32 @@
       </div>
 
       <div class="terminal-body">
-        <div class="stat-row">
-          <div class="stat">
-            <div class="stat-label">Attempts</div>
-            <div class="stat-value" id="attempts">0</div>
+        <div id="game-ui">
+          <div class="stat-row">
+            <div class="stat">
+              <div class="stat-label">Attempts</div>
+              <div class="stat-value" id="attempts">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Best</div>
+              <div class="stat-value" id="best">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Played</div>
+              <div class="stat-value" id="played">0</div>
+            </div>
           </div>
-          <div class="stat">
-            <div class="stat-label">Best</div>
-            <div class="stat-value" id="best">--</div>
+
+          <div class="range-display">
+            Search range: <span id="rangeDisplay">1 &mdash; 100</span>
           </div>
-          <div class="stat">
-            <div class="stat-label">Played</div>
-            <div class="stat-value" id="played">0</div>
+
+          <div id="log"></div>
+
+          <div id="display-row" class="idle">
+            <span id="displayValue"></span>
+            <span id="user-tag"></span>
           </div>
-        </div>
-
-        <div class="range-display">
-          Search range: <span id="rangeDisplay">1 &mdash; 100</span>
-        </div>
-
-        <div id="log"></div>
-
-        <div id="display-row" class="idle">
-          <span id="displayValue"></span>
         </div>
       </div>
     </div>
@@ -1798,6 +1927,9 @@
   let high;
   let gameOver;
 
+  // USER STATE
+  let currentUser = null;
+
   const MAX_GUESSES = 7;
 
   function storageGet(key) {
@@ -1805,6 +1937,14 @@
   }
   function storageSet(key, val) {
     try { localStorage.setItem(key, val); } catch(e) {}
+  }
+  function storageRemove(key) {
+    try { localStorage.removeItem(key); } catch(e) {}
+  }
+
+  // Namespace all game data under the active user
+  function userKey(key) {
+    return 'user:' + currentUser + ':' + key;
   }
 
   // NUMPAD STATE
@@ -1853,10 +1993,11 @@
   }
 
   function init() {
-    bestScore    = parseInt(storageGet('bestScore')) || null;
-    gamesPlayed  = parseInt(storageGet('gamesPlayed')) || 0;
-    batteryLives = parseInt(storageGet('batteryLives'));
+    bestScore    = parseInt(storageGet(userKey('bestScore'))) || null;
+    gamesPlayed  = parseInt(storageGet(userKey('gamesPlayed'))) || 0;
+    batteryLives = parseInt(storageGet(userKey('batteryLives')));
     if (isNaN(batteryLives) || batteryLives < 0 || batteryLives > 3) batteryLives = 3;
+    document.getElementById('user-tag').textContent = currentUser;
     updateBestDisplay();
     updatePlayedDisplay();
     updateBatteryLives();
@@ -1877,7 +2018,7 @@
         seg.classList.add('active', color);
       }
     });
-    storageSet('batteryLives', batteryLives);
+    storageSet(userKey('batteryLives'), batteryLives);
   }
 
   function shakeBattery() {
@@ -1916,8 +2057,8 @@
       updateBatteryLives();
     }
 
-    gamesPlayed = (parseInt(storageGet('gamesPlayed')) || 0) + 1;
-    storageSet('gamesPlayed', gamesPlayed);
+    gamesPlayed = (parseInt(storageGet(userKey('gamesPlayed'))) || 0) + 1;
+    storageSet(userKey('gamesPlayed'), gamesPlayed);
     updatePlayedDisplay();
 
     // Restore enter key to normal mode
@@ -2006,7 +2147,7 @@
 
     if (!bestScore || attempts < bestScore) {
       bestScore = attempts;
-      storageSet('bestScore', bestScore);
+      storageSet(userKey('bestScore'), bestScore);
       log('win', `> new best score: ${bestScore}`);
     }
 
@@ -2226,6 +2367,8 @@
 
   // Keyboard input
   document.addEventListener('keydown', function(e) {
+    // Yield to callsign screen if it's active
+    if (document.getElementById('callsign-screen')) return;
     if (e.key === 'Enter') {
       playClick('enter');
       if (gameOver) resetGame();
@@ -2404,6 +2547,157 @@
     if (ctx.state === 'suspended') ctx.resume();
   }
 
+  // ==========================================
+  // USER SYSTEM
+  // ==========================================
+
+  // Entry point called after splash exits.
+  // Routes to callsign prompt or welcome back based on stored session.
+  function checkUser() {
+    var saved = storageGet('user:session');
+    if (saved) {
+      currentUser = saved;
+      showWelcomeScreen(saved);
+    } else {
+      showCallsignScreen();
+    }
+  }
+
+  // Build and display the callsign entry screen inside terminal-body
+  function showCallsignScreen() {
+    var body = document.querySelector('.terminal-body');
+
+    var screen = document.createElement('div');
+    screen.id = 'callsign-screen';
+    screen.className = 'user-screen';
+    screen.innerHTML =
+      '<div class="user-screen-label">IDENT REQUIRED</div>' +
+      '<div class="user-screen-title">ENTER CALLSIGN</div>' +
+      '<div class="callsign-display">' +
+        '<span class="callsign-prompt-char">&gt;</span>' +
+        '<span class="callsign-char cursor" id="cs0">&nbsp;</span>' +
+        '<span class="callsign-char" id="cs1">&nbsp;</span>' +
+        '<span class="callsign-char" id="cs2">&nbsp;</span>' +
+      '</div>' +
+      '<div class="user-screen-hint">[ ENTER TO CONFIRM ]</div>' +
+      '<input id="callsign-input" type="text" maxlength="6" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">';
+
+    body.appendChild(screen);
+
+    var buffer = '';
+    var input  = document.getElementById('callsign-input');
+    input.style.position = 'absolute';
+    input.style.opacity  = '0';
+    input.style.pointerEvents = 'none';
+    input.style.top  = '0';
+    input.style.left = '0';
+    input.style.width  = '1px';
+    input.style.height = '1px';
+    body.appendChild(input);
+
+    // Focus the hidden input to trigger native keyboard
+    setTimeout(function() { input.focus(); }, 80);
+
+    // Tap on screen re-focuses input (in case it lost focus)
+    screen.addEventListener('pointerdown', function() {
+      input.focus();
+    });
+
+    function renderSlots() {
+      for (var i = 0; i < 3; i++) {
+        var slot = document.getElementById('cs' + i);
+        slot.classList.remove('filled', 'cursor');
+        if (i < buffer.length) {
+          slot.textContent = buffer[i];
+          slot.classList.add('filled');
+        } else {
+          slot.innerHTML = '&nbsp;';
+          if (i === buffer.length) slot.classList.add('cursor');
+        }
+      }
+    }
+
+    function handleKey(key) {
+      if (/^[A-Za-z]$/.test(key) && buffer.length < 3) {
+        buffer += key.toUpperCase();
+        playClick('key');
+        renderSlots();
+      } else if (key === 'Backspace' && buffer.length > 0) {
+        buffer = buffer.slice(0, -1);
+        playClick('backspace');
+        renderSlots();
+      } else if (key === 'Enter' && buffer.length === 3) {
+        playClick('enter');
+        confirmCallsign(buffer);
+      }
+    }
+
+    // Desktop keyboard
+    document.addEventListener('keydown', callsignKeyHandler);
+    function callsignKeyHandler(e) {
+      handleKey(e.key);
+      // Clear hidden input to prevent mobile from submitting stale data
+      input.value = '';
+    }
+
+    // Mobile keyboard via hidden input
+    input.addEventListener('input', function() {
+      var raw = input.value.replace(/[^A-Za-z]/g, '');
+      input.value = '';
+      for (var i = 0; i < raw.length && buffer.length < 3; i++) {
+        buffer += raw[i].toUpperCase();
+      }
+      playClick('key');
+      renderSlots();
+    });
+
+    // Mobile ENTER key (Go button)
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Backspace') {
+        if (buffer.length > 0) {
+          buffer = buffer.slice(0, -1);
+          playClick('backspace');
+          renderSlots();
+        }
+        e.preventDefault();
+        return;
+      }
+      if (e.key === 'Enter' && buffer.length === 3) {
+        playClick('enter');
+        confirmCallsign(buffer);
+      }
+    });
+
+    function confirmCallsign(callsign) {
+      document.removeEventListener('keydown', callsignKeyHandler);
+      currentUser = callsign;
+      storageSet('user:session', callsign);
+      screen.remove();
+      input.remove();
+      init();
+    }
+  }
+
+  // Show "WELCOME BACK / [NAME]" for 3 seconds then launch game
+  function showWelcomeScreen(callsign) {
+    var body = document.querySelector('.terminal-body');
+
+    var screen = document.createElement('div');
+    screen.id = 'welcome-screen';
+    screen.className = 'user-screen';
+    screen.innerHTML =
+      '<div class="user-screen-label">SYSTEM ONLINE</div>' +
+      '<div class="user-screen-title">WELCOME BACK</div>' +
+      '<div class="welcome-callsign">' + callsign + '</div>';
+
+    body.appendChild(screen);
+
+    setTimeout(function() {
+      screen.remove();
+      init();
+    }, 3000);
+  }
+
   // Splash sequence
   (function() {
     var splashEl  = document.getElementById('splash');
@@ -2463,7 +2757,7 @@
                   setTimeout(function() {
                     splashEl.classList.add('hidden');
                     // Init game when splash actually exits, not on a fixed timer
-                    init();
+                    checkUser();
                     setTimeout(function() { splashEl.remove(); }, 900);
                   }, 300);
                 }, 200);
