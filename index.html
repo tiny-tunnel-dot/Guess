@@ -721,6 +721,7 @@
       justify-content: center;
       gap: 6px;
       padding: 8px 0 14px;
+      position: relative;
     }
 
     .bulb-strip-label {
@@ -1782,6 +1783,102 @@
       opacity: 0.6;
       pointer-events: none;
     }
+    /* ==========================================
+       SPLIT-FLAP CALLSIGN DISPLAY
+       ========================================== */
+
+    #split-flap {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+    }
+
+    .sf-label {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 7px;
+      letter-spacing: 2px;
+      color: #4a5a4a;
+      text-transform: uppercase;
+      margin-bottom: 1px;
+      user-select: none;
+    }
+
+    .sf-tiles {
+      display: flex;
+      gap: 3px;
+    }
+
+    .sf-tile {
+      width: 33px;
+      height: 42px;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      background: #0a0c0a;
+      border: 1px solid #2a3a2a;
+      box-shadow:
+        inset 0 1px 3px rgba(0,0,0,0.9),
+        inset 0 -1px 0 rgba(255,255,255,0.03),
+        0 1px 2px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(0,0,0,0.4);
+    }
+
+    /* Mechanical split seam across the middle */
+    .sf-tile::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: 50%;
+      height: 1px;
+      background: rgba(0,0,0,0.8);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.04);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .sf-char {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: #d4e8c2;
+      text-shadow: 0 0 6px rgba(200,240,160,0.3);
+      letter-spacing: 0;
+      user-select: none;
+      z-index: 1;
+    }
+
+    /* Top-half darker (shadow from flap above) */
+    .sf-tile::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 50% 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 3;
+      pointer-events: none;
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* Flap animation: rotates top half down like a mechanical flip */
+    @keyframes sfFlip {
+      0%   { transform: rotateX(0deg);   opacity: 1; }
+      45%  { transform: rotateX(-90deg); opacity: 0.3; }
+      55%  { transform: rotateX(-90deg); opacity: 0.3; }
+      100% { transform: rotateX(0deg);   opacity: 1; }
+    }
+
+    .sf-tile.flipping .sf-char {
+      animation: sfFlip 0.12s ease-in-out forwards;
+    }
   </style>
 </head>
 <body>
@@ -1880,6 +1977,14 @@
 
   <!-- Power cells: recessed indicator bulbs on housing surface -->
   <div class="bulb-strip">
+    <div id="split-flap">
+      <div class="sf-label">ID</div>
+      <div class="sf-tiles">
+        <div class="sf-tile"><div class="sf-char" id="sf0">&nbsp;</div></div>
+        <div class="sf-tile"><div class="sf-char" id="sf1">&nbsp;</div></div>
+        <div class="sf-tile"><div class="sf-char" id="sf2">&nbsp;</div></div>
+      </div>
+    </div>
     <div class="bulb-strip-label">P O W E R</div>
     <div class="bulb-row" id="batteryCells">
       <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
@@ -1998,11 +2103,47 @@
     batteryLives = parseInt(storageGet(userKey('batteryLives')));
     if (isNaN(batteryLives) || batteryLives < 0 || batteryLives > 3) batteryLives = 3;
     document.getElementById('user-tag').textContent = currentUser;
+    splitFlapDisplay(currentUser);
     updateBestDisplay();
     updatePlayedDisplay();
     updateBatteryLives();
     resetGame();
     if (window._startCRT) window._startCRT();
+  }
+
+  // Animates the split-flap tiles to land on the callsign letters
+  function splitFlapDisplay(callsign) {
+    var CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    callsign = (callsign || '   ').toUpperCase();
+
+    for (var i = 0; i < 3; i++) {
+      (function(idx) {
+        var el       = document.getElementById('sf' + idx);
+        var target   = callsign[idx] || ' ';
+        var tile     = el.parentElement;
+        var cycles   = 0;
+        var maxCycles = 10 + idx * 4; // stagger: each tile flips a bit longer
+        var delay    = 60;
+
+        function flip() {
+          tile.classList.remove('flipping');
+          void tile.offsetWidth; // reflow to restart animation
+          tile.classList.add('flipping');
+
+          if (cycles < maxCycles) {
+            el.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
+            cycles++;
+            setTimeout(flip, delay + cycles * 8);
+          } else {
+            el.textContent = target;
+            tile.classList.remove('flipping');
+          }
+        }
+
+        // Stagger start time per tile
+        setTimeout(flip, idx * 120);
+      })(i);
+    }
   }
 
   function updateBatteryLives() {
