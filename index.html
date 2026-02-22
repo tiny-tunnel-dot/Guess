@@ -74,22 +74,64 @@
 
     .housing {
       position: relative;
-      border-radius: 22px;
-      width: 560px;
-      height: 933px;
+      border-radius: 8px;
+      padding: 28px 26px 26px;
       transform-style: preserve-3d;
-      background-image: url('assets/images/housing.png');
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      border: none;
+      background:
+        repeating-linear-gradient(
+          87deg,
+          transparent,
+          transparent 3px,
+          rgba(255,255,255,0.008) 3px,
+          rgba(255,255,255,0.008) 4px
+        ),
+        linear-gradient(
+          175deg,
+          #3a3830 0%,
+          #2e2c24 15%,
+          #262420 40%,
+          #201e18 70%,
+          #1a1810 100%
+        );
+      border: 1px solid #4a4840;
       box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.12),
+        inset 0 2px 0 rgba(255,255,255,0.05),
+        inset 1px 0 0 rgba(255,255,255,0.08),
+        inset 0 -2px 0 rgba(0,0,0,0.4),
+        inset 0 -1px 0 rgba(0,0,0,0.2),
+        inset -1px 0 0 rgba(0,0,0,0.3),
+        inset 0 0 40px rgba(0,0,0,0.3),
         0 0 80px rgba(57,255,20,0.04),
         0 0 120px rgba(57,255,20,0.02),
-        0 50px 100px rgba(0,0,0,0.95),
-        0 20px 40px rgba(0,0,0,0.7);
+        6px 16px 30px rgba(0,0,0,0.8),
+        0 40px 80px rgba(0,0,0,0.5);
     }
 
-    .housing::after, .housing::before { display: none; }
+    .housing::after {
+      content: '';
+      position: absolute;
+      top: 6px; right: -12px; bottom: -6px;
+      width: 12px;
+      background: linear-gradient(to right, #1a1810, #0e0d08);
+      transform: rotateY(90deg);
+      transform-origin: left center;
+      border-radius: 0 4px 4px 0;
+      pointer-events: none;
+      border-top: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .housing::before {
+      content: '';
+      position: absolute;
+      left: 6px; right: -6px; bottom: -12px;
+      height: 12px;
+      background: linear-gradient(to bottom, #161410, #0a0908);
+      transform: rotateX(-90deg);
+      transform-origin: top center;
+      border-radius: 0 0 4px 4px;
+      pointer-events: none;
+    }
 
     /* CORNER SCREWS */
     .screw {
@@ -162,8 +204,8 @@
     /* POWER LED */
     .power-led {
       position: absolute;
-      top: 33px;
-      right: 86px;
+      top: 14px;
+      right: 36px;
       width: 6px;
       height: 6px;
       border-radius: 50%;
@@ -258,12 +300,8 @@
        CRT SCREEN -- recessed into housing
        ========================================== */
     .screen-bezel {
-      position: absolute;
-      top: 58px;
-      left: 73px;
-      right: 147px;
-      height: 436px;
-      border-radius: 6px;
+      position: relative;
+      border-radius: 8px;
       padding: 10px;
       background:
         linear-gradient(160deg,
@@ -276,12 +314,16 @@
       border-right: 1px solid rgba(0,0,0,0.6);
       border-bottom: 1px solid rgba(0,0,0,0.6);
       box-shadow:
+        /* Inset shadow on inner face -- depth without crushing corners */
         inset 0 4px 12px rgba(0,0,0,0.8),
         inset 4px 0 10px rgba(0,0,0,0.5),
         inset -4px 0 10px rgba(0,0,0,0.5),
         inset 0 -2px 8px rgba(0,0,0,0.4),
+        /* Subtle green ambient from screen */
         0 0 20px rgba(57,255,20,0.06),
+        /* Outer shadow pressing it into the housing */
         0 2px 8px rgba(0,0,0,0.7);
+      margin-bottom: 16px;
       overflow: hidden;
     }
 
@@ -308,7 +350,38 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      /* Idle dim removed */
+      /* Idle dim transition */
+      transition: filter 1.5s ease, opacity 1.5s ease;
+    }
+
+    /* IDLE SCREEN DIMMING */
+    .terminal.idle-dim {
+      filter: brightness(0.55) saturate(0.6);
+      opacity: 0.85;
+    }
+
+    /* Phosphor drift when idle */
+    .terminal.idle-dim::after {
+      animation: phosphorDrift 8s ease-in-out infinite;
+    }
+
+    @keyframes phosphorDrift {
+      0%, 100% {
+        background:
+          radial-gradient(ellipse at 50% 40%, rgba(57,255,20,0.03) 0%, transparent 70%);
+      }
+      25% {
+        background:
+          radial-gradient(ellipse at 40% 55%, rgba(57,255,20,0.04) 0%, transparent 65%);
+      }
+      50% {
+        background:
+          radial-gradient(ellipse at 60% 35%, rgba(57,255,20,0.05) 0%, transparent 60%);
+      }
+      75% {
+        background:
+          radial-gradient(ellipse at 45% 50%, rgba(57,255,20,0.035) 0%, transparent 68%);
+      }
     }
 
     /* CRT SCANLINE + NOISE -- now handled by <canvas id="crtCanvas"> */
@@ -384,7 +457,7 @@
 
     .terminal-bar {
       background: linear-gradient(180deg, #1a2e1a 0%, #0f1f0f 100%);
-      padding: 5px 8px;
+      padding: 8px 14px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -506,7 +579,7 @@
     }
 
     .log-line {
-      font-size: 18px;
+      font-size: 14px;
       line-height: 1.6;
       padding: 2px 0;
       animation: fadeIn 0.2s ease;
@@ -612,26 +685,252 @@
     }
 
     /* ==========================================
+       POWER INDICATOR BULBS -- on housing surface
+       Recessed jewel pilot lights drilled into metal
+       ========================================== */
+    .bulb-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px 0 14px;
+    }
+
+    .bulb-strip-label {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 7px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #4a4838;
+      user-select: none;
+    }
+
+    .bulb-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Each bulb: a recessed circular socket drilled into the housing */
+    .bulb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      position: relative;
+      /* Socket recess: dark pit with metallic rim */
+      background:
+        radial-gradient(circle at 50% 55%,
+          #0a0908 0%,
+          #0e0d0a 60%,
+          #1a1810 100%
+        );
+      border: 1.5px solid #2a2820;
+      box-shadow:
+        /* Inset shadow: drilled hole depth */
+        inset 0 2px 4px rgba(0,0,0,0.9),
+        inset 0 -1px 2px rgba(0,0,0,0.5),
+        inset 1px 0 2px rgba(0,0,0,0.4),
+        inset -1px 0 2px rgba(0,0,0,0.4),
+        /* Outer rim catch light */
+        0 1px 0 rgba(255,255,255,0.06),
+        0 -1px 0 rgba(0,0,0,0.4);
+    }
+
+    /* The glass lens dome sitting inside the socket */
+    .bulb .bulb-lens {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border-radius: 50%;
+      /* Dark unlit lens by default */
+      background:
+        radial-gradient(circle at 40% 35%,
+          rgba(255,255,255,0.06) 0%,
+          transparent 50%
+        ),
+        radial-gradient(circle at 50% 50%,
+          #1a1a14 0%,
+          #111110 100%
+        );
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* ---- Active lit states ---- */
+    .bulb.active.tier-green .bulb-lens {
+      background:
+        radial-gradient(circle at 40% 35%,
+          rgba(255,255,255,0.5) 0%,
+          rgba(180,255,160,0.3) 20%,
+          transparent 55%
+        ),
+        radial-gradient(circle at 50% 50%,
+          #44ee18 0%,
+          #2ab808 40%,
+          #1a8800 80%,
+          #0e5500 100%
+        );
+      box-shadow:
+        0 0 4px rgba(57,255,20,0.5),
+        0 0 10px rgba(57,255,20,0.25),
+        inset 0 -1px 2px rgba(0,0,0,0.3);
+    }
+
+    .bulb.active.tier-amber .bulb-lens {
+      background:
+        radial-gradient(circle at 40% 35%,
+          rgba(255,255,255,0.5) 0%,
+          rgba(255,230,160,0.3) 20%,
+          transparent 55%
+        ),
+        radial-gradient(circle at 50% 50%,
+          #ffcc20 0%,
+          #dd9e00 40%,
+          #aa7800 80%,
+          #775200 100%
+        );
+      box-shadow:
+        0 0 4px rgba(255,183,0,0.5),
+        0 0 10px rgba(255,183,0,0.25),
+        inset 0 -1px 2px rgba(0,0,0,0.3);
+      animation: bulbAmberPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes bulbAmberPulse {
+      0%, 100% {
+        opacity: 1;
+        box-shadow:
+          0 0 5px rgba(255,183,0,0.6),
+          0 0 12px rgba(255,183,0,0.3),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+      50% {
+        opacity: 0.8;
+        box-shadow:
+          0 0 3px rgba(255,183,0,0.35),
+          0 0 6px rgba(255,183,0,0.12),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+    }
+
+    .bulb.active.tier-red .bulb-lens {
+      background:
+        radial-gradient(circle at 40% 35%,
+          rgba(255,255,255,0.5) 0%,
+          rgba(255,180,160,0.3) 20%,
+          transparent 55%
+        ),
+        radial-gradient(circle at 50% 50%,
+          #ff4444 0%,
+          #cc2020 40%,
+          #991010 80%,
+          #660808 100%
+        );
+      animation: bulbFlicker 0.4s ease-in-out infinite;
+    }
+
+    /* Drain animation: bulb fades out like a filament cooling */
+    .bulb.draining .bulb-lens {
+      animation: bulbDrain 0.5s ease forwards;
+    }
+
+    @keyframes bulbDrain {
+      0%   { opacity: 1; }
+      30%  { opacity: 0.6; }
+      100% {
+        opacity: 1;
+        background:
+          radial-gradient(circle at 40% 35%,
+            rgba(255,255,255,0.06) 0%,
+            transparent 50%
+          ),
+          radial-gradient(circle at 50% 50%,
+            #1a1a14 0%,
+            #111110 100%
+          );
+        box-shadow: none;
+      }
+    }
+
+    /* Last bulb standing: rapid strobe */
+    .bulb.active.tier-red.last-bulb .bulb-lens {
+      animation: bulbCritical 0.12s linear infinite;
+    }
+
+    @keyframes bulbFlicker {
+      0%, 100% {
+        opacity: 1;
+        box-shadow:
+          0 0 6px rgba(255,64,64,0.7),
+          0 0 14px rgba(255,64,64,0.35),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+      50% {
+        opacity: 0.65;
+        box-shadow:
+          0 0 3px rgba(255,64,64,0.4),
+          0 0 6px rgba(255,64,64,0.15),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+    }
+
+    @keyframes bulbCritical {
+      0%, 100% {
+        opacity: 1;
+        box-shadow:
+          0 0 8px rgba(255,64,64,0.9),
+          0 0 20px rgba(255,64,64,0.5),
+          0 0 32px rgba(255,64,64,0.2),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+      50% {
+        opacity: 0.25;
+        box-shadow:
+          0 0 2px rgba(255,64,64,0.3),
+          inset 0 -1px 2px rgba(0,0,0,0.3);
+      }
+    }
+
+    /* ==========================================
        PHYSICAL KEYPAD -- on the housing surface
        ========================================== */
 
     .keypad-well {
-      position: absolute;
-      top: 604px;
-      left: 70px;
-      right: 117px;
-      bottom: 58px;
-      background: transparent;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 2px,
+          rgba(0,0,0,0.03) 2px,
+          rgba(0,0,0,0.03) 3px
+        ),
+        linear-gradient(180deg, #100e0a 0%, #141210 50%, #100e0a 100%);
       border-radius: 6px;
-      padding: 6px;
-      border: none;
-      box-shadow: none;
+      padding: 16px;
+      border: 1px solid rgba(0,0,0,0.6);
+      box-shadow:
+        inset 0 4px 10px rgba(0,0,0,0.9),
+        inset 0 -1px 0 rgba(255,255,255,0.03),
+        inset 3px 0 8px rgba(0,0,0,0.6),
+        inset -3px 0 8px rgba(0,0,0,0.6),
+        0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .keypad-label {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 8px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #5a5848;
+      margin-bottom: 12px;
+      padding-left: 2px;
     }
 
     #numpad {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
     }
 
     /* MECHANICAL KEYCAP CONTAINER */
@@ -648,7 +947,7 @@
       -webkit-user-select: none;
       touch-action: manipulation;
       /* Must be tall enough to contain cap + full side wall travel */
-      height: 61px;
+      height: 62px;
     }
 
     /* ---- KEYCAP ----
@@ -662,7 +961,7 @@
       position: absolute;
       left: 0; right: 0;
       top: 0;
-      height: 51px;
+      height: 50px;
       border-radius: 6px;
 
       /* Cap surface -- lighter top edge fading darker toward base */
@@ -901,31 +1200,16 @@
         inset 0 1px 0 rgba(57,255,20,0.06);
     }
 
-    .np-spacer { grid-column: span 4; height: 3px; }
+    .np-spacer { grid-column: span 3; height: 3px; }
     .np.enter.full {
-      grid-column: span 4;
-      height: 61px;
+      grid-column: span 3;
+      height: 66px;
     }
 
     .np.enter.full .key-face {
-      height: 51px;
-      font-size: 13px;
+      height: 54px;
+      font-size: 16px;
       letter-spacing: 8px;
-    }
-
-    .np.enter.tall {
-      grid-row: span 3;
-      height: auto;
-    }
-    .np.enter.tall .key-face {
-      height: 100%;
-      font-size: 13px;
-      letter-spacing: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      line-height: 1.6;
     }
 
     /* ENTER key in NEW GAME mode -- glowing pulse */
@@ -1215,10 +1499,6 @@
       color: var(--green);
       opacity: 1;
       animation: promptPulse 1.0s ease-in-out infinite;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
     }
 
     .splash-ready.hidden-prompt {
@@ -1263,36 +1543,26 @@
       body {
         padding: 0;
         align-items: flex-start;
-        justify-content: center;
-        overflow-x: hidden;
       }
       .device {
         width: 100%;
         max-width: 100%;
-        margin: 0;
         /* Kill tilt -- frees up space, perspective on .device stays harmless */
         transform: none !important;
         filter: none;
       }
       .device:hover { transform: none !important; }
       .housing {
-        width: 100vw;
-        height: calc(100vw * 933 / 560);
         border-radius: 0;
-        background-size: 100% 100%;
+        padding: 30px 12px 16px;
+        min-height: 100vh;
+        min-height: 100dvh;
       }
-      .screen-bezel {
-        top: 6.2%;
-        left: 13.0%;
-        right: 26.3%;
-        height: 46.7%;
-      }
-      .keypad-well {
-        top: 64.7%;
-        left: 12.5%;
-        right: 20.9%;
-        bottom: 6.2%;
-      }
+      /* Kill 3D depth faces -- invisible without tilt, just add overflow */
+      .housing::before, .housing::after { display: none; }
+      .vents { display: none; }
+      /* Bottom screws serve no purpose on full-bleed mobile */
+      .screw-bl, .screw-br { display: none; }
       .screw { width: 10px; height: 10px; }
       .screw::before, .screw::after { width: 6px; }
       .screw-tl { top: 8px; left: 8px; }
@@ -1309,6 +1579,10 @@
       .stat-value { font-size: 18px; }
       .range-display { font-size: 12px; padding: 5px 10px; margin-bottom: 8px; }
       .range-display span { font-size: 14px; }
+      .bulb-strip { padding: 6px 0 10px; gap: 6px; }
+      .bulb-row { gap: 5px; }
+      .bulb { width: 15px; height: 15px; }
+      .bulb-strip-label { font-size: 6px; letter-spacing: 2px; }
       #log { height: 100px; max-height: 100px; padding: 6px 8px; margin-bottom: 8px; }
       .log-line { font-size: 12px; }
       #display-row { font-size: 22px; padding: 0 12px; height: 44px; margin-bottom: 8px; }
@@ -1341,6 +1615,10 @@
       #display-row { font-size: 20px; padding: 0 10px; height: 38px; margin-bottom: 6px; }
       .screen-bezel { margin-bottom: 8px; }
       .housing-divider { margin-bottom: 8px; }
+      .bulb-strip { padding: 4px 0 8px; gap: 4px; }
+      .bulb-row { gap: 4px; }
+      .bulb { width: 13px; height: 13px; }
+      .bulb-strip-label { font-size: 5px; letter-spacing: 1.5px; }
       .keypad-well { padding: 8px; }
       .keypad-label { font-size: 7px; margin-bottom: 6px; }
       #numpad { gap: 4px; }
@@ -1349,10 +1627,6 @@
       .np.enter.full { height: 48px; }
       .np.enter.full .key-face { height: 38px; font-size: 12px; letter-spacing: 5px; }
     }
-
-    /* Photo housing — hide CSS chrome */
-    .screw, .vents, .vent-slit, .housing-wear,
-    .housing-divider { display: none !important; }
   </style>
 </head>
 <body>
@@ -1401,14 +1675,12 @@
       <div class="crt-reflection"></div>
 
       <div class="terminal-bar">
-        
+        <span class="terminal-title">guess.exe</span>
       </div>
 
       <div class="terminal-body">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
-          <h1 style="margin-bottom:0;">GUESS</h1>
-          <div class="subtitle" style="margin-bottom:0;">// protocol v4.9.3</div>
-        </div>
+        <h1>GUESS</h1>
+        <div class="subtitle">// number guessing protocol v4.9.3</div>
 
         <div class="stat-row">
           <div class="stat">
@@ -1441,21 +1713,39 @@
   <!-- Etched divider between screen and keypad -->
   <div class="housing-divider"></div>
 
+  <!-- Power cells: recessed indicator bulbs on housing surface -->
+  <div class="bulb-strip">
+    <span class="bulb-strip-label">POWER</span>
+    <div class="bulb-row" id="batteryCells">
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+      <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
+    </div>
+    <span class="bulb-strip-label">DRAIN</span>
+  </div>
+
   <!-- Physical keypad on housing surface -->
   <div class="keypad-well">
+    <div class="keypad-label">Data Input</div>
     <div id="numpad">
       <button class="np" data-digit="7"><span class="key-face">7</span></button>
       <button class="np" data-digit="8"><span class="key-face">8</span></button>
       <button class="np" data-digit="9"><span class="key-face">9</span></button>
-      <button class="np enter tall" id="guessBtn" data-action="enter" style="grid-row: span 3;"><span class="key-face">E<br>N<br>T<br>E<br>R</span></button>
       <button class="np" data-digit="4"><span class="key-face">4</span></button>
       <button class="np" data-digit="5"><span class="key-face">5</span></button>
       <button class="np" data-digit="6"><span class="key-face">6</span></button>
       <button class="np" data-digit="1"><span class="key-face">1</span></button>
       <button class="np" data-digit="2"><span class="key-face">2</span></button>
       <button class="np" data-digit="3"><span class="key-face">3</span></button>
-      <button class="np" data-digit="0" style="grid-column: span 2;"><span class="key-face">0</span></button>
+      <button class="np" data-digit="0"><span class="key-face">0</span></button>
+      <button class="np np-decimal" data-action="decimal"><span class="key-face">.</span></button>
       <button class="np" data-action="backspace"><span class="key-face">⌫</span></button>
+      <div class="np-spacer"></div>
+      <button class="np enter full" id="guessBtn" data-action="enter"><span class="key-face">ENTER</span></button>
     </div>
   </div>
 
@@ -1498,6 +1788,8 @@
     updateDisplay();
   }
 
+  function npDecimal() {}
+
   function updateDisplay() {
     const el = document.getElementById('display-row');
     const span = el.querySelector('span');
@@ -1530,11 +1822,12 @@
     updateBestDisplay();
     updatePlayedDisplay();
     resetGame();
-
+    if (window._startIdleTimer) window._startIdleTimer();
   }
 
   function initLayout() {
     document.getElementById('attempts').textContent = '0';
+    resetBattery();
     document.getElementById('displayValue').textContent = '';
     document.getElementById('display-row').classList.add('idle');
     document.getElementById('rangeDisplay').textContent = '1 \u2014 100';
@@ -1562,6 +1855,7 @@
 
     document.getElementById('cheatValue').classList.remove('visible');
     document.getElementById('attempts').textContent = '0';
+    resetBattery();
     setNumpadDisabled(false);
     updateDisplay();
     updateRangeDisplay();
@@ -1594,6 +1888,8 @@
 
     attempts++;
     document.getElementById('attempts').textContent = attempts;
+
+    updateBattery(attempts);
 
     log('guess', `> you guessed: ${guess}`);
 
@@ -1689,6 +1985,59 @@
     document.getElementById('rangeDisplay').textContent = `${low} \u2014 ${high}`;
   }
 
+  function updateBattery(attemptsUsed) {
+    var remaining = MAX_GUESSES - attemptsUsed;
+    var cells = document.querySelectorAll('.bulb');
+    cells.forEach(function(cell, i) {
+      cell.classList.remove('active', 'draining', 'tier-green', 'tier-amber', 'tier-red', 'last-bulb');
+      var tier;
+      if (remaining <= 2)      tier = 'tier-red';
+      else if (remaining <= 4) tier = 'tier-amber';
+      else                     tier = 'tier-green';
+      cell.classList.add(tier);
+
+      if (i < remaining) {
+        cell.classList.add('active');
+      } else if (i === remaining && attemptsUsed > 0) {
+        cell.classList.add('draining');
+      }
+    });
+
+    // Mark the sole surviving bulb for critical strobe
+    if (remaining === 1) {
+      cells[0].classList.add('last-bulb');
+    }
+
+    // Update power LED pulse rate: faster and redder as attempts run low
+    var led = document.querySelector('.power-led');
+    if (remaining <= 2) {
+      led.style.background = 'var(--red)';
+      led.style.boxShadow = '0 0 4px var(--red), 0 0 10px rgba(255,64,64,0.6), 0 0 20px rgba(255,64,64,0.25)';
+      led.style.animation = 'ledPulseRed 0.35s ease-in-out infinite';
+    } else if (remaining <= 4) {
+      led.style.background = 'var(--amber)';
+      led.style.boxShadow = '0 0 4px var(--amber), 0 0 10px rgba(255,183,0,0.5), 0 0 20px rgba(255,183,0,0.2)';
+      led.style.animation = 'ledPulseAmber 0.8s ease-in-out infinite';
+    } else {
+      led.style.background = '';
+      led.style.boxShadow = '';
+      led.style.animation = '';
+    }
+  }
+
+  function resetBattery() {
+    var cells = document.querySelectorAll('.bulb');
+    cells.forEach(function(cell) {
+      cell.classList.remove('draining', 'last-bulb');
+      cell.classList.add('active', 'tier-green');
+      cell.classList.remove('tier-amber', 'tier-red');
+    });
+    var led = document.querySelector('.power-led');
+    led.style.background = '';
+    led.style.boxShadow = '';
+    led.style.animation = '';
+  }
+
   function updateBestDisplay() {
     document.getElementById('best').textContent = bestScore || '--';
   }
@@ -1769,6 +2118,7 @@
 
       if (btn.dataset.digit)           npPress(btn.dataset.digit);
       else if (btn.dataset.action === 'backspace') npBackspace();
+      else if (btn.dataset.action === 'decimal')   npDecimal();
       else if (btn.dataset.action === 'enter') {
         if (gameOver) resetGame();
         else makeGuess();
@@ -1983,7 +2333,6 @@
   // scheduled nodes play as soon as ctx resumes.
   function withAudio(fn) {
     var ctx = getAudioCtx();
-    if (!ctx) return;
     fn(ctx);
     if (ctx.state === 'suspended') ctx.resume();
   }
@@ -2218,6 +2567,36 @@
 
     // Start the loop
     requestAnimationFrame(render);
+  })();
+
+  // IDLE SCREEN DIMMING
+  (function() {
+    var IDLE_MS = 10000;
+    var idleTimer = null;
+    var terminal = document.querySelector('.terminal');
+    var started = false;
+
+    function goDim() {
+      terminal.classList.add('idle-dim');
+    }
+
+    function wakeUp() {
+      if (!started) return;
+      terminal.classList.remove('idle-dim');
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(goDim, IDLE_MS);
+    }
+
+    // Expose a start function so we can kick it off after splash
+    window._startIdleTimer = function() {
+      started = true;
+      idleTimer = setTimeout(goDim, IDLE_MS);
+    };
+
+    // Any interaction resets
+    ['click', 'keydown', 'pointerdown', 'touchstart', 'mousemove'].forEach(function(evt) {
+      document.addEventListener(evt, wakeUp, { passive: true });
+    });
   })();
 </script>
 
