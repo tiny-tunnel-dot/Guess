@@ -323,7 +323,7 @@
         0 0 20px rgba(57,255,20,0.06),
         /* Outer shadow pressing it into the housing */
         0 2px 8px rgba(0,0,0,0.7);
-      margin-bottom: 16px;
+      margin-bottom: 4px;
       overflow: hidden;
     }
 
@@ -690,19 +690,29 @@
        ========================================== */
     .bulb-strip {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      padding: 10px 0 14px;
+      gap: 6px;
+      padding: 8px 0 14px;
     }
 
     .bulb-strip-label {
       font-family: 'Courier New', Courier, monospace;
-      font-size: 7px;
-      letter-spacing: 3px;
+      font-size: 23px;
+      font-weight: 700;
+      letter-spacing: 5px;
       text-transform: uppercase;
-      color: #4a4838;
+      color: #7e827e;
+      text-shadow:
+        0 1px 0 rgba(255,255,255,0.45),
+        0 -1px 0 rgba(0,0,0,0.6),
+        0 2px 4px rgba(0,0,0,0.8),
+        1px 0 2px rgba(0,0,0,0.4),
+        -1px 0 2px rgba(0,0,0,0.4);
       user-select: none;
+      text-align: center;
+      margin-bottom: 3px;
     }
 
     .bulb-row {
@@ -713,8 +723,8 @@
 
     /* Each bulb: a recessed circular socket drilled into the housing */
     .bulb {
-      width: 18px;
-      height: 18px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       position: relative;
       /* Socket recess: dark pit with metallic rim */
@@ -1262,7 +1272,7 @@
         rgba(0,0,0,0.4) 85%,
         transparent 100%
       );
-      margin-bottom: 14px;
+      margin-bottom: 4px;
       position: relative;
     }
     .housing-divider::after {
@@ -1359,29 +1369,6 @@
       color: var(--muted);
       letter-spacing: 2px;
       margin-bottom: 32px;
-    }
-
-    .splash-bar-wrap {
-      width: 200px;
-      height: 2px;
-      background: var(--border);
-      margin: 0 auto 20px;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .splash-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green);
-      /* animation triggered by JS on tap, not at page load */
-    }
-
-    @keyframes loadBar {
-      0%   { width: 0%; }
-      60%  { width: 80%; }
-      100% { width: 100%; }
     }
 
     .glitch-letter {
@@ -1494,6 +1481,10 @@
 
     /* TAP prompt -- visible immediately, pulses to invite tap */
     .splash-ready {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       font-size: 12px;
       letter-spacing: 4px;
       color: var(--green);
@@ -1510,15 +1501,13 @@
     /* Before tap: hide everything except the prompt */
     #splash-content.pre-tap .splash-label,
     #splash-content.pre-tap .splash-title,
-    #splash-content.pre-tap .splash-sub,
-    #splash-content.pre-tap .splash-bar-wrap {
+    #splash-content.pre-tap .splash-sub {
       opacity: 0;
     }
 
-    /* After tap: label/sub/bar fade in normally */
+    /* After tap: label/sub fade in normally */
     #splash-content.post-tap .splash-label,
-    #splash-content.post-tap .splash-sub,
-    #splash-content.post-tap .splash-bar-wrap {
+    #splash-content.post-tap .splash-sub {
       animation: blinkIn 0.4s ease forwards;
     }
     /* Title gets its own deep-zoom animation (defined above) */
@@ -1581,8 +1570,7 @@
       .range-display span { font-size: 14px; }
       .bulb-strip { padding: 6px 0 10px; gap: 6px; }
       .bulb-row { gap: 5px; }
-      .bulb { width: 15px; height: 15px; }
-      .bulb-strip-label { font-size: 6px; letter-spacing: 2px; }
+      .bulb { width: 22px; height: 22px; }
       #log { height: 100px; max-height: 100px; padding: 6px 8px; margin-bottom: 8px; }
       .log-line { font-size: 12px; }
       #display-row { font-size: 22px; padding: 0 12px; height: 44px; margin-bottom: 8px; }
@@ -1617,8 +1605,7 @@
       .housing-divider { margin-bottom: 8px; }
       .bulb-strip { padding: 4px 0 8px; gap: 4px; }
       .bulb-row { gap: 4px; }
-      .bulb { width: 13px; height: 13px; }
-      .bulb-strip-label { font-size: 5px; letter-spacing: 1.5px; }
+      .bulb { width: 18px; height: 18px; }
       .keypad-well { padding: 8px; }
       .keypad-label { font-size: 7px; margin-bottom: 6px; }
       #numpad { gap: 4px; }
@@ -1638,8 +1625,8 @@
     <h1 class="splash-title">
       <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
     </h1>
-    <div class="splash-sub">// number guessing protocol v4.9.3</div>
-    <div class="splash-bar-wrap"><div class="splash-bar-fill"></div></div>
+    <div class="splash-sub">// number guessing protocol v4.9.4</div>
+
     <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
   </div>
 </div>
@@ -1680,7 +1667,7 @@
 
       <div class="terminal-body">
         <h1>GUESS</h1>
-        <div class="subtitle">// number guessing protocol v4.9.3</div>
+        <div class="subtitle">// number guessing protocol v4.9.4</div>
 
         <div class="stat-row">
           <div class="stat">
@@ -1715,7 +1702,7 @@
 
   <!-- Power cells: recessed indicator bulbs on housing surface -->
   <div class="bulb-strip">
-    <span class="bulb-strip-label">POWER</span>
+    <div class="bulb-strip-label">P O W E R</div>
     <div class="bulb-row" id="batteryCells">
       <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
       <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
@@ -1725,7 +1712,6 @@
       <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
       <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
     </div>
-    <span class="bulb-strip-label">DRAIN</span>
   </div>
 
   <!-- Physical keypad on housing surface -->
@@ -1778,6 +1764,7 @@
   function npPress(digit) {
     if (gameOver) return;
     if (npBuffer.length >= 3) return;
+    if (digit === '0' && npBuffer === '') return; // block leading zero
     npBuffer += digit;
     updateDisplay();
   }
@@ -2367,10 +2354,6 @@
       function go() {
         contentEl.classList.remove('pre-tap');
         contentEl.classList.add('post-tap');
-
-        // Start the load bar animation now (not at page load)
-        var barFill = document.querySelector('.splash-bar-fill');
-        if (barFill) barFill.style.animation = 'loadBar 1.8s ease forwards';
 
         setTimeout(function() {
           var titleEl = document.querySelector('.splash-title');
