@@ -162,8 +162,8 @@
     /* POWER LED */
     .power-led {
       position: absolute;
-      top: 18px;
-      right: 18px;
+      top: 33px;
+      right: 86px;
       width: 6px;
       height: 6px;
       border-radius: 50%;
@@ -825,25 +825,15 @@
 
     .keypad-well {
       position: absolute;
-      top: 530px;
-      left: 63px;
-      right: 115px;
+      top: 604px;
+      left: 70px;
+      right: 117px;
       bottom: 58px;
       background: transparent;
       border-radius: 6px;
       padding: 6px;
       border: none;
       box-shadow: none;
-    }
-
-    .keypad-label {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 8px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #5a5848;
-      margin-bottom: 12px;
-      padding-left: 2px;
     }
 
     #numpad {
@@ -866,7 +856,7 @@
       -webkit-user-select: none;
       touch-action: manipulation;
       /* Must be tall enough to contain cap + full side wall travel */
-      height: 74px;
+      height: 61px;
     }
 
     /* ---- KEYCAP ----
@@ -880,7 +870,7 @@
       position: absolute;
       left: 0; right: 0;
       top: 0;
-      height: 62px;
+      height: 51px;
       border-radius: 6px;
 
       /* Cap surface -- lighter top edge fading darker toward base */
@@ -1122,11 +1112,11 @@
     .np-spacer { grid-column: span 4; height: 3px; }
     .np.enter.full {
       grid-column: span 4;
-      height: 74px;
+      height: 61px;
     }
 
     .np.enter.full .key-face {
-      height: 62px;
+      height: 51px;
       font-size: 13px;
       letter-spacing: 8px;
     }
@@ -1505,9 +1495,9 @@
         height: 46.7%;
       }
       .keypad-well {
-        top: 56.8%;
-        left: 11.3%;
-        right: 20.5%;
+        top: 64.7%;
+        left: 12.5%;
+        right: 20.9%;
         bottom: 6.2%;
       }
       .screw { width: 10px; height: 10px; }
@@ -1683,7 +1673,6 @@
 
   <!-- Physical keypad on housing surface -->
   <div class="keypad-well">
-    <div class="keypad-label">Data Input</div>
     <div id="numpad">
       <button class="np" data-digit="7"><span class="key-face">7</span></button>
       <button class="np" data-digit="8"><span class="key-face">8</span></button>
