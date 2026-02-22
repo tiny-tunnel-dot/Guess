@@ -2115,9 +2115,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding: 24px 16px;
+      padding: 0 16px 24px;
     }
     #stats-panel-inner::after {
       content: '';
@@ -2129,7 +2127,26 @@
       );
       pointer-events: none;
     }
-    .stats-panel-callsign {
+    #stats-panel-header {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0 16px;
+      position: relative;
+      z-index: 1;
+    }
+    #stats-panel-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
       font-family: 'Courier New', monospace;
       font-size: 30px;
       font-weight: 700;
@@ -2147,25 +2164,37 @@
       position: relative;
       z-index: 1;
     }
+    #stats-panel-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
     .stats-panel-row {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
       width: 100%;
+      padding: 10px 0;
       position: relative;
       z-index: 1;
     }
     .stats-panel-label {
       font-family: 'Courier New', monospace;
-      font-size: 8px;
+      font-size: 9px;
       letter-spacing: 3px;
-      color: rgba(57,255,20,0.4);
+      color: rgba(57,255,20,0.45);
       text-transform: uppercase;
     }
     .stats-panel-value {
       font-family: 'Courier New', monospace;
-      font-size: 28px;
+      font-size: 34px;
       font-weight: 700;
       color: #39ff14;
       letter-spacing: 2px;
@@ -2218,15 +2247,31 @@
       <div id="stats-panel">
         <div id="stats-handle"><div class="stats-handle-arrow">&#8249;</div></div>
         <div id="stats-panel-inner">
-          <div class="stats-panel-callsign" id="stats-callsign">---</div>
-          <div class="stats-panel-divider"></div>
-          <div class="stats-panel-row">
-            <div class="stats-panel-label">BEST SCORE</div>
-            <div class="stats-panel-value" id="stats-best">--</div>
+          <div id="stats-panel-header">
+            <div class="stats-panel-label">CALLSIGN</div>
+            <div class="stats-panel-callsign" id="stats-callsign">---</div>
           </div>
-          <div class="stats-panel-row">
-            <div class="stats-panel-label">GAMES PLAYED</div>
-            <div class="stats-panel-value" id="stats-played">0</div>
+          <div class="stats-panel-divider"></div>
+          <div id="stats-panel-body">
+            <div class="stats-panel-row">
+              <div class="stats-panel-label">BEST SCORE</div>
+              <div class="stats-panel-value" id="stats-best">--</div>
+            </div>
+            <div class="stats-panel-divider"></div>
+            <div class="stats-panel-row">
+              <div class="stats-panel-label">WIN RATE</div>
+              <div class="stats-panel-value" id="stats-winrate">--%</div>
+            </div>
+            <div class="stats-panel-divider"></div>
+            <div class="stats-panel-row">
+              <div class="stats-panel-label">CURRENT STREAK</div>
+              <div class="stats-panel-value" id="stats-streak">--</div>
+            </div>
+            <div class="stats-panel-divider"></div>
+            <div class="stats-panel-row">
+              <div class="stats-panel-label">GAMES PLAYED</div>
+              <div class="stats-panel-value" id="stats-played">0</div>
+            </div>
           </div>
         </div>
       </div>
@@ -2951,41 +2996,6 @@
     handle.addEventListener('click', function(e) {
       e.stopPropagation();
       isOpen ? closePanel() : openPanel();
-    });
-
-    // Drag to open/close
-    var dragStartX = 0;
-    var dragStartOpen = false;
-    var dragging = false;
-    var panelWidth = 190;
-
-    handle.addEventListener('pointerdown', function(e) {
-      dragStartX = e.clientX;
-      dragStartOpen = isOpen;
-      dragging = false;
-      handle.setPointerCapture(e.pointerId);
-      panel.style.transition = 'none';
-    });
-
-    handle.addEventListener('pointermove', function(e) {
-      var dx = e.clientX - dragStartX;
-      if (Math.abs(dx) > 4) dragging = true;
-      if (!dragging) return;
-      var base = dragStartOpen ? 0 : panelWidth;
-      var offset = Math.max(0, Math.min(panelWidth, base + dx));
-      panel.style.transform = 'translateX(' + offset + 'px)';
-    });
-
-    handle.addEventListener('pointerup', function(e) {
-      panel.style.transition = '';
-      if (!dragging) return;
-      var dx = e.clientX - dragStartX;
-      if (dragStartOpen) {
-        dx > 40 ? closePanel() : openPanel();
-      } else {
-        dx < -40 ? openPanel() : closePanel();
-      }
-      dragging = false;
     });
 
     document.addEventListener('click', function(e) {
