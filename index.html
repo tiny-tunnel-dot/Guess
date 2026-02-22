@@ -1703,14 +1703,14 @@
     }
 
     .user-screen-label {
-      font-size: 10px;
+      font-size: 13px;
       color: var(--muted);
       letter-spacing: 3px;
       text-transform: uppercase;
     }
 
     .user-screen-title {
-      font-size: 13px;
+      font-size: 17px;
       color: var(--green);
       letter-spacing: 3px;
       text-transform: uppercase;
@@ -2057,7 +2057,7 @@
     <h1 class="splash-title">
       <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
     </h1>
-    <div class="splash-sub">// number protocol v5.0.0</div>
+    <div class="splash-sub">// number protocol v5.1.0</div>
 
     <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
   </div>
@@ -2095,7 +2095,7 @@
 
       <div class="terminal-bar">
         <span class="terminal-title">guess.exe</span>
-        <span class="terminal-title">// number protocol v5.0.0</span>
+        <span class="terminal-title">// number protocol v5.1.0</span>
         <div class="battery-lives" id="batteryLives">
           <div class="battery-shell">
             <div class="battery-body">
@@ -2494,6 +2494,21 @@
         log('hint', `> too high. go lower.${warmthHigh}`);
       }
       updateRangeDisplay();
+
+      // Auto-resolve: only one possibility remains
+      if (low === high) {
+        if (batteryLives > 0) {
+          flashDisplay('correct');
+          log('win', `> only one possibility remains. ${low} confirmed.`);
+          secretNumber = low;
+          handleWin();
+        } else {
+          flashDisplay('far');
+          log('hint', `> only one possibility remains. ${low} confirmed. battery depleted.`);
+          secretNumber = low;
+          handleLoss();
+        }
+      }
     }
 
     npBuffer = '';
@@ -2758,6 +2773,11 @@
     try { localStorage.clear(); } catch(e) {}
     currentUser = null;
 
+    // Reset battery and power bulbs to full
+    batteryLives = 3;
+    updateBatteryLives();
+    resetBattery();
+
     // Clear the ID split-flap display
     resetSplitFlap();
 
@@ -2994,7 +3014,7 @@
     tilesHtml += '</div>';
 
     screen.innerHTML =
-      '<div class="user-screen-label">IDENT REQUIRED</div>' +
+      '<div class="user-screen-label">ID REQUIRED</div>' +
       '<div class="user-screen-title">ENTER CALLSIGN</div>' +
       tilesHtml +
       '<button class="cs-enter" id="cs-enter-btn">ENTER</button>';
@@ -3044,6 +3064,8 @@
       setTimeout(function() { playSfFlap(true); }, 160);
       document.removeEventListener('keydown', csKeyHandler);
       enterBtn.removeEventListener('click', csEnterClick);
+      enterBtn.disabled = false;
+      enterBtn.style.visibility = '';
       currentUser = callsign;
       storageSet('user:session', callsign);
       screen.remove();
@@ -3071,8 +3093,11 @@
       confirm();
     });
 
-    // --- numpad ENTER on physical keypad ---
+    // --- numpad ENTER: disable during callsign entry, restore on confirm ---
     var enterBtn = document.getElementById('guessBtn');
+    enterBtn.disabled = true;
+    enterBtn.style.visibility = '';
+
     function csEnterClick() { confirm(); }
     enterBtn.addEventListener('click', csEnterClick);
 
