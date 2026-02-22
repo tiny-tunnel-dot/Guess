@@ -2490,14 +2490,54 @@
       const distance = Math.abs(guess - secretNumber);
       flashDisplay(distance <= 15 ? 'close' : 'far');
 
+      var dist = Math.abs(guess - secretNumber);
+      var tooLowFar = [
+        '> signal too weak. search higher.',
+        '> negative. target above current position.',
+        '> insufficient. increment.',
+        '> below threshold. adjust upward.',
+        '> reading negligible. you are nowhere near target.',
+        '> target not detected at this range. go higher.',
+        '> considerable distance from target. recalibrate upward.',
+        '> are you even trying? search higher.'
+      ];
+      var tooLowClose = [
+        '> proximity alert. target close. search higher.',
+        '> signal strengthening. adjust upward.',
+        '> narrowing. increment.',
+        '> i can almost resolve it. push higher.',
+        '> getting warmer. target is just above you.',
+        '> delta closing. increment further.',
+        '> so close. how did you miss that? go higher.'
+      ];
+      var tooHighFar = [
+        '> signal overshot. search lower.',
+        '> negative. target below current position.',
+        '> exceeded. decrement.',
+        '> above threshold. adjust downward.',
+        '> you have overshot by a significant margin.',
+        '> target not detected at this range. go lower.',
+        '> considerable distance from target. recalibrate downward.',
+        '> impressive. spectacularly wrong. go lower.'
+      ];
+      var tooHighClose = [
+        '> proximity alert. target close. search lower.',
+        '> signal strengthening. adjust downward.',
+        '> narrowing. decrement.',
+        '> i can almost resolve it. pull back lower.',
+        '> getting warmer. target is just below you.',
+        '> delta closing. decrement further.',
+        '> you were right there. what happened? go lower.'
+      ];
+
       if (guess < secretNumber) {
         low = Math.max(low, guess + 1);
-        const warmthLow = (secretNumber - guess) <= 20 ? ' 🔥 getting warmer!' : '';
-        log('hint', `> too low. go higher.${warmthLow}`);
+        var pool = dist <= 15 ? tooLowClose : tooLowFar;
+        log('hint', pool[Math.floor(Math.random() * pool.length)]);
       } else {
         high = Math.min(high, guess - 1);
-        const warmthHigh = (guess - secretNumber) <= 20 ? ' 🔥 getting warmer!' : '';
-        log('hint', `> too high. go lower.${warmthHigh}`);
+        var pool = dist <= 15 ? tooHighClose : tooHighFar;
+        log('hint', pool[Math.floor(Math.random() * pool.length)]);
       }
       updateRangeDisplay();
 
