@@ -1605,11 +1605,17 @@
         min-height: 0;
         overflow: hidden;
       }
+      #game-ui {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
       #log {
         flex: 1;
         height: auto;
         max-height: calc(100dvh - 620px);
-        min-height: 60px;
+        min-height: 120px;
         overflow-y: auto;
       }
       /* Kill 3D depth faces -- invisible without tilt, just add overflow */
@@ -1631,7 +1637,7 @@
       .range-display { font-size: 11px; padding: 4px 10px; margin-bottom: 6px; }
       .range-display span { font-size: 13px; }
       #log { padding: 5px 8px; margin-bottom: 6px; }
-      .log-line { font-size: 11px; }
+      .log-line { font-size: 14px; }
       #display-row { font-size: 22px; padding: 0 12px; height: 38px; bottom: 10px; left: 12px; right: 12px; }
       .screen-bezel { margin-bottom: 8px; }
       .housing-divider { margin-bottom: 6px; }
@@ -1659,7 +1665,7 @@
       .range-display { font-size: 11px; padding: 4px 8px; margin-bottom: 6px; }
       .range-display span { font-size: 13px; }
       #log { padding: 4px 6px; margin-bottom: 6px; }
-      .log-line { font-size: 11px; line-height: 1.4; }
+      .log-line { font-size: 14px; line-height: 1.4; }
       #display-row { font-size: 20px; padding: 0 10px; height: 38px; bottom: 8px; left: 10px; right: 10px; }
       .screen-bezel { margin-bottom: 8px; }
       .housing-divider { margin-bottom: 8px; }
@@ -3066,6 +3072,7 @@
       enterBtn.removeEventListener('click', csEnterClick);
       enterBtn.disabled = false;
       enterBtn.style.visibility = '';
+      setNumpadDisabled(false);
       currentUser = callsign;
       storageSet('user:session', callsign);
       screen.remove();
@@ -3097,6 +3104,7 @@
     var enterBtn = document.getElementById('guessBtn');
     enterBtn.disabled = true;
     enterBtn.style.visibility = '';
+    setNumpadDisabled(true);
 
     function csEnterClick() { confirm(); }
     enterBtn.addEventListener('click', csEnterClick);
