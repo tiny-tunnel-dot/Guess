@@ -442,19 +442,6 @@
     }
 
 
-
-    .battery-label {
-      text-align: center;
-      font-size: 6px;
-      letter-spacing: 3px;
-      color: #4a4c3e;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 -1px 0 rgba(0,0,0,0.4);
-      margin-bottom: 6px;
-      user-select: none;
-      font-family: 'Courier New', Courier, monospace;
-      text-transform: uppercase;
-    }
-
     .battery-bay {
       position: relative;
       border-radius: 4px;
@@ -590,7 +577,96 @@
     }
     .battery-housing.shake { animation: batteryShake 0.4s ease; }
 
+    /* ── Scoreboard: mirrors battery on right side of bulb-strip ── */
+    /* Height derivation from battery:
+       battery-housing: border 1+1, padding 3+3           = 8px shell
+       battery-bay:     border 1+1, padding 4+5           = 11px shell
+       battery content: cell nub clamp(2,0.5vw,4)+1mb
+                      + cell-body clamp(22,4vw,35)
+                      + charge-dots margin-top 4 + h 3    = 7px
+       Total battery outer = 8 + 11 + clamp(25,4.5vw,40) + 7
+       Scoreboard must match. Same 8px housing shell + 11px bay shell = 19px.
+       So sb-digit height = clamp(25,4.5vw,40) + 7 = clamp(32, calc(4.5vw + 7px), 47) */
+    .bulb-strip .scoreboard-housing {
+      position: absolute;
+      right: 2%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: auto;
+      min-width: 60px;
+      max-width: 120px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent, transparent 2px,
+          rgba(255,255,255,0.008) 2px,
+          rgba(255,255,255,0.008) 4px
+        ),
+        linear-gradient(180deg, #282a22 0%, #222418 50%, #1c1e14 100%);
+      border-radius: 4px;
+      border-top: 1px solid #1a1c12;
+      border-left: 1px solid #1e2016;
+      border-right: 1px solid #2a2c22;
+      border-bottom: 1px solid #2e3026;
+      box-shadow:
+        inset 0 2px 8px rgba(0,0,0,0.9),
+        inset 0 1px 3px rgba(0,0,0,0.6),
+        0 1px 0 rgba(255,255,255,0.04);
+      padding: 3px 5px 3px;
+      z-index: 2;
+    }
 
+    .scoreboard-bay {
+      position: relative;
+      border-radius: 4px;
+      padding: 4px 4px 5px;
+      background: linear-gradient(180deg, #0c0e09 0%, #111309 60%, #0e1008 100%);
+      box-shadow:
+        inset 0 3px 8px rgba(0,0,0,0.9),
+        inset 0 1px 3px rgba(0,0,0,0.7),
+        inset -1px 0 2px rgba(0,0,0,0.5),
+        inset 1px 0 0 rgba(255,255,255,0.025);
+      border: 1px solid #0a0b07;
+    }
+
+    .scoreboard-digits {
+      display: flex;
+      gap: clamp(2px, 0.4vw, 3px);
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .sb-digit {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      gap: clamp(1px, 0.15vw, 2px);
+      height: clamp(32px, calc(4.5vw + 7px), 47px);
+      aspect-ratio: 4 / 7;
+    }
+
+    .sb-dot {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(255,140,0,0.07);
+      transition: background 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .sb-dot.on {
+      background: radial-gradient(circle at 35% 35%, #ffe0a0, #ff8c00 60%, #cc6600);
+      box-shadow:
+        0 0 clamp(1px, 0.3vw, 3px) rgba(255,140,0,0.8),
+        0 0 clamp(3px, 0.8vw, 6px) rgba(255,140,0,0.4);
+    }
+
+    .scoreboard-window {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      background: linear-gradient(180deg, rgba(255,140,0,0.02) 0%, transparent 40%);
+      pointer-events: none;
+    }
 
     .cheat-value {
       position: absolute;
@@ -646,39 +722,6 @@
       text-shadow: 0 0 20px var(--green), 0 0 40px rgba(57,255,20,0.3);
       letter-spacing: 3px;
       margin-bottom: 6px;
-    }
-
-    .stat-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .stat {
-      flex: 1;
-      padding: 8px 12px;
-      border-radius: 4px;
-      background: linear-gradient(180deg, var(--panel-light) 0%, var(--panel) 100%);
-      border: 1px solid var(--border);
-      box-shadow:
-        inset 0 1px 0 rgba(57,255,20,0.08),
-        inset 0 -2px 4px rgba(0,0,0,0.4),
-        0 2px 6px rgba(0,0,0,0.4);
-    }
-
-    .stat-label {
-      font-size: 10px;
-      color: #8aba8a;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .stat-value {
-      font-size: 22px;
-      font-family: 'Courier New', Courier, monospace;
-      color: var(--green);
-      text-shadow: 0 0 10px rgba(57,255,20,0.5);
     }
 
     .info-row {
@@ -759,13 +802,7 @@
 
     /* Blinking cursor in display when idle */
     #display-row.idle::after {
-      content: '▋';
-      color: var(--green);
-      animation: cursorBlink 1.1s step-end infinite;
-      margin-left: 2px;
-      font-size: 22px;
-      vertical-align: middle;
-      text-shadow: 0 0 8px rgba(57,255,20,0.8);
+      content: none;
     }
 
     @keyframes cursorBlink {
@@ -853,6 +890,8 @@
       justify-content: center;
       padding: 40px 0 40px;
       position: relative;
+      overflow: visible;
+      width: 100%;
     }
 
     /* Battery: absolute left of bulb strip */
@@ -1382,6 +1421,7 @@
     }
 
     .np-spacer { grid-column: span 3; height: 3px; }
+    .np.np-wide { grid-column: span 2; }
     .np.enter.full {
       grid-column: span 3;
       height: 66px;
@@ -1766,10 +1806,6 @@
       .screw-tr { top: 8px; right: 8px; }
       .terminal-bar { padding: 5px 10px; }
       .terminal-body { padding: 8px 12px 56px; }
-      .stat-row { gap: 6px; margin-bottom: 6px; }
-      .stat { padding: 4px 8px; }
-      .stat-label { font-size: 9px; }
-      .stat-value { font-size: 16px; }
       .info-row { margin-bottom: 6px; }
       .info-box { padding: 4px 10px; }
       .info-box-label { font-size: 9px; }
@@ -1796,10 +1832,6 @@
       .terminal-bar { padding: 4px 8px; }
       .terminal-body { padding: 8px 10px 52px; }
       h1 { font-size: 14px; margin-bottom: 2px; }
-      .stat-row { gap: 6px; margin-bottom: 6px; }
-      .stat { padding: 4px 6px; }
-      .stat-label { font-size: 8px; }
-      .stat-value { font-size: 15px; }
       .info-row { margin-bottom: 6px; }
       .info-box { padding: 4px 8px; }
       .info-box-label { font-size: 8px; }
@@ -2253,7 +2285,7 @@
     <h1 class="splash-title">
       <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
     </h1>
-    <div class="splash-sub">// number protocol v5.7.0</div>
+    <div class="splash-sub">// number protocol v6.0.0</div>
 
     <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
   </div>
@@ -2323,7 +2355,7 @@
 
       <div class="terminal-bar">
         <span class="terminal-title">guess.exe</span>
-        <span class="terminal-title">// number protocol v5.7.0</span>
+        <span class="terminal-title">// number protocol v6.0.0</span>
       </div>
 
       <div class="terminal-body">
@@ -2331,7 +2363,7 @@
 
           <div class="info-row">
             <div class="info-box">
-              <div class="info-box-value" id="rangeDisplay">1 &mdash; 100</div>
+              <div class="info-box-value" id="rangeDisplay">1 &mdash; 99</div>
               <div class="info-box-label">Range</div>
             </div>
             <div class="info-box">
@@ -2343,7 +2375,6 @@
           <div id="log"></div>
 
           <div id="display-row" class="idle">
-            <span id="displayValue"></span>
             <span id="user-tag"></span>
           </div>
         </div>
@@ -2384,6 +2415,17 @@
         <div class="bulb active tier-green"><div class="bulb-lens"></div></div>
       </div>
     </div>
+
+    <!-- Scoreboard: dot-matrix bulb display, mirrors battery on right side -->
+    <div class="scoreboard-housing" id="scoreboardHousing">
+      <div class="scoreboard-bay">
+        <div class="scoreboard-digits">
+          <div class="sb-digit" id="sbDigit0"></div>
+          <div class="sb-digit" id="sbDigit1"></div>
+        </div>
+        <div class="scoreboard-window"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Physical keypad on housing surface -->
@@ -2398,8 +2440,7 @@
       <button class="np" data-digit="1"><span class="key-face">1</span></button>
       <button class="np" data-digit="2"><span class="key-face">2</span></button>
       <button class="np" data-digit="3"><span class="key-face">3</span></button>
-      <button class="np" data-digit="0"><span class="key-face">0</span></button>
-      <button class="np np-decimal" data-action="decimal"><span class="key-face">.</span></button>
+      <button class="np np-wide" data-digit="0"><span class="key-face">0</span></button>
       <button class="np" data-action="backspace"><span class="key-face">⌫</span></button>
       <div class="np-spacer"></div>
       <button class="np enter full" id="guessBtn" data-action="enter"><span class="key-face">ENTER</span></button>
@@ -2446,7 +2487,7 @@
 
   function npPress(digit) {
     if (gameOver) return;
-    if (npBuffer.length >= 3) return;
+    if (npBuffer.length >= 2) return;
     if (digit === '0' && npBuffer === '') return; // block leading zero
     npBuffer += digit;
     updateDisplay();
@@ -2458,19 +2499,147 @@
     updateDisplay();
   }
 
-  function npDecimal() {}
-
   function updateDisplay() {
     const el = document.getElementById('display-row');
-    const span = document.getElementById('displayValue');
     if (npBuffer) {
       el.classList.remove('idle');
-      span.textContent = npBuffer;
     } else {
-      span.textContent = '';
       el.classList.add('idle');
     }
+    updateScoreboard(npBuffer);
   }
+
+
+  // Dot-matrix pixel font: 4 cols x 7 rows per digit
+  // 1 = lit bulb, 0 = dim bulb
+  var SB_FONT = {
+    '0': [
+      1,1,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1
+    ],
+    '1': [
+      0,0,1,0,
+      0,1,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,1,1,1
+    ],
+    '2': [
+      1,1,1,1,
+      0,0,0,1,
+      0,0,0,1,
+      1,1,1,1,
+      1,0,0,0,
+      1,0,0,0,
+      1,1,1,1
+    ],
+    '3': [
+      1,1,1,1,
+      0,0,0,1,
+      0,0,0,1,
+      1,1,1,1,
+      0,0,0,1,
+      0,0,0,1,
+      1,1,1,1
+    ],
+    '4': [
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1,
+      0,0,0,1,
+      0,0,0,1,
+      0,0,0,1
+    ],
+    '5': [
+      1,1,1,1,
+      1,0,0,0,
+      1,0,0,0,
+      1,1,1,1,
+      0,0,0,1,
+      0,0,0,1,
+      1,1,1,1
+    ],
+    '6': [
+      1,1,1,1,
+      1,0,0,0,
+      1,0,0,0,
+      1,1,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1
+    ],
+    '7': [
+      1,1,1,1,
+      0,0,0,1,
+      0,0,0,1,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0
+    ],
+    '8': [
+      1,1,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1
+    ],
+    '9': [
+      1,1,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1,
+      0,0,0,1,
+      0,0,0,1,
+      1,1,1,1
+    ]
+  };
+
+  // Build dot grid for each digit container on load
+  var SB_DOTS = [[],[]];
+  (function initScoreboardDots() {
+    for (var pos = 0; pos < 2; pos++) {
+      var container = document.getElementById('sbDigit' + pos);
+      if (!container) continue;
+      container.innerHTML = '';
+      for (var i = 0; i < 28; i++) {
+        var dot = document.createElement('div');
+        dot.className = 'sb-dot';
+        container.appendChild(dot);
+        SB_DOTS[pos].push(dot);
+      }
+    }
+  })();
+
+  function updateScoreboard(str) {
+    var padded = (str || '').slice(-2);
+    var digits = padded.length === 1 ? ['', padded[0]] : [padded[0] || '', padded[1] || ''];
+
+    for (var pos = 0; pos < 2; pos++) {
+      var ch = digits[pos];
+      var pattern = ch && SB_FONT[ch] ? SB_FONT[ch] : null;
+      for (var i = 0; i < 28; i++) {
+        var dot = SB_DOTS[pos][i];
+        if (!dot) continue;
+        if (pattern && pattern[i]) {
+          dot.classList.add('on');
+        } else {
+          dot.classList.remove('on');
+        }
+      }
+    }
+  }
+
 
   function setIdleCursor(on) {
     const el = document.getElementById('display-row');
@@ -2492,8 +2661,6 @@
     batteryLives = parseInt(storageGet(userKey('batteryLives')));
     if (isNaN(batteryLives) || batteryLives < 0 || batteryLives > 3) batteryLives = 3;
     document.getElementById('user-tag').textContent = currentUser;
-    updateBestDisplay();
-    updatePlayedDisplay();
     updateBatteryLives();
     resetGame();
     if (window._startCRT) window._startCRT();
@@ -2501,16 +2668,66 @@
     document.getElementById('stats-panel').style.visibility = 'visible';
   }
 
-  // Split-flap tick and settle sounds
+  function playBatteryWarningStatic() {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
 
+      // Sharp noise burst — the zap body
+      var bufSize = Math.floor(ctx.sampleRate * 0.08);
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1);
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
 
+      // High bandpass — cuts the low rumble, keeps the crackle bite
+      var hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 3000;
 
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 6000;
+      bp.Q.value = 1.5;
+
+      var noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.8, now + 0.001); // instant attack
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07); // fast decay
+
+      noise.connect(hp);
+      hp.connect(bp);
+      bp.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.09);
+
+      // Tonal zap — pitch-swept sine that drops fast
+      var osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(1800, now);
+      osc.frequency.exponentialRampToValueAtTime(120, now + 0.08); // pitch drop
+
+      var oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0, now);
+      oscGain.gain.linearRampToValueAtTime(0.18, now + 0.001);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.09);
+    });
+  }
 
   function batterySetCharges(n) {
     n = Math.max(0, Math.min(4, n));
     var housing = document.getElementById('batteryComponent');
     if (!housing) return;
+    var prev = parseInt(housing.dataset.charges) || 0;
     housing.dataset.charges = n;
+    // Fire static burst when dropping specifically to 2
+    if (n === 2 && prev > 2) playBatteryWarningStatic();
     var isOvercharge = n === 4;
     var activeCells  = isOvercharge ? 3 : n;
     var mode = isOvercharge ? 'overcharge'
@@ -2553,21 +2770,17 @@
   }
 
   function initLayout() {
-    var _a = document.getElementById('attempts'); if (_a) _a.textContent = '0';
     resetBattery();
-    document.getElementById('displayValue').textContent = '';
     document.getElementById('display-row').classList.add('idle');
-    document.getElementById('rangeDisplay').textContent = '1 \u2014 100';
-    updateBestDisplay();
-    updatePlayedDisplay();
+    document.getElementById('rangeDisplay').textContent = '1 \u2014 99';
     setNumpadDisabled(true);
   }
 
   function resetGame() {
-    secretNumber = Math.floor(Math.random() * 100) + 1;
+    secretNumber = Math.floor(Math.random() * 99) + 1;
     attempts     = 0;
     low          = 1;
-    high         = 100;
+    high         = 99;
     gameOver     = false;
     npBuffer     = '';
 
@@ -2579,7 +2792,6 @@
 
     gamesPlayed = (parseInt(storageGet(userKey('gamesPlayed'))) || 0) + 1;
     storageSet(userKey('gamesPlayed'), gamesPlayed);
-    updatePlayedDisplay();
 
     // Restore enter key to normal mode
     var enterBtn = document.getElementById('guessBtn');
@@ -2587,14 +2799,14 @@
     enterBtn.classList.remove('new-game');
 
     document.getElementById('cheatValue').classList.remove('visible');
-    var _a = document.getElementById('attempts'); if (_a) _a.textContent = '0';
     resetBattery();
     setNumpadDisabled(false);
     updateDisplay();
     updateRangeDisplay();
     var _lg = document.getElementById('lastGuessDisplay'); if (_lg) _lg.textContent = '—';
     clearLog();
-    typeLog('system', '> system initialized. pick a number between 1 and 100.');
+    typeLog('system', '> system initialized. pick a number between 1 and 99.');
+    if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
 
   function flashDisplay(type) {
@@ -2613,16 +2825,14 @@
 
     const guess = parseInt(npBuffer);
 
-    if (isNaN(guess) || guess < 1 || guess > 100) {
-      log('hint', '> enter a valid number between 1 and 100.');
+    if (isNaN(guess) || guess < 1 || guess > 99) {
+      log('hint', '> enter a valid number between 1 and 99.');
       npBuffer = '';
       updateDisplay();
       return;
     }
 
     attempts++;
-    var _a = document.getElementById('attempts'); if (_a) _a.textContent = attempts;
-
     updateBattery(attempts);
 
     log('guess', `> you guessed: ${guess}`);
@@ -2635,10 +2845,9 @@
       flashDisplay('far');
       handleLoss();
     } else {
-      const distance = Math.abs(guess - secretNumber);
-      flashDisplay(distance <= 15 ? 'close' : 'far');
-
       var dist = Math.abs(guess - secretNumber);
+      flashDisplay(dist <= 15 ? 'close' : 'far');
+
       var tooLowFar = [
         '> signal too weak. search higher.',
         '> negative. target above current position.',
@@ -2678,15 +2887,15 @@
         '> you were right there. what happened? go lower.'
       ];
 
+      var pool;
       if (guess < secretNumber) {
         low = Math.max(low, guess + 1);
-        var pool = dist <= 15 ? tooLowClose : tooLowFar;
-        log('hint', pool[Math.floor(Math.random() * pool.length)]);
+        pool = dist <= 15 ? tooLowClose : tooLowFar;
       } else {
         high = Math.min(high, guess - 1);
-        var pool = dist <= 15 ? tooHighClose : tooHighFar;
-        log('hint', pool[Math.floor(Math.random() * pool.length)]);
+        pool = dist <= 15 ? tooHighClose : tooHighFar;
       }
+      log('hint', pool[Math.floor(Math.random() * pool.length)]);
       updateRangeDisplay();
 
       // Auto-resolve: only one possibility remains
@@ -2728,6 +2937,14 @@
       log('win', `> new best score: ${bestScore}`);
     }
 
+    // Track wins and streak
+    var wins = (parseInt(storageGet(userKey('wins'))) || 0) + 1;
+    storageSet(userKey('wins'), wins);
+    var streak = (parseInt(storageGet(userKey('currentStreak'))) || 0) + 1;
+    storageSet(userKey('currentStreak'), streak);
+    var bestStreak = parseInt(storageGet(userKey('bestStreak'))) || 0;
+    if (streak > bestStreak) storageSet(userKey('bestStreak'), streak);
+
     if (batteryLives === 3) {
       shakeBattery();
     } else {
@@ -2735,7 +2952,6 @@
       updateBatteryLives();
     }
 
-    updateBestDisplay();
     if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
 
@@ -2743,12 +2959,18 @@
     batteryLives = Math.max(0, batteryLives - 1);
     updateBatteryLives();
     endGame();
+
+    // Reset streak on loss
+    storageSet(userKey('currentStreak'), 0);
+
     if (batteryLives === 0) {
       log('hint', `> out of attempts. the number was ${secretNumber}.`);
       log('hint', `> battery depleted. system failure.`);
     } else {
       log('hint', `> out of attempts. the number was ${secretNumber}.`);
     }
+
+    if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
 
   function log(type, message) {
@@ -2824,14 +3046,6 @@
     });
   }
 
-  function updateBestDisplay() {
-    var _b = document.getElementById('best'); if (_b) _b.textContent = bestScore || '--';
-  }
-
-  function updatePlayedDisplay() {
-    var _p = document.getElementById('played'); if (_p) _p.textContent = gamesPlayed || 0;
-  }
-
   // ==========================================
   // AUDIO -- mechanical key click (synthesized)
   // ==========================================
@@ -2904,7 +3118,6 @@
 
       if (btn.dataset.digit)           npPress(btn.dataset.digit);
       else if (btn.dataset.action === 'backspace') npBackspace();
-      else if (btn.dataset.action === 'decimal')   npDecimal();
       else if (btn.dataset.action === 'enter') {
         if (gameOver) resetGame();
         else makeGuess();
@@ -2956,6 +3169,24 @@
         currentUser ? (storageGet(userKey('bestScore')) || '--') : '--';
       document.getElementById('stats-played').textContent =
         currentUser ? (storageGet(userKey('gamesPlayed')) || '0') : '0';
+
+      // Win rate
+      if (currentUser) {
+        var played = parseInt(storageGet(userKey('gamesPlayed'))) || 0;
+        var wins = parseInt(storageGet(userKey('wins'))) || 0;
+        var rate = played > 0 ? Math.round((wins / played) * 100) : 0;
+        document.getElementById('stats-winrate').textContent = rate + '%';
+      } else {
+        document.getElementById('stats-winrate').textContent = '--%';
+      }
+
+      // Current streak
+      if (currentUser) {
+        var streak = parseInt(storageGet(userKey('currentStreak'))) || 0;
+        document.getElementById('stats-streak').textContent = streak;
+      } else {
+        document.getElementById('stats-streak').textContent = '--';
+      }
     }
 
     handle.addEventListener('click', function(e) {
