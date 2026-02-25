@@ -453,7 +453,7 @@
 
     .cells {
       display: flex;
-      gap: 3px;
+      gap: clamp(2px, 0.5vw, 5px);
       justify-content: center;
       align-items: flex-end;
       position: relative;
@@ -462,7 +462,7 @@
 
     .cell {
       position: relative;
-      width: clamp(14px, 3vw, 22px);
+      width: clamp(18px, calc(2.57vw + 4px), 27px);
       border-radius: 3px 3px 2px 2px;
       overflow: hidden;
       transition: all 0.4s ease;
@@ -555,8 +555,8 @@
     .window-panel::before, .window-panel::after { display: none; }
     .window-screws { display: none; }
 
-    .charge-dots { display: flex; gap: 3px; justify-content: center; margin-top: 4px; position: relative; z-index: 1; }
-    .charge-dot { width: clamp(14px, 3vw, 22px); height: 3px; border-radius: 1px; transition: all 0.4s ease; }
+    .charge-dots { display: flex; gap: clamp(2px, 0.5vw, 5px); justify-content: center; margin-top: 4px; position: relative; z-index: 1; }
+    .charge-dot { width: clamp(18px, calc(2.57vw + 4px), 27px); height: 3px; border-radius: 1px; transition: all 0.4s ease; }
     .charge-dot.charged   { background: #3a8a1a; box-shadow: 0 0 4px rgba(80,200,40,0.5), 0 0 8px rgba(80,200,40,0.2); }
     .charge-dot.amber     { background: #8a5a00; box-shadow: 0 0 4px rgba(220,140,20,0.5), 0 0 8px rgba(220,140,20,0.2); }
     .charge-dot.red       { background: #8a1000; box-shadow: 0 0 4px rgba(220,30,20,0.5), 0 0 8px rgba(220,30,20,0.2); animation: dot-red-pulse 1.8s ease-in-out infinite; }
@@ -589,7 +589,7 @@
        So sb-digit height = clamp(25,4.5vw,40) + 7 = clamp(32, calc(4.5vw + 7px), 47) */
     .bulb-strip .scoreboard-housing {
       position: absolute;
-      right: 2%;
+      left: calc(50% + 115px + clamp(4px, 1vw, 10px));
       top: 50%;
       transform: translateY(-50%);
       width: auto;
@@ -631,7 +631,7 @@
 
     .scoreboard-digits {
       display: flex;
-      gap: clamp(2px, 0.4vw, 3px);
+      gap: clamp(2px, 0.5vw, 5px);
       justify-content: center;
       align-items: stretch;
     }
@@ -894,10 +894,10 @@
       width: 100%;
     }
 
-    /* Battery: absolute left of bulb strip */
+    /* Battery: absolute left of bulb strip, respects bulb row spacing */
     .bulb-strip .battery-housing {
       position: absolute;
-      left: 2%;
+      right: calc(50% + 115px + clamp(4px, 1vw, 10px));
       top: 50%;
       transform: translateY(-50%);
     }
@@ -2285,7 +2285,7 @@
     <h1 class="splash-title">
       <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
     </h1>
-    <div class="splash-sub">// number protocol v6.0.0</div>
+    <div class="splash-sub">// number protocol v5.6.1</div>
 
     <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
   </div>
@@ -2355,7 +2355,7 @@
 
       <div class="terminal-bar">
         <span class="terminal-title">guess.exe</span>
-        <span class="terminal-title">// number protocol v6.0.0</span>
+        <span class="terminal-title">// number protocol v5.6.1</span>
       </div>
 
       <div class="terminal-body">
@@ -2422,6 +2422,7 @@
         <div class="scoreboard-digits">
           <div class="sb-digit" id="sbDigit0"></div>
           <div class="sb-digit" id="sbDigit1"></div>
+          <div class="sb-digit" id="sbDigit2"></div>
         </div>
         <div class="scoreboard-window"></div>
       </div>
@@ -2606,9 +2607,9 @@
   };
 
   // Build dot grid for each digit container on load
-  var SB_DOTS = [[],[]];
+  var SB_DOTS = [[],[],[]];
   (function initScoreboardDots() {
-    for (var pos = 0; pos < 2; pos++) {
+    for (var pos = 0; pos < 3; pos++) {
       var container = document.getElementById('sbDigit' + pos);
       if (!container) continue;
       container.innerHTML = '';
@@ -2622,10 +2623,10 @@
   })();
 
   function updateScoreboard(str) {
-    var padded = (str || '').slice(-2);
-    var digits = padded.length === 1 ? ['', padded[0]] : [padded[0] || '', padded[1] || ''];
+    var raw = (str || '').slice(-3);
+    var digits = raw.padStart(3, '').split('');
 
-    for (var pos = 0; pos < 2; pos++) {
+    for (var pos = 0; pos < 3; pos++) {
       var ch = digits[pos];
       var pattern = ch && SB_FONT[ch] ? SB_FONT[ch] : null;
       for (var i = 0; i < 28; i++) {
