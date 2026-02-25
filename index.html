@@ -746,6 +746,29 @@
       animation: rangePulse 0.4s ease-out;
     }
 
+    @keyframes rangeExpandLand {
+      0%   { text-shadow: 0 0 20px rgba(57,255,20,1), 0 0 40px rgba(57,255,20,0.7), 0 0 80px rgba(57,255,20,0.4); transform: scale(1.1); }
+      100% { text-shadow: 0 0 8px rgba(57,255,20,0.7), 0 0 20px rgba(57,255,20,0.35), 0 0 40px rgba(57,255,20,0.15); transform: scale(1); }
+    }
+
+    .range-num.expand-land {
+      animation: rangeExpandLand 0.5s ease-out;
+    }
+
+    .range-num.ticking {
+      text-shadow: 0 0 12px rgba(57,255,20,0.9), 0 0 25px rgba(57,255,20,0.5), 0 0 50px rgba(57,255,20,0.2);
+    }
+
+    @keyframes rangeCollapseLand {
+      0%   { opacity: 0.3; text-shadow: 0 0 2px rgba(57,255,20,0.2); }
+      40%  { opacity: 0.3; text-shadow: 0 0 2px rgba(57,255,20,0.2); }
+      100% { opacity: 1; text-shadow: 0 0 8px rgba(57,255,20,0.7), 0 0 20px rgba(57,255,20,0.35), 0 0 40px rgba(57,255,20,0.15); }
+    }
+
+    .range-num.collapse-land {
+      animation: rangeCollapseLand 0.6s ease-out;
+    }
+
     .info-box-label {
       font-size: 11px;
       color: #b8d4b8;
@@ -2221,7 +2244,7 @@
     <h1 class="splash-title">
       <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
     </h1>
-    <div class="splash-sub">// number protocol v6.5.0</div>
+    <div class="splash-sub">// number protocol v6.6.0</div>
 
     <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
   </div>
@@ -2299,7 +2322,7 @@
 
       <div class="terminal-bar">
         <span class="terminal-title">guess.exe</span>
-        <span class="terminal-title">// number protocol v6.5.0</span>
+        <span class="terminal-title">// number protocol v6.6.0</span>
       </div>
 
       <div class="terminal-body">
@@ -3236,6 +3259,7 @@
     }
 
     // Expand range
+    var oldMax = maxRange;
     maxRange += RANGE_INCREMENT;
     storageSet(userKey('maxRange'), maxRange);
     if (maxRange > peakRange) {
@@ -3260,6 +3284,7 @@
     }
 
     scoreboardFireworks();
+    animateRangeExpansion(oldMax, maxRange);
 
     if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
@@ -3358,6 +3383,205 @@
     }
   }
 
+  // --- Range expansion count-up animation ---
+
+  function playRangeTick(progress) {
+    // progress: 0-1, pitch rises as we approach target
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+      var freq = 600 + progress * 600; // 600Hz → 1200Hz
+
+      var osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.06, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    });
+  }
+
+  function playRangeLand() {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+      // Bright two-tone chime
+      var osc1 = ctx.createOscillator();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(1320, now);
+
+      var osc2 = ctx.createOscillator();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1760, now + 0.04);
+
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.1, now + 0.008);
+      gain.gain.setValueAtTime(0.1, now + 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.15);
+      osc2.start(now + 0.04);
+      osc2.stop(now + 0.3);
+    });
+  }
+
+  function animateRangeExpansion(oldMax, newMax) {
+    var loEl = document.getElementById('rangeLow');
+    var hiEl = document.getElementById('rangeHigh');
+
+    // Step 1: After a short delay, reset display to show full range starting point
+    setTimeout(function() {
+      loEl.textContent = 1;
+      hiEl.textContent = oldMax;
+      hiEl.classList.add('ticking');
+
+      // Step 2: Count up from oldMax to newMax in steps of 5
+      var current = oldMax;
+      var step = 5;
+      var totalSteps = (newMax - oldMax) / step;
+      var stepIndex = 0;
+      var interval = setInterval(function() {
+        current += step;
+        stepIndex++;
+        if (current >= newMax) {
+          current = newMax;
+          clearInterval(interval);
+
+          // Land
+          hiEl.textContent = current;
+          hiEl.classList.remove('ticking');
+          hiEl.classList.remove('expand-land');
+          void hiEl.offsetWidth;
+          hiEl.classList.add('expand-land');
+          playRangeLand();
+        } else {
+          hiEl.textContent = current;
+          playRangeTick(stepIndex / totalSteps);
+        }
+      }, 120);
+    }, 600);
+  }
+
+  // --- Range collapse count-down animation ---
+
+  function playRangeDropTick(progress) {
+    // progress: 0-1, pitch descends as we fall
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+      var freq = 1000 - progress * 500; // 1000Hz → 500Hz
+
+      var osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now);
+
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.04, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+      var lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 1500;
+
+      osc.connect(gain);
+      gain.connect(lp);
+      lp.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    });
+  }
+
+  function playRangeThud() {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+      // Low dull thud
+      var osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
+
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.15, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.3);
+
+      // Noise layer for impact texture
+      var bufSize = Math.floor(ctx.sampleRate * 0.06);
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1);
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+
+      var nGain = ctx.createGain();
+      nGain.gain.setValueAtTime(0, now);
+      nGain.gain.linearRampToValueAtTime(0.06, now + 0.003);
+      nGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+      var lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 400;
+
+      noise.connect(nGain);
+      nGain.connect(lp);
+      lp.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.08);
+    });
+  }
+
+  function animateRangeCollapse(fromMax, toBase) {
+    var loEl = document.getElementById('rangeLow');
+    var hiEl = document.getElementById('rangeHigh');
+
+    // Start after a short delay so trombone gets its first note in
+    setTimeout(function() {
+      loEl.textContent = 1;
+      hiEl.textContent = fromMax;
+      hiEl.classList.add('ticking');
+
+      var current = fromMax;
+      var step = 25;
+      var totalSteps = (fromMax - toBase) / step;
+      var stepIndex = 0;
+      var interval = setInterval(function() {
+        current -= step;
+        stepIndex++;
+        if (current <= toBase) {
+          current = toBase;
+          clearInterval(interval);
+
+          hiEl.textContent = current;
+          hiEl.classList.remove('ticking');
+          hiEl.classList.remove('collapse-land');
+          void hiEl.offsetWidth;
+          hiEl.classList.add('collapse-land');
+          playRangeThud();
+        } else {
+          hiEl.textContent = current;
+          playRangeDropTick(stepIndex / totalSteps);
+        }
+      }, 200);
+    }, 300);
+  }
+
   function handleLoss() {
     batteryLives = Math.max(0, batteryLives - 1);
     updateBatteryLives();
@@ -3379,6 +3603,11 @@
 
     scoreboardAngryFace();
     playSadTrombone(batteryLives);
+
+    // Animate range collapsing back to base on total depletion
+    if (batteryLives === 0 && maxRange > BASE_RANGE) {
+      animateRangeCollapse(maxRange, BASE_RANGE);
+    }
 
     if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
