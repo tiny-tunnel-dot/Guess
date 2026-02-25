@@ -599,6 +599,13 @@
         0 0 clamp(3px, 0.8vw, 6px) rgba(255,140,0,0.4);
     }
 
+    .sb-dot.on-green {
+      background: radial-gradient(circle at 35% 35%, #b8ffb0, #39ff14 60%, #20cc10);
+      box-shadow:
+        0 0 clamp(1px, 0.3vw, 3px) rgba(57,255,20,0.8),
+        0 0 clamp(3px, 0.8vw, 6px) rgba(57,255,20,0.4);
+    }
+
     .scoreboard-window {
       position: absolute;
       inset: 0;
@@ -2214,7 +2221,7 @@
     <h1 class="splash-title">
       <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
     </h1>
-    <div class="splash-sub">// number protocol v6.3.0</div>
+    <div class="splash-sub">// number protocol v6.5.0</div>
 
     <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
   </div>
@@ -2282,7 +2289,7 @@
 
       <div class="terminal-bar">
         <span class="terminal-title">guess.exe</span>
-        <span class="terminal-title">// number protocol v6.3.0</span>
+        <span class="terminal-title">// number protocol v6.5.0</span>
       </div>
 
       <div class="terminal-body">
@@ -2416,6 +2423,7 @@
     if (gameOver) return;
     if (npBuffer.length >= 3) return;
     if (digit === '0' && npBuffer === '') return; // block leading zero
+    clearCallsignFromScoreboard();
     npBuffer += digit;
     updateDisplay();
   }
@@ -2529,6 +2537,240 @@
       0,0,0,1,
       0,0,0,1,
       1,1,1,1
+    ],
+    'A': [
+      0,1,1,0,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1
+    ],
+    'B': [
+      1,1,1,0,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,0,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,0
+    ],
+    'C': [
+      0,1,1,1,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0,
+      0,1,1,1
+    ],
+    'D': [
+      1,1,1,0,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,0
+    ],
+    'E': [
+      1,1,1,1,
+      1,0,0,0,
+      1,0,0,0,
+      1,1,1,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,1,1,1
+    ],
+    'F': [
+      1,1,1,1,
+      1,0,0,0,
+      1,0,0,0,
+      1,1,1,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0
+    ],
+    'G': [
+      0,1,1,1,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      0,1,1,1
+    ],
+    'H': [
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1
+    ],
+    'I': [
+      0,1,1,1,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,1,1,1
+    ],
+    'J': [
+      0,0,1,1,
+      0,0,0,1,
+      0,0,0,1,
+      0,0,0,1,
+      0,0,0,1,
+      1,0,0,1,
+      0,1,1,0
+    ],
+    'K': [
+      1,0,0,1,
+      1,0,1,0,
+      1,1,0,0,
+      1,1,0,0,
+      1,0,1,0,
+      1,0,0,1,
+      1,0,0,1
+    ],
+    'L': [
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,1,1,1
+    ],
+    'M': [
+      1,0,0,1,
+      1,1,1,1,
+      1,1,1,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1
+    ],
+    'N': [
+      1,0,0,1,
+      1,1,0,1,
+      1,1,0,1,
+      1,0,1,1,
+      1,0,1,1,
+      1,0,0,1,
+      1,0,0,1
+    ],
+    'O': [
+      0,1,1,0,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      0,1,1,0
+    ],
+    'P': [
+      1,1,1,0,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,0,
+      1,0,0,0,
+      1,0,0,0,
+      1,0,0,0
+    ],
+    'Q': [
+      0,1,1,0,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,1,1,
+      1,0,0,1,
+      0,1,1,1
+    ],
+    'R': [
+      1,1,1,0,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,0,
+      1,0,1,0,
+      1,0,0,1,
+      1,0,0,1
+    ],
+    'S': [
+      0,1,1,1,
+      1,0,0,0,
+      1,0,0,0,
+      0,1,1,0,
+      0,0,0,1,
+      0,0,0,1,
+      1,1,1,0
+    ],
+    'T': [
+      1,1,1,1,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0
+    ],
+    'U': [
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      0,1,1,0
+    ],
+    'V': [
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      0,1,1,0,
+      0,1,1,0
+    ],
+    'W': [
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,0,0,1,
+      1,1,1,1,
+      1,1,1,1,
+      1,0,0,1
+    ],
+    'X': [
+      1,0,0,1,
+      1,0,0,1,
+      0,1,1,0,
+      0,1,1,0,
+      0,1,1,0,
+      1,0,0,1,
+      1,0,0,1
+    ],
+    'Y': [
+      1,0,0,1,
+      1,0,0,1,
+      0,1,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0,
+      0,0,1,0
+    ],
+    'Z': [
+      1,1,1,1,
+      0,0,0,1,
+      0,0,1,0,
+      0,1,1,0,
+      0,1,0,0,
+      1,0,0,0,
+      1,1,1,1
     ]
   };
 
@@ -2548,7 +2790,8 @@
     }
   })();
 
-  function updateScoreboard(str) {
+  function updateScoreboard(str, colorClass) {
+    var cls = colorClass || 'on';
     var raw = (str || '').slice(-3);
     var digits = raw.padStart(3, '').split('');
 
@@ -2558,13 +2801,70 @@
       for (var i = 0; i < 28; i++) {
         var dot = SB_DOTS[pos][i];
         if (!dot) continue;
+        dot.classList.remove('on', 'on-green');
         if (pattern && pattern[i]) {
-          dot.classList.add('on');
-        } else {
-          dot.classList.remove('on');
+          dot.classList.add(cls);
         }
       }
     }
+  }
+
+
+  var _scoreboardShowingCallsign = false;
+
+  function showCallsignOnScoreboard(callsign) {
+    _scoreboardShowingCallsign = true;
+    var letters = callsign.split('');
+    var GLITCH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var delay = 0;
+
+    // Clear scoreboard first
+    updateScoreboard('', 'on-green');
+
+    for (var p = 0; p < 3; p++) {
+      (function(pos, target) {
+        var cycles = 6 + Math.floor(Math.random() * 4); // 6-9 random flaps
+        var step = 0;
+        var interval;
+
+        setTimeout(function() {
+          interval = setInterval(function() {
+            if (!_scoreboardShowingCallsign) { clearInterval(interval); return; }
+            step++;
+            if (step <= cycles) {
+              // Show random letter (flapper cycling effect)
+              var rand = GLITCH[Math.floor(Math.random() * GLITCH.length)];
+              updateSingleScoreboardDigit(pos, rand, 'on-green');
+            } else {
+              // Land on the real letter
+              clearInterval(interval);
+              updateSingleScoreboardDigit(pos, target, 'on-green');
+            }
+          }, 60);
+        }, delay);
+
+        delay += 250; // stagger each letter
+      })(p, letters[p]);
+    }
+  }
+
+  function updateSingleScoreboardDigit(pos, ch, colorClass) {
+    var cls = colorClass || 'on';
+    var pattern = ch && SB_FONT[ch] ? SB_FONT[ch] : null;
+    for (var i = 0; i < 28; i++) {
+      var dot = SB_DOTS[pos][i];
+      if (!dot) continue;
+      dot.classList.remove('on', 'on-green');
+      if (pattern && pattern[i]) {
+        dot.classList.add(cls);
+      }
+    }
+  }
+
+  function clearCallsignFromScoreboard() {
+    if (!_scoreboardShowingCallsign) return;
+    _scoreboardShowingCallsign = false;
+    updateScoreboard('');
   }
 
 
@@ -2683,6 +2983,48 @@
     batterySetCharges(batteryLives);
   }
 
+  function chargeBatterySequence() {
+    // Stagger: 0 → 1 → 2 → 3, each step ~500ms apart
+    var steps = [1, 2, 3];
+    for (var s = 0; s < steps.length; s++) {
+      (function(level, delay) {
+        setTimeout(function() {
+          batteryLives = level;
+          batterySetCharges(level);
+          playChargeBlip(level);
+        }, delay);
+      })(steps[s], (s + 1) * 500);
+    }
+  }
+
+  function playChargeBlip(level) {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+      // Rising pitch with each cell: low → mid → high
+      var freq = level === 1 ? 440 : level === 2 ? 587 : 784;
+
+      var osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.linearRampToValueAtTime(freq * 1.05, now + 0.06);
+
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.1, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+      var lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 2000;
+
+      osc.connect(gain);
+      gain.connect(lp);
+      lp.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    });
+  }
+
   function shakeBattery() {
     var el = document.getElementById('batteryComponent');
     if (!el) return;
@@ -2704,18 +3046,14 @@
   }
 
   function resetGame() {
+    var needsCharge = batteryLives === 0;
+
     secretNumber = Math.floor(Math.random() * 100) + 1;
     attempts     = 0;
     low          = 1;
     high         = 100;
     gameOver     = false;
     npBuffer     = '';
-
-    // Reset battery to 3 only if fully depleted
-    if (batteryLives === 0) {
-      batteryLives = 3;
-      updateBatteryLives();
-    }
 
     gamesPlayed = (parseInt(storageGet(userKey('gamesPlayed'))) || 0) + 1;
     storageSet(userKey('gamesPlayed'), gamesPlayed);
@@ -2726,12 +3064,24 @@
     enterBtn.classList.remove('new-game');
 
     document.getElementById('cheatValue').classList.remove('visible');
-    resetBattery();
+
+    if (needsCharge) {
+      // On total loss: stagger bulbs back one-by-one, then charge battery after
+      resetBulbsSequence(function() {
+        chargeBatterySequence();
+      });
+    } else {
+      resetBattery();
+    }
+
+    // Clear scoreboard (removes angry face or any leftover)
+    updateScoreboard('');
     setNumpadDisabled(false);
     updateDisplay();
     updateRangeDisplay();
     clearLog();
     typeLog('system', '> system initialized. pick a number between 1 and 100.');
+
     if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
 
@@ -2877,13 +3227,113 @@
       updateBatteryLives();
     }
 
+    scoreboardFireworks();
+
     if (window.refreshStatsPanel) window.refreshStatsPanel();
+  }
+
+  // --- Scoreboard firework burst ---
+
+  function playFireworkPop() {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+      // Bright noise burst (the pop)
+      var bufSize = Math.floor(ctx.sampleRate * 0.12);
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1);
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 4000 + Math.random() * 2000;
+      bp.Q.value = 1.2;
+
+      var noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.25, now + 0.003);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+      noise.connect(bp);
+      bp.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.12);
+
+      // Rising tone (the whistle)
+      var osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800 + Math.random() * 400, now);
+      osc.frequency.exponentialRampToValueAtTime(2000 + Math.random() * 1000, now + 0.04);
+      osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
+
+      var oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0, now);
+      oscGain.gain.linearRampToValueAtTime(0.08, now + 0.005);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    });
+  }
+
+  function scoreboardFireworks() {
+    // Burst each digit section one at a time
+    var order = [0, 1, 2];
+    for (var s = 0; s < 3; s++) {
+      (function(pos, delay) {
+        setTimeout(function() {
+          playFireworkPop();
+          burstDigit(pos);
+        }, delay);
+      })(order[s], s * 400);
+    }
+  }
+
+  function burstDigit(pos) {
+    var dots = SB_DOTS[pos];
+    if (!dots || !dots.length) return;
+
+    // Clear any existing lit dots first
+    for (var d = 0; d < 28; d++) {
+      if (dots[d]) dots[d].classList.remove('on', 'on-green');
+    }
+
+    // Center of the 4x7 grid
+    var cx = 1.5, cy = 3;
+
+    // Phase 1: burst outward from center (light up dots near center first)
+    for (var i = 0; i < 28; i++) {
+      (function(dot, idx) {
+        var col = idx % 4;
+        var row = Math.floor(idx / 4);
+        var dist = Math.sqrt((col - cx) * (col - cx) + (row - cy) * (row - cy));
+        var onDelay = dist * 30; // near center lights first
+        var offDelay = onDelay + 200 + Math.random() * 150; // fade out staggered
+
+        setTimeout(function() {
+          dot.classList.add('on-green');
+        }, onDelay);
+
+        setTimeout(function() {
+          dot.classList.remove('on-green');
+        }, offDelay);
+      })(dots[i], i);
+    }
   }
 
   function handleLoss() {
     batteryLives = Math.max(0, batteryLives - 1);
     updateBatteryLives();
     endGame();
+
+    if (batteryLives === 0) {
+      document.getElementById('guessBtn').querySelector('.key-face').textContent = 'START OVER';
+    }
 
     // Reset streak on loss
     storageSet(userKey('currentStreak'), 0);
@@ -2895,7 +3345,142 @@
       log('hint', `> out of attempts. the number was ${secretNumber}.`);
     }
 
+    scoreboardAngryFace();
+    playSadTrombone(batteryLives);
+
     if (window.refreshStatsPanel) window.refreshStatsPanel();
+  }
+
+  // --- Angry face across all 3 scoreboard sections ---
+  // Each section is 4 cols x 7 rows
+  // Left section: left eye + left brow
+  // Middle section: right eye + nose hint
+  // Right section: right brow + mouth area
+
+  var ANGRY_FACE = [
+    // pos 0 (left): left angry brow + left eye + left mouth
+    [
+      0,0,0,0,
+      1,1,0,0,
+      0,0,1,0,
+      0,0,0,0,
+      0,1,1,0,
+      0,0,0,0,
+      0,0,1,1
+    ],
+    // pos 1 (center): nose gap + right brow start + mouth center
+    [
+      0,0,0,0,
+      0,0,1,1,
+      0,1,0,0,
+      0,0,0,0,
+      0,1,1,0,
+      0,0,0,0,
+      1,1,1,1
+    ],
+    // pos 2 (right): mouth end
+    [
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0,
+      1,1,0,0
+    ]
+  ];
+
+  function scoreboardAngryFace() {
+    for (var pos = 0; pos < 3; pos++) {
+      var pattern = ANGRY_FACE[pos];
+      for (var i = 0; i < 28; i++) {
+        var dot = SB_DOTS[pos][i];
+        if (!dot) continue;
+        dot.classList.remove('on', 'on-green');
+        if (pattern && pattern[i]) {
+          dot.classList.add('on');
+        }
+      }
+    }
+  }
+
+  function playSadTrombone(livesRemaining) {
+    // livesRemaining after decrement: 2 = mild, 1 = worse, 0 = devastating
+    var noteSet;
+    if (livesRemaining >= 2) {
+      // Mild: quick 2-note drop
+      noteSet = [
+        { freq: 311, start: 0,    dur: 0.20, droop: 0 },
+        { freq: 247, start: 0.22, dur: 0.30, droop: 0.06 }
+      ];
+    } else if (livesRemaining === 1) {
+      // Worse: 3-note descending, slower, more droop
+      noteSet = [
+        { freq: 293, start: 0,    dur: 0.25, droop: 0 },
+        { freq: 247, start: 0.28, dur: 0.25, droop: 0.04 },
+        { freq: 196, start: 0.56, dur: 0.40, droop: 0.12 }
+      ];
+    } else {
+      // Devastating: full sad trombone, 5 notes, long final droop
+      noteSet = [
+        { freq: 349, start: 0,    dur: 0.24, droop: 0 },
+        { freq: 311, start: 0.26, dur: 0.24, droop: 0 },
+        { freq: 293, start: 0.52, dur: 0.24, droop: 0 },
+        { freq: 261, start: 0.78, dur: 0.28, droop: 0.05 },
+        { freq: 196, start: 1.10, dur: 0.70, droop: 0.20 }
+      ];
+    }
+
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+        for (var n = 0; n < noteSet.length; n++) {
+          (function(note) {
+            var t = now + note.start;
+
+            var osc = ctx.createOscillator();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(note.freq, t);
+            if (note.droop > 0) {
+              osc.frequency.linearRampToValueAtTime(note.freq * (1 - note.droop), t + note.dur);
+            }
+
+            var osc2 = ctx.createOscillator();
+            osc2.type = 'sawtooth';
+            osc2.frequency.setValueAtTime(note.freq * 1.003, t);
+            if (note.droop > 0) {
+              osc2.frequency.linearRampToValueAtTime(note.freq * (1 - note.droop) * 1.003, t + note.dur);
+            }
+
+            var gain = ctx.createGain();
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.12, t + 0.015);
+            gain.gain.setValueAtTime(0.12, t + note.dur - 0.04);
+            gain.gain.linearRampToValueAtTime(0, t + note.dur);
+
+            var gain2 = ctx.createGain();
+            gain2.gain.setValueAtTime(0, t);
+            gain2.gain.linearRampToValueAtTime(0.05, t + 0.015);
+            gain2.gain.setValueAtTime(0.05, t + note.dur - 0.04);
+            gain2.gain.linearRampToValueAtTime(0, t + note.dur);
+
+            var lp = ctx.createBiquadFilter();
+            lp.type = 'lowpass';
+            lp.frequency.value = livesRemaining >= 2 ? 1400 : livesRemaining === 1 ? 1000 : 800;
+
+            osc.connect(gain);
+            osc2.connect(gain2);
+            gain.connect(lp);
+            gain2.connect(lp);
+            lp.connect(ctx.destination);
+
+            osc.start(t);
+            osc.stop(t + note.dur + 0.01);
+            osc2.start(t);
+            osc2.stop(t + note.dur + 0.01);
+          })(noteSet[n]);
+        }
+      });
   }
 
   function log(type, message) {
@@ -2977,6 +3562,29 @@
       cell.classList.add('active', 'tier-green');
       cell.classList.remove('tier-amber', 'tier-red');
     });
+  }
+
+  function resetBulbsSequence(onComplete) {
+    var cells = document.querySelectorAll('.bulb');
+    // Start all bulbs dark
+    cells.forEach(function(cell) {
+      cell.classList.remove('active', 'draining', 'last-bulb', 'tier-green', 'tier-amber', 'tier-red');
+    });
+
+    var delay = 150; // faster than battery's 500ms
+    for (var i = 0; i < cells.length; i++) {
+      (function(cell, d) {
+        setTimeout(function() {
+          cell.classList.add('active', 'tier-green');
+        }, d);
+      })(cells[i], (i + 1) * delay);
+    }
+
+    // Fire callback after all bulbs are lit
+    var totalTime = (cells.length + 1) * delay;
+    if (onComplete) {
+      setTimeout(onComplete, totalTime);
+    }
   }
 
   // ==========================================
@@ -3456,6 +4064,7 @@
       storageSet('user:session', callsign);
       screen.remove();
       init();
+      showCallsignOnScoreboard(callsign);
     }
 
     // Initialise display
@@ -3519,6 +4128,7 @@
     setTimeout(function() {
       screen.remove();
       init();
+      showCallsignOnScoreboard(callsign);
     }, 3000);
   }
 
