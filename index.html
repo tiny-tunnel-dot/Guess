@@ -2279,6 +2279,16 @@
               <div class="stats-panel-label">GAMES PLAYED</div>
               <div class="stats-panel-value" id="stats-played">0</div>
             </div>
+            <div class="stats-panel-divider"></div>
+            <div class="stats-panel-row">
+              <div class="stats-panel-label">MAX RANGE</div>
+              <div class="stats-panel-value" id="stats-maxrange">100</div>
+            </div>
+            <div class="stats-panel-divider"></div>
+            <div class="stats-panel-row">
+              <div class="stats-panel-label">PEAK RANGE</div>
+              <div class="stats-panel-value" id="stats-peakrange">100</div>
+            </div>
           </div>
         </div>
       </div>
@@ -2400,6 +2410,10 @@
   let currentUser = null;
 
   const MAX_GUESSES = 7;
+  const BASE_RANGE = 100;
+  const RANGE_INCREMENT = 25;
+  let maxRange = BASE_RANGE;
+  let peakRange = BASE_RANGE;
 
   function storageGet(key) {
     try { return localStorage.getItem(key); } catch(e) { return null; }
@@ -2421,7 +2435,8 @@
 
   function npPress(digit) {
     if (gameOver) return;
-    if (npBuffer.length >= 3) return;
+    var maxDigits = String(maxRange).length;
+    if (npBuffer.length >= maxDigits) return;
     if (digit === '0' && npBuffer === '') return; // block leading zero
     clearCallsignFromScoreboard();
     npBuffer += digit;
@@ -2793,7 +2808,7 @@
   function updateScoreboard(str, colorClass) {
     var cls = colorClass || 'on';
     var raw = (str || '').slice(-3);
-    var digits = raw.padStart(3, '').split('');
+    var digits = raw.padStart(3, ' ').split('');
 
     for (var pos = 0; pos < 3; pos++) {
       var ch = digits[pos];
@@ -2887,6 +2902,8 @@
     gamesPlayed  = parseInt(storageGet(userKey('gamesPlayed'))) || 0;
     batteryLives = parseInt(storageGet(userKey('batteryLives')));
     if (isNaN(batteryLives) || batteryLives < 0 || batteryLives > 3) batteryLives = 3;
+    maxRange     = parseInt(storageGet(userKey('maxRange'))) || BASE_RANGE;
+    peakRange    = parseInt(storageGet(userKey('peakRange'))) || BASE_RANGE;
     updateBatteryLives();
     resetGame();
     if (window._startCRT) window._startCRT();
@@ -3048,10 +3065,16 @@
   function resetGame() {
     var needsCharge = batteryLives === 0;
 
-    secretNumber = Math.floor(Math.random() * 100) + 1;
+    // Reset range to base on total battery death
+    if (needsCharge) {
+      maxRange = BASE_RANGE;
+      storageSet(userKey('maxRange'), maxRange);
+    }
+
+    secretNumber = Math.floor(Math.random() * maxRange) + 1;
     attempts     = 0;
     low          = 1;
-    high         = 100;
+    high         = maxRange;
     gameOver     = false;
     npBuffer     = '';
 
@@ -3080,7 +3103,7 @@
     updateDisplay();
     updateRangeDisplay();
     clearLog();
-    typeLog('system', '> system initialized. pick a number between 1 and 100.');
+    typeLog('system', '> system initialized. pick a number between 1 and ' + maxRange + '.');
 
     if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
@@ -3101,8 +3124,8 @@
 
     const guess = parseInt(npBuffer);
 
-    if (isNaN(guess) || guess < 1 || guess > 100) {
-      log('hint', '> enter a valid number between 1 and 100.');
+    if (isNaN(guess) || guess < 1 || guess > maxRange) {
+      log('hint', '> enter a valid number between 1 and ' + maxRange + '.');
       npBuffer = '';
       updateDisplay();
       return;
@@ -3211,6 +3234,15 @@
       storageSet(userKey('bestScore'), bestScore);
       log('win', `> new best score: ${bestScore}`);
     }
+
+    // Expand range
+    maxRange += RANGE_INCREMENT;
+    storageSet(userKey('maxRange'), maxRange);
+    if (maxRange > peakRange) {
+      peakRange = maxRange;
+      storageSet(userKey('peakRange'), peakRange);
+    }
+    log('win', `> search range expanded to 1-${maxRange}.`);
 
     // Track wins and streak
     var wins = (parseInt(storageGet(userKey('wins'))) || 0) + 1;
@@ -3340,7 +3372,7 @@
 
     if (batteryLives === 0) {
       log('hint', `> out of attempts. the number was ${secretNumber}.`);
-      log('hint', `> battery depleted. system failure.`);
+      log('hint', `> battery depleted. system failure. range reset to ${BASE_RANGE}.`);
     } else {
       log('hint', `> out of attempts. the number was ${secretNumber}.`);
     }
@@ -3728,6 +3760,10 @@
       } else {
         document.getElementById('stats-streak').textContent = '--';
       }
+
+      // Range stats
+      document.getElementById('stats-maxrange').textContent = maxRange;
+      document.getElementById('stats-peakrange').textContent = peakRange;
     }
 
     handle.addEventListener('click', function(e) {
