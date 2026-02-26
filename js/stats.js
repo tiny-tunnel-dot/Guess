@@ -57,9 +57,14 @@ function userKey(key) {
       document.getElementById('stats-streak').textContent = '--';
     }
 
-    // Range stats
-    document.getElementById('stats-maxrange').textContent = GUESS.maxRange;
-    document.getElementById('stats-peakrange').textContent = GUESS.peakRange;
+    // Mode and best streak
+    document.getElementById('stats-maxrange').textContent = '3-DIGIT';
+    if (GUESS.currentUser) {
+      var bestStreak = parseInt(storageGet(userKey('bestStreak'))) || 0;
+      document.getElementById('stats-peakrange').textContent = bestStreak;
+    } else {
+      document.getElementById('stats-peakrange').textContent = '0';
+    }
   }
 
   handle.addEventListener('click', function(e) {

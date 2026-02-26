@@ -172,7 +172,7 @@
 /* Battery: absolute left of bulb strip, respects bulb row spacing */
 .bulb-strip .battery-housing {
   position: absolute;
-  right: calc(50% + 115px + clamp(4px, 1vw, 10px));
+  right: calc(50% + 132px + clamp(4px, 1vw, 10px));
   top: 50%;
   transform: translateY(-50%);
 }
@@ -187,7 +187,7 @@
   align-items: center;
   gap: 4px;
   pointer-events: none;
-  min-width: 230px;
+  min-width: 264px;
 }
 
 

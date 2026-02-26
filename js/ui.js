@@ -467,13 +467,8 @@ function npBackspace() {
 function updateRangeDisplay() {
   var lo = document.getElementById('rangeLow');
   var hi = document.getElementById('rangeHigh');
-  lo.textContent = GUESS.low;
-  hi.textContent = GUESS.high;
-  lo.classList.remove('pulse');
-  hi.classList.remove('pulse');
-  void lo.offsetWidth;
-  lo.classList.add('pulse');
-  hi.classList.add('pulse');
+  lo.textContent = '100';
+  hi.textContent = '999';
 }
 
 function updateBattery(attemptsUsed) {
@@ -643,7 +638,7 @@ function initLayout() {
   document.querySelectorAll('.bulb').forEach(function(cell) {
     cell.classList.remove('active', 'tier-green', 'tier-amber', 'tier-red', 'draining', 'last-bulb');
   });
-  document.getElementById('rangeLow').textContent = '1';
-  document.getElementById('rangeHigh').textContent = '100';
+  document.getElementById('rangeLow').textContent = '100';
+  document.getElementById('rangeHigh').textContent = '999';
   setNumpadDisabled(true);
 }

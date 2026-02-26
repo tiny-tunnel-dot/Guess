@@ -93,53 +93,12 @@ function showTutorial(callsign, onComplete) {
     highlightElement(rangeBox);
     rangeBox.classList.add('tutorial-focus');
     positionText('belowElement', rangeBox);
-    setMessage('This is your search range. It starts at 1–100 and expands +25 every time you win.', 1, TOTAL_STEPS);
+    setMessage('This is your signal range: 100–999. The target is a 3-digit code with no repeating digits.', 1, TOTAL_STEPS);
 
     var hiEl = document.getElementById('rangeHigh');
     var loEl = document.getElementById('rangeLow');
-    loEl.textContent = '1';
-    hiEl.textContent = '100';
-
-    setTimeout(function() {
-      if (!tutorialActive || stepIndex !== 0) return;
-      hiEl.classList.add('ticking');
-      var current = 100;
-      var iv = setInterval(function() {
-        if (!tutorialActive || stepIndex !== 0) { clearInterval(iv); return; }
-        current += 5;
-        if (current >= 125) {
-          current = 125;
-          clearInterval(iv);
-          hiEl.textContent = current;
-          hiEl.classList.remove('ticking');
-          hiEl.classList.remove('expand-land');
-          void hiEl.offsetWidth;
-          hiEl.classList.add('expand-land');
-          playRangeLand();
-
-          setTimeout(function() {
-            if (!tutorialActive || stepIndex !== 0) return;
-            hiEl.classList.add('ticking');
-            var back = 125;
-            var iv2 = setInterval(function() {
-              if (!tutorialActive || stepIndex !== 0) { clearInterval(iv2); hiEl.classList.remove('ticking'); return; }
-              back -= 5;
-              if (back <= 100) {
-                back = 100;
-                clearInterval(iv2);
-                hiEl.textContent = back;
-                hiEl.classList.remove('ticking');
-              } else {
-                hiEl.textContent = back;
-              }
-            }, 80);
-          }, 800);
-        } else {
-          hiEl.textContent = current;
-          playRangeTick((current - 100) / 25);
-        }
-      }, 100);
-    }, 500);
+    loEl.textContent = '100';
+    hiEl.textContent = '999';
   }
 
   function step2_dialogueLog() {
@@ -147,24 +106,21 @@ function showTutorial(callsign, onComplete) {
     var logEl = document.getElementById('log');
     highlightElement(logEl);
     positionText('belowElement', logEl);
-    setMessage('The system talks to you here. The tone changes based on how close your guess is. Learn to read it.', 2, TOTAL_STEPS);
+    setMessage('Feedback appears here. Green = LOCKED (right digit, right spot). Amber = FOUND (right digit, wrong spot). Dim = MISS.', 2, TOTAL_STEPS);
 
     clearLog();
     setTimeout(function() {
       if (!tutorialActive || stepIndex !== 1) return;
       flashDisplay('far');
-      typeLog('hint', '> nothing. target is much higher.', 30);
+      logGuessResult('531', { locked: 0, found: 0, miss: 3, results: ['miss','miss','miss'] }, 1);
+      typeLog('hint', '> total miss. none of those digits exist in the code.', 30);
     }, 400);
     setTimeout(function() {
       if (!tutorialActive || stepIndex !== 1) return;
       flashDisplay('close');
-      typeLog('hint', '> signal detected. target above current position.', 30);
-    }, 1800);
-    setTimeout(function() {
-      if (!tutorialActive || stepIndex !== 1) return;
-      flashDisplay('close');
-      typeLog('hint', '> PROXIMITY BREACH. target RIGHT above you.', 30);
-    }, 3200);
+      logGuessResult('274', { locked: 1, found: 1, miss: 1, results: ['miss','locked','found'] }, 2);
+      typeLog('hint', '> partial lock. signals detected but misaligned.', 30);
+    }, 2400);
   }
 
   function step3_numpadScoreboard() {
@@ -206,7 +162,7 @@ function showTutorial(callsign, onComplete) {
     var bulbCenter = document.querySelector('.bulb-strip-center');
     highlightElement(bulbCenter);
     positionText('belowElement', bulbCenter);
-    setMessage('These 7 bulbs are your guesses. One burns out with each attempt. Run out and you lose the round.', 4, TOTAL_STEPS);
+    setMessage('These 8 bulbs are your guesses. One burns out with each attempt. Run out and you lose the round.', 4, TOTAL_STEPS);
 
     var bulbs = document.querySelectorAll('.bulb');
     // Start all lit
@@ -339,7 +295,7 @@ function showTutorial(callsign, onComplete) {
   function step7_go() {
     unhighlightAll();
     positionText('middle');
-    setFinalMessage('Find the number. Read the signals. Good luck.');
+    setFinalMessage('Crack the code. Read the signals. Good luck.');
     skipBtn.style.display = 'none';
   }
 
@@ -370,8 +326,8 @@ function showTutorial(callsign, onComplete) {
     skipBtn.remove();
 
     clearLog();
-    document.getElementById('rangeLow').textContent = '1';
-    document.getElementById('rangeHigh').textContent = '100';
+    document.getElementById('rangeLow').textContent = '100';
+    document.getElementById('rangeHigh').textContent = '999';
     document.getElementById('rangeHigh').classList.remove('ticking', 'expand-land');
     batterySetCharges(0);
     document.querySelectorAll('.bulb').forEach(function(b) {

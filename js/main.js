@@ -7,18 +7,17 @@ window.GUESS = {
   bestScore: null,
   gamesPlayed: 0,
   batteryLives: 3,
-  low: 1,
-  high: 100,
+  low: 100,
+  high: 999,
   gameOver: false,
   currentUser: null,
-  MAX_GUESSES: 7,
-  BASE_RANGE: 100,
-  RANGE_INCREMENT: 25,
-  maxRange: 100,
-  peakRange: 100,
+  MAX_GUESSES: 8,
+  maxRange: 999,
+  peakRange: 999,
   _isStartup: false,
-  prevDistance: null,
+  prevAccuracy: null,
   convergenceStreak: 0,
+  guessHistory: [],
   npBuffer: ''
 };
 
@@ -29,8 +28,8 @@ function init() {
   GUESS.gamesPlayed  = parseInt(storageGet(userKey('gamesPlayed'))) || 0;
   GUESS.batteryLives = parseInt(storageGet(userKey('batteryLives')));
   if (isNaN(GUESS.batteryLives) || GUESS.batteryLives < 0 || GUESS.batteryLives > 4) GUESS.batteryLives = 3;
-  GUESS.maxRange     = parseInt(storageGet(userKey('maxRange'))) || GUESS.BASE_RANGE;
-  GUESS.peakRange    = parseInt(storageGet(userKey('peakRange'))) || GUESS.BASE_RANGE;
+  GUESS.maxRange     = 999;
+  GUESS.peakRange    = 999;
 
   // Start battery visually at 0, charge up to actual level
   var targetLives = GUESS.batteryLives;
@@ -56,20 +55,15 @@ function init() {
 function resetGame() {
   var needsCharge = !GUESS._isStartup && GUESS.batteryLives === 0;
 
-  // Reset range to base on total battery death
-  if (needsCharge) {
-    GUESS.maxRange = GUESS.BASE_RANGE;
-    storageSet(userKey('maxRange'), GUESS.maxRange);
-  }
-
-  GUESS.secretNumber = Math.floor(Math.random() * GUESS.maxRange) + 1;
+  GUESS.secretNumber = generateTarget();
   GUESS.attempts     = 0;
-  GUESS.low          = 1;
-  GUESS.high         = GUESS.maxRange;
+  GUESS.low          = 100;
+  GUESS.high         = 999;
   GUESS.gameOver     = false;
   GUESS.npBuffer     = '';
-  GUESS.prevDistance  = null;
+  GUESS.prevAccuracy = null;
   GUESS.convergenceStreak = 0;
+  GUESS.guessHistory = [];
 
   GUESS.gamesPlayed = (parseInt(storageGet(userKey('gamesPlayed'))) || 0) + 1;
   storageSet(userKey('gamesPlayed'), GUESS.gamesPlayed);
@@ -96,31 +90,108 @@ function resetGame() {
   updateDisplay();
   updateRangeDisplay();
   clearLog();
-  typeLog('system', '> system initialized. pick a number between 1 and ' + GUESS.maxRange + '.');
-  if (GUESS.maxRange >= 200) {
-    var rangeLines = [
-      '> searching ' + GUESS.maxRange + ' integers with 7 guesses. bold.',
-      '> range expansion detected. good luck out there.',
-      '> ' + GUESS.maxRange + ' possibilities. 7 attempts. proceed.',
-      '> operating beyond standard parameters. stay sharp.',
-      '> extended range active. precision is everything now.'
-    ];
-    setTimeout(function() {
-      typeLog('system', rangeLines[Math.floor(Math.random() * rangeLines.length)]);
-    }, 600);
-  } else if (GUESS.maxRange >= 150) {
-    if (Math.random() < 0.5) {
-      var midLines = [
-        '> range is expanding. adjust your strategy.',
-        '> wider field. same ammo. think carefully.'
-      ];
-      setTimeout(function() {
-        typeLog('system', midLines[Math.floor(Math.random() * midLines.length)]);
-      }, 600);
+  typeLog('system', '> 3-digit code generated. all digits unique.');
+  var initLines = [
+    '> ' + GUESS.MAX_GUESSES + ' attempts to decode. proceed.',
+    '> ' + GUESS.MAX_GUESSES + ' signals available. crack the code.',
+    '> code locked. ' + GUESS.MAX_GUESSES + ' attempts remaining.',
+    '> three unique digits. ' + GUESS.MAX_GUESSES + ' chances. begin.'
+  ];
+  setTimeout(function() {
+    typeLog('system', initLines[Math.floor(Math.random() * initLines.length)]);
+  }, 600);
+
+  if (window.refreshStatsPanel) window.refreshStatsPanel();
+}
+
+// === TARGET GENERATION (3-digit, no duplicate digits) ===
+
+function generateTarget() {
+  var digits = [];
+  // First digit: 1-9 (no leading zero)
+  var first = Math.floor(Math.random() * 9) + 1;
+  digits.push(first);
+
+  // Build pool of remaining digits (0-9 excluding first)
+  var pool = [];
+  for (var d = 0; d <= 9; d++) {
+    if (d !== first) pool.push(d);
+  }
+
+  // Pick 2 more unique digits via partial Fisher-Yates
+  for (var i = 0; i < 2; i++) {
+    var j = i + Math.floor(Math.random() * (pool.length - i));
+    var temp = pool[i];
+    pool[i] = pool[j];
+    pool[j] = temp;
+    digits.push(pool[i]);
+  }
+
+  return digits[0] * 100 + digits[1] * 10 + digits[2];
+}
+
+// === MASTERMIND SCORING ===
+
+function scoreMastermind(guessStr, targetStr) {
+  var guess = guessStr.split('').map(Number);
+  var target = targetStr.split('').map(Number);
+  var numDigits = guess.length;
+  var locked = 0;
+  var found = 0;
+  var results = new Array(numDigits);
+  var targetUsed = new Array(numDigits);
+  var guessUsed = new Array(numDigits);
+
+  for (var i = 0; i < numDigits; i++) {
+    targetUsed[i] = false;
+    guessUsed[i] = false;
+  }
+
+  // First pass: exact position matches (LOCKED)
+  for (var i = 0; i < numDigits; i++) {
+    if (guess[i] === target[i]) {
+      results[i] = 'locked';
+      locked++;
+      targetUsed[i] = true;
+      guessUsed[i] = true;
     }
   }
 
-  if (window.refreshStatsPanel) window.refreshStatsPanel();
+  // Second pass: right digit, wrong position (FOUND)
+  for (var i = 0; i < numDigits; i++) {
+    if (guessUsed[i]) continue;
+    for (var j = 0; j < numDigits; j++) {
+      if (targetUsed[j]) continue;
+      if (guess[i] === target[j]) {
+        results[i] = 'found';
+        found++;
+        targetUsed[j] = true;
+        break;
+      }
+    }
+  }
+
+  // Remaining positions are MISS
+  for (var i = 0; i < numDigits; i++) {
+    if (!results[i]) results[i] = 'miss';
+  }
+
+  return {
+    locked: locked,
+    found: found,
+    miss: numDigits - locked - found,
+    results: results
+  };
+}
+
+// === ACCURACY TIER ===
+
+function getAccuracyTier(locked, found) {
+  if (locked >= 2) return 'hot';
+  if (locked === 1 && found >= 1) return 'warm';
+  if (found >= 2) return 'warm';
+  if (locked === 1 || found >= 1) return 'cool';
+  return 'cold';
 }
 
 // === MAKE GUESS ===
@@ -129,10 +200,10 @@ function makeGuess() {
   if (GUESS.gameOver) return;
   if (GUESS.secretNumber === undefined) return;
 
-  const guess = parseInt(GUESS.npBuffer);
+  var guess = parseInt(GUESS.npBuffer);
 
-  if (isNaN(guess) || guess < 1 || guess > GUESS.maxRange) {
-    log('hint', '> enter a valid number between 1 and ' + GUESS.maxRange + '.');
+  if (isNaN(guess) || guess < 100 || guess > 999) {
+    log('hint', '> enter a valid 3-digit number (100-999).');
     GUESS.npBuffer = '';
     updateDisplay();
     return;
@@ -141,7 +212,16 @@ function makeGuess() {
   GUESS.attempts++;
   updateBattery(GUESS.attempts);
 
-  log('guess', `> you guessed: ${guess}`);
+  // Mastermind scoring
+  var guessStr = String(guess);
+  var targetStr = String(GUESS.secretNumber);
+  var score = scoreMastermind(guessStr, targetStr);
+
+  // Add to guess history
+  GUESS.guessHistory.push({ guess: guessStr, score: score });
+
+  // Display colored guess result in log
+  logGuessResult(guessStr, score, GUESS.attempts);
 
   if (guess === GUESS.secretNumber) {
     flashDisplay('correct');
@@ -150,39 +230,24 @@ function makeGuess() {
     flashDisplay('far');
     handleLoss();
   } else {
-    var dist = Math.abs(guess - GUESS.secretNumber);
-    var tier;
-    if (dist <= 3) tier = 'burning';
-    else if (dist <= 10) tier = 'hot';
-    else if (dist <= 25) tier = 'warm';
-    else if (dist <= 50) tier = 'cool';
-    else tier = 'cold';
+    var tier = getAccuracyTier(score.locked, score.found);
 
     flashDisplay((tier === 'cool' || tier === 'cold') ? 'far' : 'close');
 
-    // === 5-TIER DIALOGUE POOLS ===
-    var isLow = guess < GUESS.secretNumber;
-
-    // Select pool (dialogue arrays are globals from dialogue.js)
-    var pool = selectDialoguePool(tier, isLow);
-
-    // Update range bounds
-    if (isLow) {
-      GUESS.low = Math.max(GUESS.low, guess + 1);
-    } else {
-      GUESS.high = Math.min(GUESS.high, guess - 1);
-    }
-
-    // Base message
+    // === ACCURACY-BASED DIALOGUE ===
+    var pool = selectDialoguePool(tier);
     log('hint', pool[Math.floor(Math.random() * pool.length)]);
 
-    // === COMPARATIVE LAYER ===
-    if (GUESS.prevDistance !== null && Math.random() < 0.7) {
-      var diff = dist - GUESS.prevDistance;
+    // === COMPARATIVE LAYER (accuracy delta) ===
+    if (GUESS.prevAccuracy !== null && Math.random() < 0.7) {
+      var lockDiff = score.locked - GUESS.prevAccuracy.locked;
+      var foundDiff = score.found - GUESS.prevAccuracy.found;
+      var improvement = lockDiff * 2 + foundDiff;
+
       var compPool;
-      if (Math.abs(diff) <= 2) {
+      if (improvement === 0) {
         compPool = compSame;
-      } else if (diff < 0) {
+      } else if (improvement > 0) {
         compPool = compCloser;
       } else {
         compPool = compFarther;
@@ -191,10 +256,13 @@ function makeGuess() {
     }
 
     // === CONVERGENCE STREAK TRACKING ===
-    if (GUESS.prevDistance !== null) {
-      if (dist < GUESS.prevDistance - 2) {
+    if (GUESS.prevAccuracy !== null) {
+      var curScore = score.locked * 2 + score.found;
+      var prevScore = GUESS.prevAccuracy.locked * 2 + GUESS.prevAccuracy.found;
+
+      if (curScore > prevScore) {
         GUESS.convergenceStreak = GUESS.convergenceStreak > 0 ? GUESS.convergenceStreak + 1 : 1;
-      } else if (dist > GUESS.prevDistance + 2) {
+      } else if (curScore < prevScore) {
         GUESS.convergenceStreak = GUESS.convergenceStreak < 0 ? GUESS.convergenceStreak - 1 : -1;
       } else {
         GUESS.convergenceStreak = 0;
@@ -203,12 +271,7 @@ function makeGuess() {
 
     // === STREAK RECOGNITION (3+ consecutive) ===
     if (Math.abs(GUESS.convergenceStreak) >= 3 && Math.random() < 0.3) {
-      var streakPool;
-      if (GUESS.convergenceStreak > 0) {
-        streakPool = streakPositive;
-      } else {
-        streakPool = streakNegative;
-      }
+      var streakPool = GUESS.convergenceStreak > 0 ? streakPositive : streakNegative;
       log('hint', streakPool[Math.floor(Math.random() * streakPool.length)]);
     }
 
@@ -228,24 +291,7 @@ function makeGuess() {
       }, 400);
     }
 
-    GUESS.prevDistance = dist;
-
-    updateRangeDisplay();
-
-    // Auto-resolve: only one possibility remains
-    if (GUESS.low === GUESS.high) {
-      if (GUESS.batteryLives > 0) {
-        flashDisplay('correct');
-        log('win', `> only one possibility remains. ${GUESS.low} confirmed.`);
-        GUESS.secretNumber = GUESS.low;
-        handleWin();
-      } else {
-        flashDisplay('far');
-        log('hint', `> only one possibility remains. ${GUESS.low} confirmed. battery depleted.`);
-        GUESS.secretNumber = GUESS.low;
-        handleLoss();
-      }
-    }
+    GUESS.prevAccuracy = { locked: score.locked, found: score.found };
   }
 
   GUESS.npBuffer = '';
@@ -270,27 +316,17 @@ function handleWin() {
   var isJackpot = GUESS.attempts === 1;
 
   if (isJackpot) {
-    log('win', `> ✓ FIRST GUESS. ${GUESS.secretNumber} locked on contact.`);
+    log('win', '> \u2713 FIRST GUESS. ' + GUESS.secretNumber + ' cracked on contact.');
     log('win', '> JACKPOT. overcharge initiated.');
   } else {
-    log('win', `> ✓ correct! ${GUESS.secretNumber} found in ${GUESS.attempts} attempt${GUESS.attempts === 1 ? '' : 's'}.`);
+    log('win', '> \u2713 CODE CRACKED. ' + GUESS.secretNumber + ' decoded in ' + GUESS.attempts + ' attempt' + (GUESS.attempts === 1 ? '' : 's') + '.');
   }
 
   if (!GUESS.bestScore || GUESS.attempts < GUESS.bestScore) {
     GUESS.bestScore = GUESS.attempts;
     storageSet(userKey('bestScore'), GUESS.bestScore);
-    log('win', `> new best score: ${GUESS.bestScore}`);
+    log('win', '> new best score: ' + GUESS.bestScore);
   }
-
-  // Expand range
-  var oldMax = GUESS.maxRange;
-  GUESS.maxRange += GUESS.RANGE_INCREMENT;
-  storageSet(userKey('maxRange'), GUESS.maxRange);
-  if (GUESS.maxRange > GUESS.peakRange) {
-    GUESS.peakRange = GUESS.maxRange;
-    storageSet(userKey('peakRange'), GUESS.peakRange);
-  }
-  log('win', `> search range expanded to 1-${GUESS.maxRange}.`);
 
   // Track wins and streak
   var wins = (parseInt(storageGet(userKey('wins'))) || 0) + 1;
@@ -301,7 +337,6 @@ function handleWin() {
   if (streak > bestStreak) storageSet(userKey('bestStreak'), streak);
 
   if (isJackpot) {
-    // JACKPOT: overcharge battery to blue (level 4) — real extra life
     GUESS.batteryLives = 4;
     batterySetCharges(4);
     triggerJackpotCelebration();
@@ -313,7 +348,6 @@ function handleWin() {
   }
 
   scoreboardFireworks();
-  animateRangeExpansion(oldMax, GUESS.maxRange);
 
   if (window.refreshStatsPanel) window.refreshStatsPanel();
 }
@@ -332,20 +366,13 @@ function handleLoss() {
   // Reset streak on loss
   storageSet(userKey('currentStreak'), 0);
 
+  log('hint', '> DECODE FAILED. the code was ' + GUESS.secretNumber + '.');
   if (GUESS.batteryLives === 0) {
-    log('hint', `> out of attempts. the number was ${GUESS.secretNumber}.`);
-    log('hint', `> battery depleted. system failure. range reset to ${GUESS.BASE_RANGE}.`);
-  } else {
-    log('hint', `> out of attempts. the number was ${GUESS.secretNumber}.`);
+    log('hint', '> battery depleted. system failure.');
   }
 
   scoreboardAngryFace();
   playSadTrombone(GUESS.batteryLives);
-
-  // Animate range collapsing back to base on total depletion
-  if (GUESS.batteryLives === 0 && GUESS.maxRange > GUESS.BASE_RANGE) {
-    animateRangeCollapse(GUESS.maxRange, GUESS.BASE_RANGE);
-  }
 
   if (window.refreshStatsPanel) window.refreshStatsPanel();
 }
