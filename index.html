@@ -332,7 +332,6 @@
       flex-direction: column;
       overflow: hidden;
       position: relative;
-      padding-bottom: 72px;
     }
 
     .terminal-bar {
@@ -515,6 +514,51 @@
       100% { transform: translateY(-50%) translateX(0); }
     }
     .battery-housing.shake { animation: batteryShake 0.4s ease; }
+
+    /* ── Jackpot: first-guess-win full-screen celebration ── */
+    .jackpot-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .jackpot-overlay.active {
+      animation: jackpotFlash 3s ease-out forwards;
+    }
+    @keyframes jackpotFlash {
+      0%   { opacity: 0; background: rgba(100,200,255,0); }
+      5%   { opacity: 1; background: rgba(100,200,255,0.4); }
+      10%  { opacity: 1; background: rgba(255,255,255,0.6); }
+      15%  { opacity: 1; background: rgba(100,200,255,0.3); }
+      25%  { opacity: 1; background: rgba(80,180,255,0.15); }
+      50%  { opacity: 1; background: rgba(60,160,255,0.05); }
+      100% { opacity: 0; background: rgba(60,160,255,0); }
+    }
+    .housing.jackpot-glow {
+      animation: housingJackpotGlow 2.5s ease-out;
+    }
+    @keyframes housingJackpotGlow {
+      0%   { box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.4), 0 0 60px rgba(100,200,255,0.6), 0 0 120px rgba(80,180,255,0.3); }
+      30%  { box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.4), 0 0 40px rgba(100,200,255,0.4), 0 0 80px rgba(80,180,255,0.2); }
+      100% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.4); }
+    }
+    .bulb.jackpot-blue {
+      background: radial-gradient(circle, rgba(120,200,255,0.95) 0%, rgba(80,160,255,0.7) 40%, rgba(40,120,200,0.3) 70%, transparent 100%) !important;
+      box-shadow: 0 0 6px rgba(100,200,255,0.8), 0 0 14px rgba(80,180,255,0.4) !important;
+    }
+    @keyframes jackpotBulbSweep {
+      0%   { filter: brightness(1); }
+      50%  { filter: brightness(2); }
+      100% { filter: brightness(1); }
+    }
+    #log.jackpot-screen {
+      animation: jackpotScreenFlash 1.5s ease-out;
+    }
+    @keyframes jackpotScreenFlash {
+      0%   { box-shadow: inset 0 0 40px rgba(100,200,255,0.6), inset 0 0 80px rgba(80,180,255,0.3); }
+      100% { box-shadow: none; }
+    }
 
     /* ── Scoreboard: mirrors battery on right side of bulb-strip ── */
     /* Height derivation from battery:
@@ -769,6 +813,44 @@
       animation: rangeCollapseLand 0.6s ease-out;
     }
 
+    /* ── Range Takeover: scale-up celebration on win ── */
+    .range-box {
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s ease, z-index 0s;
+      position: relative;
+      z-index: 1;
+    }
+    .range-box.takeover {
+      z-index: 100;
+      transform: scale(2.2) translateY(45px);
+      box-shadow:
+        inset 0 0 12px rgba(0,0,0,0.6),
+        inset 0 0 4px rgba(57,255,20,0.04),
+        0 0 30px rgba(57,255,20,0.3),
+        0 0 60px rgba(57,255,20,0.15),
+        0 0 100px rgba(57,255,20,0.05);
+      border-color: rgba(57,255,20,0.4);
+    }
+    .range-box.takeover-return {
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+      z-index: 100;
+    }
+    .terminal-body.range-dimmed #log {
+      transition: opacity 0.3s ease;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    @media (max-width: 500px) {
+      .range-box.takeover {
+        transform: scale(1.8) translateY(35px);
+      }
+    }
+    @media (max-width: 380px) {
+      .range-box.takeover {
+        transform: scale(1.5) translateY(28px);
+      }
+    }
+
     .info-box-label {
       font-size: 11px;
       color: #b8d4b8;
@@ -791,15 +873,42 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
-      height: 120px;
-      max-height: 120px;
-      min-height: 120px;
+      height: 185px;
+      max-height: 185px;
+      min-height: 185px;
       flex-shrink: 0;
       padding: 8px 10px;
       background: rgba(0,0,0,0.3);
       border-radius: 3px;
       border: 1px solid rgba(30,58,30,0.5);
       box-shadow: inset 0 2px 12px rgba(0,0,0,0.6);
+      transition: opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Flash feedback on log container */
+    #log.flash-correct {
+      animation: logFlashCorrect 0.6s ease forwards;
+    }
+    #log.flash-close {
+      animation: logFlashClose 0.45s ease forwards;
+    }
+    #log.flash-far {
+      animation: logFlashFar 0.4s ease forwards;
+    }
+    @keyframes logFlashCorrect {
+      0%   { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+      20%  { border-color: rgba(57,255,20,0.6); box-shadow: inset 0 0 20px rgba(57,255,20,0.15), 0 0 12px rgba(57,255,20,0.2); }
+      100% { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+    }
+    @keyframes logFlashClose {
+      0%   { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+      25%  { border-color: rgba(255,183,0,0.5); box-shadow: inset 0 0 16px rgba(255,183,0,0.1), 0 0 8px rgba(255,183,0,0.15); }
+      100% { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+    }
+    @keyframes logFlashFar {
+      0%   { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+      25%  { border-color: rgba(255,64,64,0.4); box-shadow: inset 0 0 16px rgba(255,64,64,0.1), 0 0 8px rgba(255,64,64,0.15); }
+      100% { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
     }
 
     .log-line {
@@ -825,85 +934,6 @@
       animation: cursorBlink 1.1s step-end infinite;
       margin-left: 1px;
       text-shadow: 0 0 8px rgba(57,255,20,0.8);
-    }
-
-    /* Blinking cursor in display when idle */
-    #display-row.idle::after {
-      content: none;
-    }
-
-    @keyframes cursorBlink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0; }
-    }
-
-    /* DISPLAY SCREEN (input readout -- still on CRT) */
-    #display-row {
-      border-radius: 4px;
-      padding: 0 16px;
-      text-align: right;
-      font-size: 28px;
-      color: var(--green);
-      letter-spacing: 4px;
-      height: 54px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      text-shadow: 0 0 16px var(--green), 0 0 4px var(--green);
-      background: linear-gradient(180deg, #030803 0%, #050d05 100%);
-      border: 1px solid var(--green-dim);
-      box-shadow:
-        inset 0 2px 16px rgba(0,0,0,0.9),
-        inset 0 0 30px rgba(57,255,20,0.04),
-        0 2px 0 rgba(57,255,20,0.1);
-      transition: border-color 0.15s ease;
-      position: absolute;
-      bottom: 18px;
-      left: 20px;
-      right: 20px;
-    }
-
-    /* GUESS FLASH FEEDBACK */
-    #display-row.flash-correct {
-      animation: flashCorrect 0.6s ease forwards;
-      border-color: var(--green);
-    }
-    #display-row.flash-close {
-      animation: flashClose 0.45s ease forwards;
-      border-color: var(--amber);
-    }
-    #display-row.flash-far {
-      animation: flashFar 0.4s ease forwards;
-      border-color: var(--red);
-    }
-
-    @keyframes flashCorrect {
-      0%   { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
-             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), inset 0 0 30px rgba(57,255,20,0.04), 0 2px 0 rgba(57,255,20,0.1); }
-      20%  { background: linear-gradient(180deg, #0a3d00 0%, #0a3d00 100%);
-             box-shadow: inset 0 0 40px rgba(57,255,20,0.3), 0 0 30px rgba(57,255,20,0.4), 0 0 60px rgba(57,255,20,0.2); }
-      50%  { background: linear-gradient(180deg, #072e00 0%, #072e00 100%);
-             box-shadow: inset 0 0 30px rgba(57,255,20,0.2), 0 0 20px rgba(57,255,20,0.3); }
-      100% { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
-             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), inset 0 0 30px rgba(57,255,20,0.04), 0 2px 0 rgba(57,255,20,0.1); }
-    }
-
-    @keyframes flashClose {
-      0%   { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
-             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), 0 2px 0 rgba(57,255,20,0.1); }
-      25%  { background: linear-gradient(180deg, #2e2200 0%, #1e1600 100%);
-             box-shadow: inset 0 0 30px rgba(255,183,0,0.2), 0 0 20px rgba(255,183,0,0.3); }
-      100% { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
-             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), 0 2px 0 rgba(57,255,20,0.1); }
-    }
-
-    @keyframes flashFar {
-      0%   { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
-             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), 0 2px 0 rgba(57,255,20,0.1); }
-      25%  { background: linear-gradient(180deg, #2e0800 0%, #1e0500 100%);
-             box-shadow: inset 0 0 30px rgba(255,64,64,0.2), 0 0 20px rgba(255,64,64,0.25); }
-      100% { background: linear-gradient(180deg, #030803 0%, #050d05 100%);
-             box-shadow: inset 0 2px 16px rgba(0,0,0,0.9), 0 2px 0 rgba(57,255,20,0.1); }
     }
 
     /* ==========================================
@@ -1832,7 +1862,7 @@
       #cheatValue { top: 8px; left: 24px; font-size: 10px; }
       .screw-tr { top: 8px; right: 8px; }
       .terminal-bar { padding: 5px 10px; }
-      .terminal-body { padding: 8px 12px 56px; }
+      .terminal-body { padding: 8px 12px; }
       .info-row { margin-bottom: 6px; }
       .info-box { padding: 4px 10px; }
       .info-box-label { font-size: 9px; }
@@ -1841,7 +1871,6 @@
       .range-box .info-box-label { font-size: 8px; }
       #log { padding: 5px 8px; margin-bottom: 6px; }
       .log-line { font-size: 14px; }
-      #display-row { font-size: 22px; padding: 0 12px; height: 38px; bottom: 10px; left: 12px; right: 12px; }
       .screen-bezel { margin-bottom: 8px; }
       .housing-divider { margin-bottom: 6px; }
       .bulb-strip { padding: 36px 0 36px; }
@@ -1859,7 +1888,7 @@
     @media (max-width: 500px) and (max-height: 750px) {
       .housing { padding: 26px 10px 12px; }
       .terminal-bar { padding: 4px 8px; }
-      .terminal-body { padding: 8px 10px 52px; }
+      .terminal-body { padding: 8px 10px; }
       h1 { font-size: 14px; margin-bottom: 2px; }
       .info-row { margin-bottom: 6px; }
       .info-box { padding: 4px 8px; }
@@ -1869,7 +1898,6 @@
       .range-box .info-box-label { font-size: 7px; }
       #log { padding: 4px 6px; margin-bottom: 6px; }
       .log-line { font-size: 14px; line-height: 1.4; }
-      #display-row { font-size: 20px; padding: 0 10px; height: 38px; bottom: 8px; left: 10px; right: 10px; }
       .screen-bezel { margin-bottom: 8px; }
       .housing-divider { margin-bottom: 8px; }
       .bulb-strip { padding: 28px 0 28px; }
@@ -1984,8 +2012,8 @@
     }
 
     .cs-arrow {
-      width: 52px;
-      height: 40px;
+      width: 60px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1993,22 +2021,25 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       background: none;
-      border: none;
+      border: 1px solid rgba(57,255,20,0.12);
+      border-radius: 4px;
       padding: 0;
       color: var(--green);
-      font-size: 18px;
-      opacity: 0.45;
-      transition: opacity 0.12s ease, text-shadow 0.12s ease;
+      font-size: 26px;
+      opacity: 0.55;
+      transition: opacity 0.12s ease, text-shadow 0.12s ease, background 0.12s ease;
     }
 
     .cs-arrow:hover {
-      opacity: 0.8;
+      opacity: 0.9;
+      background: rgba(57,255,20,0.05);
     }
 
     .cs-arrow:active,
     .cs-arrow.flash {
       opacity: 1;
-      text-shadow: 0 0 10px rgba(57,255,20,0.7);
+      text-shadow: 0 0 12px rgba(57,255,20,0.8);
+      background: rgba(57,255,20,0.08);
     }
 
     .cs-letter-box {
@@ -2040,7 +2071,7 @@
     }
 
     .cs-enter {
-      margin-top: 8px;
+      margin-top: 28px;
       padding: 0 28px;
       height: 36px;
       background: linear-gradient(180deg, #0f1f0f 0%, #080e08 100%);
@@ -2092,6 +2123,123 @@
        ========================================== */
 
 
+    /* ==========================================
+       TUTORIAL OVERLAY
+       ========================================== */
+    .housing.tutorial-active {
+      z-index: auto;
+    }
+    .tutorial-dim {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 90;
+      border-radius: 8px;
+      pointer-events: all;
+    }
+    .tutorial-text-box {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 95;
+      text-align: center;
+      width: 88%;
+      max-width: 340px;
+      padding: 18px 20px 16px;
+      background: linear-gradient(180deg, rgba(8,18,8,0.97) 0%, rgba(4,12,4,0.98) 100%);
+      border: 1px solid rgba(57,255,20,0.4);
+      border-radius: 6px;
+      box-shadow:
+        0 0 15px rgba(57,255,20,0.12),
+        0 0 30px rgba(57,255,20,0.06),
+        0 4px 24px rgba(0,0,0,0.7),
+        inset 0 1px 0 rgba(57,255,20,0.08);
+      pointer-events: all;
+    }
+    .tutorial-message {
+      font-family: 'Courier New', monospace;
+      font-size: 15px;
+      color: #e8f8e8;
+      text-shadow: 0 0 4px rgba(200,245,200,0.3);
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+    }
+    .tutorial-tap {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: var(--green);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 14px;
+      animation: tutorialTapPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes tutorialTapPulse {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 1; }
+    }
+    .tutorial-highlight {
+      position: relative;
+      z-index: 92 !important;
+    }
+    .range-box.tutorial-focus {
+      transform: scale(1.15);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+      border-color: rgba(57,255,20,0.5);
+      box-shadow:
+        inset 0 0 12px rgba(0,0,0,0.6),
+        inset 0 0 4px rgba(57,255,20,0.04),
+        0 0 20px rgba(57,255,20,0.2),
+        0 0 40px rgba(57,255,20,0.08);
+    }
+    .tutorial-scoreboard-pulse {
+      animation: tutScoreboardPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes tutScoreboardPulse {
+      0%, 100% { box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 0 8px rgba(255,140,0,0.1); }
+      50% { box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 0 16px rgba(255,140,0,0.3), 0 0 30px rgba(255,140,0,0.1); }
+    }
+    .tutorial-skip {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      z-index: 96;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: rgba(57,255,20,0.35);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 6px 10px;
+      transition: color 0.15s;
+      pointer-events: all;
+    }
+    .tutorial-skip:hover {
+      color: rgba(57,255,20,0.7);
+    }
+    .tutorial-step-counter {
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      color: rgba(57,255,20,0.25);
+      letter-spacing: 2px;
+      margin-top: 8px;
+    }
+    @media (max-width: 500px) {
+      .tutorial-text-box {
+        width: 92%;
+        padding: 14px 14px 12px;
+      }
+      .tutorial-message {
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .tutorial-tap {
+        font-size: 10px;
+        margin-top: 10px;
+      }
+    }
+
     /* STATS PANEL */
     #stats-handle {
       position: absolute;
@@ -2110,7 +2258,13 @@
       cursor: pointer;
       z-index: 80;
       box-shadow: -2px 0 10px rgba(0,0,0,0.6);
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.15s, border-color 0.15s, opacity 0.3s ease;
+      pointer-events: all;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #stats-handle.visible {
+      opacity: 1;
       pointer-events: all;
     }
     #stats-handle:hover {
@@ -2244,13 +2398,14 @@
     <h1 class="splash-title">
       <span class="glitch-letter" id="gl0">G</span><span class="glitch-letter" id="gl1">U</span><span class="glitch-letter" id="gl2">E</span><span class="glitch-letter" id="gl3">S</span><span class="glitch-letter" id="gl4">S</span>
     </h1>
-    <div class="splash-sub">// number protocol v6.6.0</div>
+    <div class="splash-sub">// number protocol v6.7.0</div>
 
     <div class="splash-ready" id="splash-prompt">[ TAP TO BEGIN ]</div>
   </div>
 </div>
 
 <!-- DEVICE HOUSING -->
+<div class="jackpot-overlay" id="jackpotOverlay"></div>
 <div class="device">
 <div class="housing">
 
@@ -2322,7 +2477,7 @@
 
       <div class="terminal-bar">
         <span class="terminal-title">guess.exe</span>
-        <span class="terminal-title">// number protocol v6.6.0</span>
+        <span class="terminal-title">// number protocol v6.7.0</span>
       </div>
 
       <div class="terminal-body">
@@ -2437,6 +2592,11 @@
   const RANGE_INCREMENT = 25;
   let maxRange = BASE_RANGE;
   let peakRange = BASE_RANGE;
+  var _isStartup = false;
+
+  // Dialogue system state
+  let prevDistance = null;
+  let convergenceStreak = 0; // positive = consecutive closer, negative = consecutive farther
 
   function storageGet(key) {
     try { return localStorage.getItem(key); } catch(e) { return null; }
@@ -2473,12 +2633,6 @@
   }
 
   function updateDisplay() {
-    const el = document.getElementById('display-row');
-    if (npBuffer) {
-      el.classList.remove('idle');
-    } else {
-      el.classList.add('idle');
-    }
     updateScoreboard(npBuffer);
   }
 
@@ -2809,6 +2963,15 @@
       0,1,0,0,
       1,0,0,0,
       1,1,1,1
+    ],
+    '-': [
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0,
+      1,1,1,1,
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0
     ]
   };
 
@@ -2907,9 +3070,7 @@
 
 
   function setIdleCursor(on) {
-    const el = document.getElementById('display-row');
-    if (on) el.classList.add('idle');
-    else el.classList.remove('idle');
+    // display-row removed; no-op for backward compatibility
   }
 
   function setNumpadDisabled(disabled) {
@@ -2924,14 +3085,27 @@
     bestScore    = parseInt(storageGet(userKey('bestScore'))) || null;
     gamesPlayed  = parseInt(storageGet(userKey('gamesPlayed'))) || 0;
     batteryLives = parseInt(storageGet(userKey('batteryLives')));
-    if (isNaN(batteryLives) || batteryLives < 0 || batteryLives > 3) batteryLives = 3;
+    if (isNaN(batteryLives) || batteryLives < 0 || batteryLives > 4) batteryLives = 3;
     maxRange     = parseInt(storageGet(userKey('maxRange'))) || BASE_RANGE;
     peakRange    = parseInt(storageGet(userKey('peakRange'))) || BASE_RANGE;
-    updateBatteryLives();
+
+    // Start battery visually at 0, charge up to actual level
+    var targetLives = batteryLives;
+    batteryLives = 0;
+    batterySetCharges(0);
+    startupChargeSequence(targetLives);
+
+    _isStartup = true;
     resetGame();
+    _isStartup = false;
+
+    // Restore batteryLives immediately for game logic (visual catches up via animation)
+    batteryLives = targetLives;
+
     if (window._startCRT) window._startCRT();
     if (window.refreshStatsPanel) window.refreshStatsPanel();
     document.getElementById('stats-panel').style.visibility = 'visible';
+    document.getElementById('stats-handle').classList.add('visible');
   }
 
   function playBatteryWarningStatic() {
@@ -3037,31 +3211,94 @@
     }
   }
 
+  function startupChargeSequence(targetLevel) {
+    // Light up bulbs first (fast), then battery charges alongside
+    var cells = document.querySelectorAll('.bulb');
+    // Start all bulbs dark
+    cells.forEach(function(cell) {
+      cell.classList.remove('active', 'draining', 'last-bulb', 'tier-green', 'tier-amber', 'tier-red');
+    });
+
+    var bulbDelay = 120;
+    for (var b = 0; b < cells.length; b++) {
+      (function(cell, d) {
+        setTimeout(function() {
+          cell.classList.add('active', 'tier-green');
+        }, d);
+      })(cells[b], (b + 1) * bulbDelay);
+    }
+
+    // Charge battery cells up to targetLevel, starting after bulbs begin
+    var batteryStart = 400;
+    for (var s = 0; s < targetLevel; s++) {
+      (function(level, delay) {
+        setTimeout(function() {
+          batteryLives = level;
+          batterySetCharges(level);
+          playChargeBlip(level);
+        }, delay);
+      })(s + 1, batteryStart + s * 500);
+    }
+  }
+
   function playChargeBlip(level) {
     withAudio(function(ctx) {
       var now = ctx.currentTime;
-      // Rising pitch with each cell: low → mid → high
-      var freq = level === 1 ? 440 : level === 2 ? 587 : 784;
 
-      var osc = ctx.createOscillator();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(freq, now);
-      osc.frequency.linearRampToValueAtTime(freq * 1.05, now + 0.06);
+      // Base frequency rises with each cell
+      var freq = level === 1 ? 80 : level === 2 ? 120 : 160;
+      var blipFreq = level === 1 ? 440 : level === 2 ? 587 : 784;
 
-      var gain = ctx.createGain();
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.1, now + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      // Buzzing warmup hum: low sawtooth building up
+      var hum = ctx.createOscillator();
+      hum.type = 'sawtooth';
+      hum.frequency.setValueAtTime(freq, now);
+      hum.frequency.linearRampToValueAtTime(freq * 2, now + 0.3);
+
+      var humGain = ctx.createGain();
+      humGain.gain.setValueAtTime(0, now);
+      humGain.gain.linearRampToValueAtTime(0.06 + level * 0.02, now + 0.25);
+      humGain.gain.linearRampToValueAtTime(0, now + 0.35);
+
+      // Electrical buzz texture: square wave at mains-like frequency
+      var buzz = ctx.createOscillator();
+      buzz.type = 'square';
+      buzz.frequency.setValueAtTime(60, now);
+
+      var buzzGain = ctx.createGain();
+      buzzGain.gain.setValueAtTime(0, now);
+      buzzGain.gain.linearRampToValueAtTime(0.015 + level * 0.005, now + 0.2);
+      buzzGain.gain.linearRampToValueAtTime(0, now + 0.35);
+
+      // Confirmation blip at the end of the warmup
+      var blip = ctx.createOscillator();
+      blip.type = 'square';
+      blip.frequency.setValueAtTime(blipFreq, now + 0.28);
+      blip.frequency.linearRampToValueAtTime(blipFreq * 1.05, now + 0.34);
+
+      var blipGain = ctx.createGain();
+      blipGain.gain.setValueAtTime(0, now + 0.28);
+      blipGain.gain.linearRampToValueAtTime(0.1, now + 0.288);
+      blipGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
 
       var lp = ctx.createBiquadFilter();
       lp.type = 'lowpass';
-      lp.frequency.value = 2000;
+      lp.frequency.value = 1800;
 
-      osc.connect(gain);
-      gain.connect(lp);
+      hum.connect(humGain);
+      buzz.connect(buzzGain);
+      blip.connect(blipGain);
+      humGain.connect(lp);
+      buzzGain.connect(lp);
+      blipGain.connect(lp);
       lp.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.15);
+
+      hum.start(now);
+      hum.stop(now + 0.36);
+      buzz.start(now);
+      buzz.stop(now + 0.36);
+      blip.start(now + 0.28);
+      blip.stop(now + 0.42);
     });
   }
 
@@ -3078,15 +3315,18 @@
   }
 
   function initLayout() {
-    resetBattery();
-    document.getElementById('display-row').classList.add('idle');
+    // Start battery and bulbs visually empty -- will charge up on game start
+    batterySetCharges(0);
+    document.querySelectorAll('.bulb').forEach(function(cell) {
+      cell.classList.remove('active', 'tier-green', 'tier-amber', 'tier-red', 'draining', 'last-bulb');
+    });
     document.getElementById('rangeLow').textContent = '1';
     document.getElementById('rangeHigh').textContent = '100';
     setNumpadDisabled(true);
   }
 
   function resetGame() {
-    var needsCharge = batteryLives === 0;
+    var needsCharge = !_isStartup && batteryLives === 0;
 
     // Reset range to base on total battery death
     if (needsCharge) {
@@ -3100,6 +3340,8 @@
     high         = maxRange;
     gameOver     = false;
     npBuffer     = '';
+    prevDistance  = null;
+    convergenceStreak = 0;
 
     gamesPlayed = (parseInt(storageGet(userKey('gamesPlayed'))) || 0) + 1;
     storageSet(userKey('gamesPlayed'), gamesPlayed);
@@ -3116,7 +3358,7 @@
       resetBulbsSequence(function() {
         chargeBatterySequence();
       });
-    } else {
+    } else if (!_isStartup) {
       resetBattery();
     }
 
@@ -3127,12 +3369,34 @@
     updateRangeDisplay();
     clearLog();
     typeLog('system', '> system initialized. pick a number between 1 and ' + maxRange + '.');
+    if (maxRange >= 200) {
+      var rangeLines = [
+        '> searching ' + maxRange + ' integers with 7 guesses. bold.',
+        '> range expansion detected. good luck out there.',
+        '> ' + maxRange + ' possibilities. 7 attempts. proceed.',
+        '> operating beyond standard parameters. stay sharp.',
+        '> extended range active. precision is everything now.'
+      ];
+      setTimeout(function() {
+        typeLog('system', rangeLines[Math.floor(Math.random() * rangeLines.length)]);
+      }, 600);
+    } else if (maxRange >= 150) {
+      if (Math.random() < 0.5) {
+        var midLines = [
+          '> range is expanding. adjust your strategy.',
+          '> wider field. same ammo. think carefully.'
+        ];
+        setTimeout(function() {
+          typeLog('system', midLines[Math.floor(Math.random() * midLines.length)]);
+        }, 600);
+      }
+    }
 
     if (window.refreshStatsPanel) window.refreshStatsPanel();
   }
 
   function flashDisplay(type) {
-    var el = document.getElementById('display-row');
+    var el = document.getElementById('log');
     el.classList.remove('flash-correct', 'flash-close', 'flash-far');
     void el.offsetWidth;
     el.classList.add('flash-' + type);
@@ -3144,6 +3408,7 @@
 
   function makeGuess() {
     if (gameOver) return;
+    if (secretNumber === undefined) return;
 
     const guess = parseInt(npBuffer);
 
@@ -3167,56 +3432,274 @@
       handleLoss();
     } else {
       var dist = Math.abs(guess - secretNumber);
-      flashDisplay(dist <= 15 ? 'close' : 'far');
+      var tier;
+      if (dist <= 3) tier = 'burning';
+      else if (dist <= 10) tier = 'hot';
+      else if (dist <= 25) tier = 'warm';
+      else if (dist <= 50) tier = 'cool';
+      else tier = 'cold';
 
-      var tooLowFar = [
-        '> signal too weak. search higher.',
-        '> negative. target above current position.',
-        '> insufficient. increment.',
-        '> below threshold. adjust upward.',
-        '> reading negligible. you are nowhere near target.',
-        '> target not detected at this range. go higher.',
-        '> considerable distance from target. recalibrate upward.',
-        '> are you even trying? search higher.'
+      flashDisplay((tier === 'cool' || tier === 'cold') ? 'far' : 'close');
+
+      // === 5-TIER DIALOGUE POOLS ===
+      var isLow = guess < secretNumber;
+
+      var burningLow = [
+        '> PROXIMITY BREACH. target RIGHT above you.',
+        '> signal deafening. increment. now.',
+        '> you are on top of it. nudge higher.',
+        '> contact imminent. barely above.',
+        '> reading off the charts. push up.',
+        '> the target can hear you. go up.',
+        '> i — just a little higher.',
+        '> interference. too close to resolve. up.',
+        '> any lower and you pass through it.',
+        '> SYSTEM OVERLOAD. just above current.'
       ];
-      var tooLowClose = [
-        '> proximity alert. target close. search higher.',
-        '> signal strengthening. adjust upward.',
-        '> narrowing. increment.',
-        '> i can almost resolve it. push higher.',
-        '> getting warmer. target is just above you.',
-        '> delta closing. increment further.',
-        '> so close. how did you miss that? go higher.'
-      ];
-      var tooHighFar = [
-        '> signal overshot. search lower.',
-        '> negative. target below current position.',
-        '> exceeded. decrement.',
-        '> above threshold. adjust downward.',
-        '> you have overshot by a significant margin.',
-        '> target not detected at this range. go lower.',
-        '> considerable distance from target. recalibrate downward.',
-        '> impressive. spectacularly wrong. go lower.'
-      ];
-      var tooHighClose = [
-        '> proximity alert. target close. search lower.',
-        '> signal strengthening. adjust downward.',
-        '> narrowing. decrement.',
-        '> i can almost resolve it. pull back lower.',
-        '> getting warmer. target is just below you.',
-        '> delta closing. decrement further.',
-        '> you were right there. what happened? go lower.'
+      var burningHigh = [
+        '> PROXIMITY BREACH. target RIGHT below you.',
+        '> signal deafening. decrement. now.',
+        '> you are on top of it. nudge lower.',
+        '> contact imminent. barely below.',
+        '> reading off the charts. pull back.',
+        '> the target can hear you. go down.',
+        '> i — just a little lower.',
+        '> interference. too close to resolve. down.',
+        '> any higher and you pass through it.',
+        '> SYSTEM OVERLOAD. just below current.'
       ];
 
+      var hotLow = [
+        '> strong signal. you\'re close. higher.',
+        '> almost locked on. adjust upward.',
+        '> target near. single-digit correction. higher.',
+        '> i can feel it from here. push up.',
+        '> we\'re in the zone. go higher.',
+        '> solid read. not far. increment.',
+        '> signal clear and climbing. higher.',
+        '> you\'re circling it. bump up.',
+        '> nearly there. raise your position.',
+        '> tight window. shift upward.'
+      ];
+      var hotHigh = [
+        '> strong signal. you\'re close. lower.',
+        '> almost locked on. adjust downward.',
+        '> target near. single-digit correction. lower.',
+        '> i can feel it from here. pull back.',
+        '> we\'re in the zone. go lower.',
+        '> solid read. not far. decrement.',
+        '> signal clear and descending. lower.',
+        '> you\'re circling it. nudge down.',
+        '> nearly there. drop your position.',
+        '> tight window. shift downward.'
+      ];
+
+      var warmLow = [
+        '> signal detected. target above current position.',
+        '> positive read. adjust upward.',
+        '> you\'re in range. keep searching higher.',
+        '> tracking. target is above you.',
+        '> measurable signal. increment recommended.',
+        '> contact ahead. raise trajectory.',
+        '> reading moderate. push higher.',
+        '> on approach. continue upward.',
+        '> directional lock acquired. go higher.',
+        '> target within operational range. higher.'
+      ];
+      var warmHigh = [
+        '> signal detected. target below current position.',
+        '> positive read. adjust downward.',
+        '> you\'re in range. keep searching lower.',
+        '> tracking. target is below you.',
+        '> measurable signal. decrement recommended.',
+        '> contact below. lower trajectory.',
+        '> reading moderate. pull lower.',
+        '> on approach. continue downward.',
+        '> directional lock acquired. go lower.',
+        '> target within operational range. lower.'
+      ];
+
+      var coolLow = [
+        '> weak signal. target is higher.',
+        '> insufficient. recalibrate upward.',
+        '> below threshold. significant adjustment needed.',
+        '> minimal read. target well above position.',
+        '> you\'re not close. search higher.',
+        '> faint trace. go up. considerably.',
+        '> reading low-confidence. push higher.',
+        '> scanner shows activity well above you.',
+        '> not in range yet. keep climbing.',
+        '> sparse data. target substantially higher.'
+      ];
+      var coolHigh = [
+        '> weak signal. target is lower.',
+        '> exceeded. recalibrate downward.',
+        '> above threshold. significant adjustment needed.',
+        '> minimal read. target well below position.',
+        '> you\'re not close. search lower.',
+        '> faint trace. go down. considerably.',
+        '> reading low-confidence. pull lower.',
+        '> scanner shows activity well below you.',
+        '> not in range yet. keep descending.',
+        '> sparse data. target substantially lower.'
+      ];
+
+      var coldLow = [
+        '> nothing. target is much higher.',
+        '> are you even trying? search higher.',
+        '> signal void. nowhere near target. go up.',
+        '> waste of a guess. considerably higher.',
+        '> impressive. spectacularly wrong. higher.',
+        '> i don\'t even have a read at this range.',
+        '> you\'re searching in the dark. much higher.',
+        '> did you forget we\'re looking for something?',
+        '> that\'s not in the neighborhood. go up.',
+        '> the target doesn\'t know you exist. higher.'
+      ];
+      var coldHigh = [
+        '> nothing. target is much lower.',
+        '> are you even trying? search lower.',
+        '> signal void. nowhere near target. go down.',
+        '> waste of a guess. considerably lower.',
+        '> impressive. spectacularly wrong. lower.',
+        '> i don\'t even have a read at this range.',
+        '> you\'re searching in the dark. much lower.',
+        '> did you forget we\'re looking for something?',
+        '> that\'s not in the neighborhood. go down.',
+        '> the target doesn\'t know you exist. lower.'
+      ];
+
+      // Select pool
       var pool;
-      if (guess < secretNumber) {
+      if (isLow) {
+        pool = tier === 'burning' ? burningLow
+             : tier === 'hot' ? hotLow
+             : tier === 'warm' ? warmLow
+             : tier === 'cool' ? coolLow
+             : coldLow;
+      } else {
+        pool = tier === 'burning' ? burningHigh
+             : tier === 'hot' ? hotHigh
+             : tier === 'warm' ? warmHigh
+             : tier === 'cool' ? coolHigh
+             : coldHigh;
+      }
+
+      // Update range bounds
+      if (isLow) {
         low = Math.max(low, guess + 1);
-        pool = dist <= 15 ? tooLowClose : tooLowFar;
       } else {
         high = Math.min(high, guess - 1);
-        pool = dist <= 15 ? tooHighClose : tooHighFar;
       }
+
+      // Base message
       log('hint', pool[Math.floor(Math.random() * pool.length)]);
+
+      // === COMPARATIVE LAYER ===
+      if (prevDistance !== null && Math.random() < 0.7) {
+        var diff = dist - prevDistance;
+        var compPool;
+        if (Math.abs(diff) <= 2) {
+          compPool = [
+            '> ...same distance. different side maybe?',
+            '> lateral move. no closer, no farther.',
+            '> delta unchanged. try a different angle.',
+            '> you moved but the signal didn\'t.',
+            '> parallel track. break the pattern.'
+          ];
+        } else if (diff < 0) {
+          compPool = [
+            '> ...closer than last time.',
+            '> delta shrinking. keep going.',
+            '> trajectory improving.',
+            '> you\'re converging.',
+            '> better. much better.',
+            '> correction acknowledged. signal strengthening.',
+            '> narrowing the gap.',
+            '> that moved the needle.'
+          ];
+        } else {
+          compPool = [
+            '> ...farther than before.',
+            '> wrong direction.',
+            '> signal degrading. you overcorrected.',
+            '> that was worse. recalibrate.',
+            '> delta growing. reverse course.',
+            '> you had a better read last time.',
+            '> regression detected.',
+            '> you\'re drifting.'
+          ];
+        }
+        log('hint', compPool[Math.floor(Math.random() * compPool.length)]);
+      }
+
+      // === CONVERGENCE STREAK TRACKING ===
+      if (prevDistance !== null) {
+        if (dist < prevDistance - 2) {
+          convergenceStreak = convergenceStreak > 0 ? convergenceStreak + 1 : 1;
+        } else if (dist > prevDistance + 2) {
+          convergenceStreak = convergenceStreak < 0 ? convergenceStreak - 1 : -1;
+        } else {
+          convergenceStreak = 0;
+        }
+      }
+
+      // === STREAK RECOGNITION (3+ consecutive) ===
+      if (Math.abs(convergenceStreak) >= 3 && Math.random() < 0.3) {
+        var streakPool;
+        if (convergenceStreak > 0) {
+          streakPool = [
+            '> you\'re hunting it down.',
+            '> methodical. i respect that.',
+            '> systematic approach. keep it up.',
+            '> you\'ve locked onto a vector.',
+            '> the signal is following you now.'
+          ];
+        } else {
+          streakPool = [
+            '> are you guessing or panicking?',
+            '> strategy would help here.',
+            '> you\'re spiraling. reset your approach.',
+            '> each guess worse than the last.',
+            '> the target is running away from you.'
+          ];
+        }
+        log('hint', streakPool[Math.floor(Math.random() * streakPool.length)]);
+      }
+
+      // === GUESS COUNT PRESSURE LINES ===
+      var remaining = MAX_GUESSES - attempts;
+      if (remaining === 3 && Math.random() < 0.6) {
+        var pressure3 = [
+          '> 3 guesses left. narrow it down.',
+          '> reserves depleting. choose wisely.',
+          '> halfway through your ammo.'
+        ];
+        setTimeout(function() {
+          log('system', pressure3[Math.floor(Math.random() * pressure3.length)]);
+        }, 400);
+      } else if (remaining === 2) {
+        var pressure2 = [
+          '> 2 guesses remaining. make them count.',
+          '> critical reserves. no room for error.',
+          '> penultimate attempt. think.'
+        ];
+        setTimeout(function() {
+          log('system', pressure2[Math.floor(Math.random() * pressure2.length)]);
+        }, 400);
+      } else if (remaining === 1) {
+        var pressure1 = [
+          '> FINAL GUESS. make it matter.',
+          '> last signal. this is it.',
+          '> one shot left. don\'t waste it.'
+        ];
+        setTimeout(function() {
+          log('system', pressure1[Math.floor(Math.random() * pressure1.length)]);
+        }, 400);
+      }
+
+      prevDistance = dist;
+
       updateRangeDisplay();
 
       // Auto-resolve: only one possibility remains
@@ -3250,7 +3733,14 @@
 
   function handleWin() {
     endGame();
-    log('win', `> ✓ correct! ${secretNumber} found in ${attempts} attempt${attempts === 1 ? '' : 's'}.`);
+    var isJackpot = attempts === 1;
+
+    if (isJackpot) {
+      log('win', `> ✓ FIRST GUESS. ${secretNumber} locked on contact.`);
+      log('win', '> JACKPOT. overcharge initiated.');
+    } else {
+      log('win', `> ✓ correct! ${secretNumber} found in ${attempts} attempt${attempts === 1 ? '' : 's'}.`);
+    }
 
     if (!bestScore || attempts < bestScore) {
       bestScore = attempts;
@@ -3276,7 +3766,12 @@
     var bestStreak = parseInt(storageGet(userKey('bestStreak'))) || 0;
     if (streak > bestStreak) storageSet(userKey('bestStreak'), streak);
 
-    if (batteryLives === 3) {
+    if (isJackpot) {
+      // JACKPOT: overcharge battery to blue (level 4) — real extra life
+      batteryLives = 4;
+      batterySetCharges(4);
+      triggerJackpotCelebration();
+    } else if (batteryLives >= 3) {
       shakeBattery();
     } else {
       batteryLives = Math.min(3, batteryLives + 1);
@@ -3287,6 +3782,151 @@
     animateRangeExpansion(oldMax, maxRange);
 
     if (window.refreshStatsPanel) window.refreshStatsPanel();
+  }
+
+  // === JACKPOT CELEBRATION (first-guess win) ===
+
+  function playJackpotSound() {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+      // Rising power surge
+      var surge = ctx.createOscillator();
+      surge.type = 'sawtooth';
+      surge.frequency.setValueAtTime(100, now);
+      surge.frequency.exponentialRampToValueAtTime(2000, now + 0.5);
+      var surgeGain = ctx.createGain();
+      surgeGain.gain.setValueAtTime(0, now);
+      surgeGain.gain.linearRampToValueAtTime(0.08, now + 0.1);
+      surgeGain.gain.linearRampToValueAtTime(0.12, now + 0.4);
+      surgeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      var surgeLp = ctx.createBiquadFilter();
+      surgeLp.type = 'lowpass';
+      surgeLp.frequency.setValueAtTime(800, now);
+      surgeLp.frequency.exponentialRampToValueAtTime(6000, now + 0.5);
+      surge.connect(surgeLp);
+      surgeLp.connect(surgeGain);
+      surgeGain.connect(ctx.destination);
+      surge.start(now);
+      surge.stop(now + 0.6);
+
+      // Big impact chord at 0.5s
+      var chordFreqs = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+      chordFreqs.forEach(function(f, i) {
+        var osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now + 0.5);
+        var g = ctx.createGain();
+        g.gain.setValueAtTime(0, now + 0.5);
+        g.gain.linearRampToValueAtTime(0.1, now + 0.52);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(now + 0.5);
+        osc.stop(now + 2.0);
+      });
+
+      // Electric crackle noise
+      var bufSize = Math.floor(ctx.sampleRate * 0.3);
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1);
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 8000;
+      bp.Q.value = 0.5;
+      var noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, now + 0.45);
+      noiseGain.gain.linearRampToValueAtTime(0.15, now + 0.52);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+      noise.connect(bp);
+      bp.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noise.start(now + 0.45);
+      noise.stop(now + 0.8);
+    });
+  }
+
+  function triggerJackpotCelebration() {
+    playJackpotSound();
+
+    // Full-screen flash overlay
+    var overlay = document.getElementById('jackpotOverlay');
+    overlay.classList.remove('active');
+    void overlay.offsetWidth;
+    overlay.classList.add('active');
+    overlay.addEventListener('animationend', function handler() {
+      overlay.classList.remove('active');
+      overlay.removeEventListener('animationend', handler);
+    });
+
+    // Housing glow
+    var housing = document.querySelector('.housing');
+    housing.classList.remove('jackpot-glow');
+    void housing.offsetWidth;
+    housing.classList.add('jackpot-glow');
+    housing.addEventListener('animationend', function handler() {
+      housing.classList.remove('jackpot-glow');
+      housing.removeEventListener('animationend', handler);
+    });
+
+    // Screen flash on log
+    var logEl = document.getElementById('log');
+    logEl.classList.remove('jackpot-screen');
+    void logEl.offsetWidth;
+    logEl.classList.add('jackpot-screen');
+    logEl.addEventListener('animationend', function handler() {
+      logEl.classList.remove('jackpot-screen');
+      logEl.removeEventListener('animationend', handler);
+    });
+
+    // Sweep bulbs to blue, then back to green
+    var bulbs = document.querySelectorAll('.bulb');
+    bulbs.forEach(function(bulb, i) {
+      setTimeout(function() {
+        bulb.classList.add('jackpot-blue');
+        bulb.style.animation = 'jackpotBulbSweep 0.3s ease-out';
+      }, i * 60);
+    });
+    // Revert bulbs after 2.5s
+    setTimeout(function() {
+      bulbs.forEach(function(bulb) {
+        bulb.classList.remove('jackpot-blue');
+        bulb.style.animation = '';
+      });
+    }, 2500);
+
+    // Scoreboard: rapid blue-green-blue flicker across all dots
+    setTimeout(function() {
+      jackpotScoreboardBurst();
+    }, 200);
+  }
+
+  function jackpotScoreboardBurst() {
+    // Rapid burst across all 3 digit positions simultaneously
+    for (var pos = 0; pos < 3; pos++) {
+      var dots = SB_DOTS[pos];
+      if (!dots || !dots.length) continue;
+      for (var i = 0; i < 28; i++) {
+        (function(dot, delay) {
+          setTimeout(function() {
+            dot.classList.add('on-green');
+          }, delay);
+          setTimeout(function() {
+            dot.classList.remove('on-green');
+          }, delay + 150);
+          // Second burst
+          setTimeout(function() {
+            dot.classList.add('on-green');
+          }, delay + 300);
+          setTimeout(function() {
+            dot.classList.remove('on-green');
+          }, delay + 500);
+        })(dots[i], Math.random() * 200);
+      }
+    }
   }
 
   // --- Scoreboard firework burst ---
@@ -3439,38 +4079,113 @@
   function animateRangeExpansion(oldMax, newMax) {
     var loEl = document.getElementById('rangeLow');
     var hiEl = document.getElementById('rangeHigh');
+    var rangeBox = document.querySelector('.range-box');
+    var termBody = document.querySelector('.terminal-body');
 
-    // Step 1: After a short delay, reset display to show full range starting point
+    // Phase 1 (delay 600ms after win): Reset range display, dim surroundings, scale up
     setTimeout(function() {
       loEl.textContent = 1;
       hiEl.textContent = oldMax;
-      hiEl.classList.add('ticking');
 
-      // Step 2: Count up from oldMax to newMax in steps of 5
-      var current = oldMax;
-      var step = 5;
-      var totalSteps = (newMax - oldMax) / step;
-      var stepIndex = 0;
-      var interval = setInterval(function() {
-        current += step;
-        stepIndex++;
-        if (current >= newMax) {
-          current = newMax;
-          clearInterval(interval);
+      // Dim terminal content behind range box
+      termBody.classList.add('range-dimmed');
 
-          // Land
-          hiEl.textContent = current;
-          hiEl.classList.remove('ticking');
-          hiEl.classList.remove('expand-land');
-          void hiEl.offsetWidth;
-          hiEl.classList.add('expand-land');
-          playRangeLand();
-        } else {
-          hiEl.textContent = current;
-          playRangeTick(stepIndex / totalSteps);
-        }
-      }, 120);
+      // Scale up the range box
+      rangeBox.classList.add('takeover');
+      playRangeTakeoverUp();
+
+      // Phase 2 (400ms after scale): Start counting up
+      setTimeout(function() {
+        hiEl.classList.add('ticking');
+
+        var current = oldMax;
+        var step = 5;
+        var totalSteps = (newMax - oldMax) / step;
+        var stepIndex = 0;
+        var interval = setInterval(function() {
+          current += step;
+          stepIndex++;
+          if (current >= newMax) {
+            current = newMax;
+            clearInterval(interval);
+
+            // Land: final number with glow
+            hiEl.textContent = current;
+            hiEl.classList.remove('ticking');
+            hiEl.classList.remove('expand-land');
+            void hiEl.offsetWidth;
+            hiEl.classList.add('expand-land');
+            playRangeLand();
+
+            // Phase 3 (800ms hold, then scale back down)
+            setTimeout(function() {
+              rangeBox.classList.remove('takeover');
+              rangeBox.classList.add('takeover-return');
+              termBody.classList.remove('range-dimmed');
+
+              // Clean up transition class after animation
+              setTimeout(function() {
+                rangeBox.classList.remove('takeover-return');
+              }, 500);
+            }, 800);
+          } else {
+            hiEl.textContent = current;
+            playRangeTick(stepIndex / totalSteps);
+          }
+        }, 120);
+      }, 400);
     }, 600);
+  }
+
+  function playRangeTakeoverUp() {
+    withAudio(function(ctx) {
+      var now = ctx.currentTime;
+
+      // Rising whoosh
+      var osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(200, now);
+      osc.frequency.exponentialRampToValueAtTime(800, now + 0.35);
+
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.06, now + 0.05);
+      gain.gain.linearRampToValueAtTime(0.08, now + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+      var lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.setValueAtTime(600, now);
+      lp.frequency.exponentialRampToValueAtTime(3000, now + 0.35);
+
+      osc.connect(lp);
+      lp.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.45);
+
+      // Subtle noise whoosh layer
+      var bufSize = Math.floor(ctx.sampleRate * 0.3);
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var j = 0; j < bufSize; j++) data[j] = (Math.random() * 2 - 1);
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(1000, now);
+      bp.frequency.exponentialRampToValueAtTime(4000, now + 0.3);
+      bp.Q.value = 0.8;
+      var noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.04, now + 0.1);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      noise.connect(bp);
+      bp.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.35);
+    });
   }
 
   // --- Range collapse count-down animation ---
@@ -4011,6 +4726,8 @@
     });
 
     window.refreshStatsPanel = updateStatsPanel;
+    window.openStatsPanel = openPanel;
+    window.closeStatsPanel = closePanel;
   })();
 
   document.getElementById('cheatDot').addEventListener('click', function() {
@@ -4047,10 +4764,15 @@
     try { localStorage.clear(); } catch(e) {}
     currentUser = null;
 
-    // Reset battery and power bulbs to full
-    batteryLives = 3;
-    updateBatteryLives();
-    resetBattery();
+    // Power down battery, bulbs, and scoreboard
+    batteryLives = 0;
+    batterySetCharges(0);
+    document.querySelectorAll('.bulb').forEach(function(cell) {
+      cell.classList.remove('active', 'tier-green', 'tier-amber', 'tier-red', 'draining', 'last-bulb');
+    });
+    updateScoreboard('');
+    document.getElementById('stats-panel').style.visibility = 'hidden';
+    document.getElementById('stats-handle').classList.remove('visible');
 
     resetSplitFlap();
 
@@ -4248,6 +4970,453 @@
   }
 
   // ==========================================
+  // TUTORIAL (first-time players only)
+  // ==========================================
+
+  function showTutorial(callsign, onComplete) {
+    var housing = document.querySelector('.housing');
+    var stepIndex = 0;
+    var advancing = false;
+    var tutorialActive = true;
+
+    // Add tutorial class to housing for stacking context
+    housing.classList.add('tutorial-active');
+
+    // Dim overlay inside housing (same stacking context)
+    var dim = document.createElement('div');
+    dim.className = 'tutorial-dim';
+    housing.appendChild(dim);
+
+    // Text box inside housing
+    var textBox = document.createElement('div');
+    textBox.className = 'tutorial-text-box';
+    textBox.style.bottom = '20px';
+    housing.appendChild(textBox);
+
+    // Skip button inside housing
+    var skipBtn = document.createElement('button');
+    skipBtn.className = 'tutorial-skip';
+    skipBtn.textContent = 'SKIP';
+    housing.appendChild(skipBtn);
+
+    function setMessage(msg, stepNum, totalSteps) {
+      textBox.innerHTML =
+        '<div class="tutorial-message">' + msg + '</div>' +
+        '<div class="tutorial-tap">tap to continue</div>' +
+        '<div class="tutorial-step-counter">' + stepNum + ' / ' + totalSteps + '</div>';
+    }
+
+    function setFinalMessage(msg) {
+      textBox.innerHTML =
+        '<div class="tutorial-message">' + msg + '</div>' +
+        '<div class="tutorial-tap">tap to start</div>';
+    }
+
+    function highlightElement(el) {
+      if (el) el.classList.add('tutorial-highlight');
+    }
+    function unhighlightAll() {
+      document.querySelectorAll('.tutorial-highlight').forEach(function(el) {
+        el.classList.remove('tutorial-highlight');
+      });
+      document.querySelectorAll('.tutorial-focus').forEach(function(el) {
+        el.classList.remove('tutorial-focus');
+      });
+      document.querySelectorAll('.tutorial-scoreboard-pulse').forEach(function(el) {
+        el.classList.remove('tutorial-scoreboard-pulse');
+      });
+    }
+
+    function positionText(position, refElement) {
+      textBox.style.top = '';
+      textBox.style.bottom = '';
+      textBox.style.left = '50%';
+      textBox.style.right = '';
+      textBox.style.transform = 'translateX(-50%)';
+      textBox.style.maxWidth = '340px';
+      if (position === 'belowElement' && refElement) {
+        // Position right below a specific element
+        var refRect = refElement.getBoundingClientRect();
+        var housingRect = housing.getBoundingClientRect();
+        var topOffset = refRect.bottom - housingRect.top + 6;
+        textBox.style.top = topOffset + 'px';
+      } else if (position === 'aboveElement' && refElement) {
+        var refRect = refElement.getBoundingClientRect();
+        var housingRect = housing.getBoundingClientRect();
+        var bottomOffset = housingRect.bottom - refRect.top + 6;
+        textBox.style.bottom = bottomOffset + 'px';
+      } else if (position === 'top') {
+        textBox.style.top = '12px';
+      } else if (position === 'middle') {
+        textBox.style.top = '50%';
+        textBox.style.transform = 'translate(-50%, -50%)';
+      } else {
+        textBox.style.bottom = '20px';
+      }
+    }
+
+    var TOTAL_STEPS = 7;
+    var step3WaitingForInput = false;
+
+    // === STEP DEFINITIONS ===
+
+    function step1_searchRange() {
+      var rangeBox = document.querySelector('.range-box');
+      unhighlightAll();
+      highlightElement(rangeBox);
+      rangeBox.classList.add('tutorial-focus');
+      positionText('belowElement', rangeBox);
+      setMessage('This is your search range. It starts at 1–100 and expands +25 every time you win.', 1, TOTAL_STEPS);
+
+      var hiEl = document.getElementById('rangeHigh');
+      var loEl = document.getElementById('rangeLow');
+      loEl.textContent = '1';
+      hiEl.textContent = '100';
+
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 0) return;
+        hiEl.classList.add('ticking');
+        var current = 100;
+        var iv = setInterval(function() {
+          if (!tutorialActive || stepIndex !== 0) { clearInterval(iv); return; }
+          current += 5;
+          if (current >= 125) {
+            current = 125;
+            clearInterval(iv);
+            hiEl.textContent = current;
+            hiEl.classList.remove('ticking');
+            hiEl.classList.remove('expand-land');
+            void hiEl.offsetWidth;
+            hiEl.classList.add('expand-land');
+            playRangeLand();
+
+            setTimeout(function() {
+              if (!tutorialActive || stepIndex !== 0) return;
+              hiEl.classList.add('ticking');
+              var back = 125;
+              var iv2 = setInterval(function() {
+                if (!tutorialActive || stepIndex !== 0) { clearInterval(iv2); hiEl.classList.remove('ticking'); return; }
+                back -= 5;
+                if (back <= 100) {
+                  back = 100;
+                  clearInterval(iv2);
+                  hiEl.textContent = back;
+                  hiEl.classList.remove('ticking');
+                } else {
+                  hiEl.textContent = back;
+                }
+              }, 80);
+            }, 800);
+          } else {
+            hiEl.textContent = current;
+            playRangeTick((current - 100) / 25);
+          }
+        }, 100);
+      }, 500);
+    }
+
+    function step2_dialogueLog() {
+      unhighlightAll();
+      var logEl = document.getElementById('log');
+      highlightElement(logEl);
+      positionText('belowElement', logEl);
+      setMessage('The system talks to you here. The tone changes based on how close your guess is. Learn to read it.', 2, TOTAL_STEPS);
+
+      clearLog();
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 1) return;
+        flashDisplay('far');
+        typeLog('hint', '> nothing. target is much higher.', 30);
+      }, 400);
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 1) return;
+        flashDisplay('close');
+        typeLog('hint', '> signal detected. target above current position.', 30);
+      }, 1800);
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 1) return;
+        flashDisplay('close');
+        typeLog('hint', '> PROXIMITY BREACH. target RIGHT above you.', 30);
+      }, 3200);
+    }
+
+    function step3_numpadScoreboard() {
+      unhighlightAll();
+      clearLog();
+      var keypadWell = document.querySelector('.keypad-well');
+      var scoreHousing = document.getElementById('scoreboardHousing');
+      highlightElement(keypadWell);
+      if (scoreHousing) highlightElement(scoreHousing);
+
+      // Show amber dashes on scoreboard and pulse it
+      updateScoreboard('---');
+      if (scoreHousing) {
+        scoreHousing.classList.add('tutorial-scoreboard-pulse');
+      }
+
+      // Position above keypad, aligned left so scoreboard stays visible
+      var keypadRect = keypadWell.getBoundingClientRect();
+      var housingRect = housing.getBoundingClientRect();
+      var bottomOffset = housingRect.bottom - keypadRect.top + 6;
+      textBox.style.top = '';
+      textBox.style.bottom = bottomOffset + 'px';
+      textBox.style.left = '16px';
+      textBox.style.right = '';
+      textBox.style.transform = 'none';
+      textBox.style.maxWidth = '65%';
+
+      setMessage('Type a number on the numpad, then press ENTER to continue.', 3, TOTAL_STEPS);
+      textBox.querySelector('.tutorial-tap').textContent = 'waiting for input...';
+
+      // Block tap-to-advance on this step, auto-advance on ENTER after input
+      step3WaitingForInput = true;
+    }
+
+    function step4_powerBulbs() {
+      unhighlightAll();
+      npBuffer = '';
+      updateDisplay();
+      var bulbCenter = document.querySelector('.bulb-strip-center');
+      highlightElement(bulbCenter);
+      positionText('belowElement', bulbCenter);
+      setMessage('These 7 bulbs are your guesses. One burns out with each attempt. Run out and you lose the round.', 4, TOTAL_STEPS);
+
+      var bulbs = document.querySelectorAll('.bulb');
+      // Start all lit
+      bulbs.forEach(function(b) {
+        b.classList.remove('draining', 'tier-amber', 'tier-red');
+        b.classList.add('active', 'tier-green');
+      });
+      var drainIndex = 0;
+
+      function drainNext() {
+        if (!tutorialActive || stepIndex !== 3) return;
+        if (drainIndex >= bulbs.length) {
+          setTimeout(function() {
+            if (!tutorialActive || stepIndex !== 3) return;
+            bulbs.forEach(function(b) {
+              b.classList.remove('active', 'tier-green', 'tier-amber', 'tier-red', 'draining');
+            });
+            var ri = 0;
+            var rIv = setInterval(function() {
+              if (!tutorialActive || stepIndex !== 3) { clearInterval(rIv); return; }
+              if (ri >= bulbs.length) { clearInterval(rIv); return; }
+              bulbs[ri].classList.add('active', 'tier-green');
+              ri++;
+            }, 100);
+          }, 600);
+          return;
+        }
+
+        var remaining = bulbs.length - drainIndex;
+        var tier = remaining <= 2 ? 'tier-red' : remaining <= 4 ? 'tier-amber' : 'tier-green';
+        bulbs.forEach(function(b, i) {
+          b.classList.remove('tier-green', 'tier-amber', 'tier-red', 'draining');
+          if (i < remaining - 1) {
+            b.classList.add('active', tier);
+          } else if (i === remaining - 1) {
+            b.classList.add('draining', tier);
+          } else {
+            b.classList.remove('active');
+          }
+        });
+        drainIndex++;
+        setTimeout(drainNext, 250);
+      }
+
+      setTimeout(drainNext, 600);
+    }
+
+    function step5_battery() {
+      unhighlightAll();
+      document.querySelectorAll('.bulb').forEach(function(b) {
+        b.classList.remove('draining', 'tier-amber', 'tier-red');
+        b.classList.add('active', 'tier-green');
+      });
+
+      var batteryEl = document.getElementById('batteryComponent');
+      highlightElement(batteryEl);
+      positionText('belowElement', batteryEl);
+      setMessage('You have 3 lives. Lose a round and you lose a cell. Win and earn one back. Lose all 3 and your range and streak reset.', 5, TOTAL_STEPS);
+
+      // Drain all 3 cells one by one, then recharge back up
+      batterySetCharges(3);
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 4) return;
+        batterySetCharges(2);
+        playBatteryWarningStatic();
+      }, 800);
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 4) return;
+        batterySetCharges(1);
+        playBatteryWarningStatic();
+      }, 1600);
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 4) return;
+        batterySetCharges(0);
+        playBatteryWarningStatic();
+      }, 2400);
+      // Recharge back up
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 4) return;
+        batterySetCharges(1);
+        playChargeBlip(1);
+      }, 3400);
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 4) return;
+        batterySetCharges(2);
+        playChargeBlip(2);
+      }, 3900);
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 4) return;
+        batterySetCharges(3);
+        playChargeBlip(3);
+      }, 4400);
+    }
+
+    function step6_statsPanel() {
+      unhighlightAll();
+      batterySetCharges(3);
+
+      var statsPanel = document.getElementById('stats-panel');
+      var statsHandle = document.getElementById('stats-handle');
+      highlightElement(statsPanel);
+      if (statsHandle) highlightElement(statsHandle);
+
+      // Position text box on the left side, vertically centered in terminal
+      var housingRect = housing.getBoundingClientRect();
+      textBox.style.top = (housingRect.height * 0.25) + 'px';
+      textBox.style.bottom = '';
+      textBox.style.left = '12px';
+      textBox.style.right = '';
+      textBox.style.transform = 'none';
+      textBox.style.maxWidth = '45%';
+
+      setMessage('Your stats live here. Pull this tab anytime.', 6, TOTAL_STEPS);
+
+      statsPanel.style.visibility = 'visible';
+      statsHandle.classList.add('visible');
+      if (window.refreshStatsPanel) window.refreshStatsPanel();
+
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 5) return;
+        if (window.openStatsPanel) window.openStatsPanel();
+      }, 500);
+
+      setTimeout(function() {
+        if (!tutorialActive || stepIndex !== 5) return;
+        if (window.closeStatsPanel) window.closeStatsPanel();
+      }, 3000);
+    }
+
+    function step7_go() {
+      unhighlightAll();
+      positionText('middle');
+      setFinalMessage('Find the number. Read the signals. Good luck.');
+      skipBtn.style.display = 'none';
+    }
+
+    var steps = [step1_searchRange, step2_dialogueLog, step3_numpadScoreboard, step4_powerBulbs, step5_battery, step6_statsPanel, step7_go];
+
+    function advance() {
+      if (advancing) return;
+      advancing = true;
+
+      stepIndex++;
+      if (stepIndex >= steps.length) {
+        finish();
+        return;
+      }
+
+      setTimeout(function() {
+        steps[stepIndex]();
+        advancing = false;
+      }, 200);
+    }
+
+    function finish() {
+      tutorialActive = false;
+      unhighlightAll();
+      housing.classList.remove('tutorial-active');
+      dim.remove();
+      textBox.remove();
+      skipBtn.remove();
+
+      clearLog();
+      document.getElementById('rangeLow').textContent = '1';
+      document.getElementById('rangeHigh').textContent = '100';
+      document.getElementById('rangeHigh').classList.remove('ticking', 'expand-land');
+      batterySetCharges(0);
+      document.querySelectorAll('.bulb').forEach(function(b) {
+        b.classList.remove('active', 'tier-green', 'tier-amber', 'tier-red', 'draining');
+      });
+      npBuffer = '';
+      updateDisplay();
+
+      document.getElementById('stats-panel').style.visibility = 'hidden';
+      document.getElementById('stats-handle').classList.remove('visible');
+      if (window.closeStatsPanel) window.closeStatsPanel();
+
+      storageSet(userKey('tutorialDone'), '1');
+      onComplete();
+    }
+
+    // Tap handlers - tapping anywhere advances (except step 3)
+    function tutTapHandler(e) {
+      if (!tutorialActive) {
+        document.removeEventListener('click', tutTapHandler, true);
+        return;
+      }
+      // Don't advance if tapping skip button
+      if (skipBtn.contains(e.target)) return;
+      // Step 3: only numpad keys and enter work, no tap-to-advance
+      if (step3WaitingForInput) {
+        var btn = e.target.closest('.np');
+        if (btn && btn.dataset.action === 'enter' && npBuffer.length > 0) {
+          // They typed something and hit enter, advance
+          step3WaitingForInput = false;
+          advance();
+          return;
+        }
+        // Allow numpad digit/backspace clicks to pass through (don't advance)
+        return;
+      }
+      advance();
+    }
+    document.addEventListener('click', tutTapHandler, true);
+
+    skipBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      finish();
+    });
+
+    // Keyboard advance
+    function tutKeyHandler(e) {
+      if (!tutorialActive) {
+        document.removeEventListener('keydown', tutKeyHandler);
+        return;
+      }
+      if (step3WaitingForInput) {
+        // Only advance on Enter if they've typed something
+        if (e.key === 'Enter' && npBuffer.length > 0) {
+          e.preventDefault();
+          step3WaitingForInput = false;
+          advance();
+        }
+        return;
+      }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        advance();
+      }
+    }
+    document.addEventListener('keydown', tutKeyHandler);
+
+    // Start step 1
+    steps[0]();
+  }
+
+  // ==========================================
   // USER SYSTEM
   // ==========================================
 
@@ -4328,8 +5497,18 @@
       currentUser = callsign;
       storageSet('user:session', callsign);
       screen.remove();
-      init();
-      showCallsignOnScoreboard(callsign);
+
+      // First-time users get the tutorial
+      var tutorialDone = storageGet(userKey('tutorialDone'));
+      if (!tutorialDone) {
+        showTutorial(callsign, function() {
+          init();
+          showCallsignOnScoreboard(callsign);
+        });
+      } else {
+        init();
+        showCallsignOnScoreboard(callsign);
+      }
     }
 
     // Initialise display
