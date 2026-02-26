@@ -1,0 +1,232 @@
+/* ==========================================
+   SPLASH SCREEN
+   ========================================== */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: opacity 0.8s ease;
+}
+
+#splash.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#splash-content {
+  text-align: center;
+}
+
+.splash-label {
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.splash-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 64px;
+  font-weight: 700;
+  color: var(--green);
+  text-shadow: 0 0 40px var(--green), 0 0 80px rgba(57,255,20,0.3);
+  letter-spacing: 12px;
+  margin-bottom: 60px;
+  position: relative;
+}
+
+/* Post-tap: title drifts in from deep back, matching the bass attack */
+#splash-content.post-tap .splash-title {
+  animation: titleRiseFromBack 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes titleRiseFromBack {
+  0%   {
+    opacity: 0;
+    transform: scale(0.18) translateZ(0);
+    text-shadow: 0 0 120px var(--green), 0 0 200px rgba(57,255,20,0.6);
+    filter: blur(8px);
+    letter-spacing: 2px;
+  }
+  30%  {
+    opacity: 0.4;
+    filter: blur(3px);
+  }
+  65%  {
+    opacity: 0.85;
+    transform: scale(1.04) translateZ(0);
+    text-shadow: 0 0 60px var(--green), 0 0 120px rgba(57,255,20,0.4);
+    filter: blur(0.5px);
+    letter-spacing: 10px;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+    text-shadow: 0 0 40px var(--green), 0 0 80px rgba(57,255,20,0.3);
+    filter: blur(0px);
+    letter-spacing: 12px;
+  }
+}
+
+.splash-sub {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  margin-top: 60px;
+  margin-bottom: 32px;
+}
+
+.glitch-letter {
+  display: inline-block;
+  transition: color 0.1s;
+}
+
+.glitch-letter.scrambling {
+  color: var(--green);
+  text-shadow:
+    0 0 10px var(--green),
+    0 0 30px var(--green),
+    0 0 60px rgba(57,255,20,0.8),
+    2px 0 8px rgba(255,0,0,0.6),
+    -2px 0 8px rgba(0,200,255,0.6);
+  animation: glitchShake 0.05s infinite;
+}
+
+.glitch-letter.settled {
+  color: var(--muted);
+  text-shadow: none;
+  animation: none;
+}
+
+@keyframes glitchShake {
+  0%   { transform: translate(0,0) skewX(0deg); opacity: 1; }
+  10%  { transform: translate(-4px, 2px) skewX(-8deg); opacity: 0.8; }
+  20%  { transform: translate(4px,-2px) skewX(6deg); opacity: 1; }
+  30%  { transform: translate(-3px, 3px) skewX(0deg); opacity: 0.6; }
+  40%  { transform: translate(3px,-1px) skewX(-4deg); opacity: 1; }
+  50%  { transform: translate(0, 0) skewX(10deg); opacity: 0.7; }
+  60%  { transform: translate(-5px, 1px) skewX(-6deg); opacity: 1; }
+  70%  { transform: translate(5px, 2px) skewX(4deg); opacity: 0.5; }
+  80%  { transform: translate(-2px,-3px) skewX(0deg); opacity: 1; }
+  90%  { transform: translate(2px, 0px) skewX(-8deg); opacity: 0.8; }
+  100% { transform: translate(0,0) skewX(0deg); opacity: 1; }
+}
+
+.splash-title.glitching::before,
+.splash-title.glitching::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: 12px;
+  pointer-events: none;
+}
+
+.splash-title.glitching::before {
+  color: rgba(255, 0, 80, 0.5);
+  animation: rgbLeft 0.08s infinite;
+  clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+}
+
+.splash-title.glitching::after {
+  color: rgba(0, 255, 255, 0.5);
+  animation: rgbRight 0.06s infinite;
+  clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
+}
+
+@keyframes rgbLeft {
+  0%   { transform: translate(-6px, 0); opacity: 1; }
+  50%  { transform: translate(4px, -2px); opacity: 0.6; }
+  100% { transform: translate(-6px, 0); opacity: 1; }
+}
+
+@keyframes rgbRight {
+  0%   { transform: translate(6px, 0); opacity: 1; }
+  50%  { transform: translate(-4px, 2px); opacity: 0.6; }
+  100% { transform: translate(6px, 0); opacity: 1; }
+}
+
+#splash.glitch-active::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,255,0,0.03) 3px,
+    rgba(0,255,0,0.03) 4px
+  );
+  animation: scanFlicker 0.1s infinite;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+@keyframes scanFlicker {
+  0%   { opacity: 1; transform: translateY(0); }
+  50%  { opacity: 0.5; transform: translateY(-2px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tear {
+  0%   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  10%  { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 47%); }
+  11%  { clip-path: polygon(0 47%, 100% 45%, 100% 100%, 0 100%); }
+  20%  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  80%  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  90%  { clip-path: polygon(0 0, 100% 0, 100% 70%, 0 72%); }
+  91%  { clip-path: polygon(0 72%, 100% 70%, 100% 100%, 0 100%); }
+  100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+}
+
+#splash-content.tearing {
+  animation: tear 0.3s infinite;
+}
+
+/* TAP prompt -- visible immediately, pulses to invite tap */
+.splash-ready {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--green);
+  opacity: 1;
+  animation: promptPulse 1.0s ease-in-out infinite;
+}
+
+.splash-ready.hidden-prompt {
+  opacity: 0;
+  animation: none;
+  transition: opacity 0.15s;
+}
+
+/* Before tap: hide everything except the prompt */
+#splash-content.pre-tap .splash-label,
+#splash-content.pre-tap .splash-title,
+#splash-content.pre-tap .splash-sub {
+  opacity: 0;
+}
+
+/* After tap: label/sub fade in normally */
+#splash-content.post-tap .splash-label,
+#splash-content.post-tap .splash-sub {
+  animation: blinkIn 0.4s ease forwards;
+}
+/* Title gets its own deep-zoom animation (defined above) */
+
+@keyframes promptPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+
+@keyframes blinkIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

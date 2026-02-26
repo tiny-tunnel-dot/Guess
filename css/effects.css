@@ -1,0 +1,144 @@
+/* ── Jackpot: first-guess-win full-screen celebration ── */
+.jackpot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+}
+.jackpot-overlay.active {
+  animation: jackpotFlash 3s ease-out forwards;
+}
+@keyframes jackpotFlash {
+  0%   { opacity: 0; background: rgba(100,200,255,0); }
+  5%   { opacity: 1; background: rgba(100,200,255,0.4); }
+  10%  { opacity: 1; background: rgba(255,255,255,0.6); }
+  15%  { opacity: 1; background: rgba(100,200,255,0.3); }
+  25%  { opacity: 1; background: rgba(80,180,255,0.15); }
+  50%  { opacity: 1; background: rgba(60,160,255,0.05); }
+  100% { opacity: 0; background: rgba(60,160,255,0); }
+}
+.housing.jackpot-glow {
+  animation: housingJackpotGlow 2.5s ease-out;
+}
+@keyframes housingJackpotGlow {
+  0%   { box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.4), 0 0 60px rgba(100,200,255,0.6), 0 0 120px rgba(80,180,255,0.3); }
+  30%  { box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.4), 0 0 40px rgba(100,200,255,0.4), 0 0 80px rgba(80,180,255,0.2); }
+  100% { box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.4); }
+}
+.bulb.jackpot-blue {
+  background: radial-gradient(circle, rgba(120,200,255,0.95) 0%, rgba(80,160,255,0.7) 40%, rgba(40,120,200,0.3) 70%, transparent 100%) !important;
+  box-shadow: 0 0 6px rgba(100,200,255,0.8), 0 0 14px rgba(80,180,255,0.4) !important;
+}
+@keyframes jackpotBulbSweep {
+  0%   { filter: brightness(1); }
+  50%  { filter: brightness(2); }
+  100% { filter: brightness(1); }
+}
+#log.jackpot-screen {
+  animation: jackpotScreenFlash 1.5s ease-out;
+}
+@keyframes jackpotScreenFlash {
+  0%   { box-shadow: inset 0 0 40px rgba(100,200,255,0.6), inset 0 0 80px rgba(80,180,255,0.3); }
+  100% { box-shadow: none; }
+}
+
+/* ── Battery shake ── */
+@keyframes batteryShake {
+  0%   { transform: translateY(-50%) translateX(0); }
+  15%  { transform: translateY(-50%) translateX(-3px); }
+  30%  { transform: translateY(-50%) translateX(3px); }
+  45%  { transform: translateY(-50%) translateX(-3px); }
+  60%  { transform: translateY(-50%) translateX(3px); }
+  75%  { transform: translateY(-50%) translateX(-2px); }
+  90%  { transform: translateY(-50%) translateX(2px); }
+  100% { transform: translateY(-50%) translateX(0); }
+}
+.battery-housing.shake { animation: batteryShake 0.4s ease; }
+
+/* ── Range pulse and animations ── */
+@keyframes rangePulse {
+  0%   { text-shadow: 0 0 8px rgba(57,255,20,0.7), 0 0 20px rgba(57,255,20,0.35), 0 0 40px rgba(57,255,20,0.15); }
+  50%  { text-shadow: 0 0 14px rgba(57,255,20,1), 0 0 30px rgba(57,255,20,0.6), 0 0 60px rgba(57,255,20,0.3); }
+  100% { text-shadow: 0 0 8px rgba(57,255,20,0.7), 0 0 20px rgba(57,255,20,0.35), 0 0 40px rgba(57,255,20,0.15); }
+}
+
+.range-num.pulse {
+  animation: rangePulse 0.4s ease-out;
+}
+
+@keyframes rangeExpandLand {
+  0%   { text-shadow: 0 0 20px rgba(57,255,20,1), 0 0 40px rgba(57,255,20,0.7), 0 0 80px rgba(57,255,20,0.4); transform: scale(1.1); }
+  100% { text-shadow: 0 0 8px rgba(57,255,20,0.7), 0 0 20px rgba(57,255,20,0.35), 0 0 40px rgba(57,255,20,0.15); transform: scale(1); }
+}
+
+.range-num.expand-land {
+  animation: rangeExpandLand 0.5s ease-out;
+}
+
+.range-num.ticking {
+  text-shadow: 0 0 12px rgba(57,255,20,0.9), 0 0 25px rgba(57,255,20,0.5), 0 0 50px rgba(57,255,20,0.2);
+}
+
+@keyframes rangeCollapseLand {
+  0%   { opacity: 0.3; text-shadow: 0 0 2px rgba(57,255,20,0.2); }
+  40%  { opacity: 0.3; text-shadow: 0 0 2px rgba(57,255,20,0.2); }
+  100% { opacity: 1; text-shadow: 0 0 8px rgba(57,255,20,0.7), 0 0 20px rgba(57,255,20,0.35), 0 0 40px rgba(57,255,20,0.15); }
+}
+
+.range-num.collapse-land {
+  animation: rangeCollapseLand 0.6s ease-out;
+}
+
+/* ── Range Takeover: scale-up celebration on win ── */
+.range-box {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s ease, z-index 0s;
+  position: relative;
+  z-index: 1;
+}
+.range-box.takeover {
+  z-index: 100;
+  transform: scale(2.2) translateY(45px);
+  box-shadow:
+    inset 0 0 12px rgba(0,0,0,0.6),
+    inset 0 0 4px rgba(57,255,20,0.04),
+    0 0 30px rgba(57,255,20,0.3),
+    0 0 60px rgba(57,255,20,0.15),
+    0 0 100px rgba(57,255,20,0.05);
+  border-color: rgba(57,255,20,0.4);
+}
+.range-box.takeover-return {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+  z-index: 100;
+}
+.terminal-body.range-dimmed #log {
+  transition: opacity 0.3s ease;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* Flash feedback on log container */
+#log.flash-correct {
+  animation: logFlashCorrect 0.6s ease forwards;
+}
+#log.flash-close {
+  animation: logFlashClose 0.45s ease forwards;
+}
+#log.flash-far {
+  animation: logFlashFar 0.4s ease forwards;
+}
+@keyframes logFlashCorrect {
+  0%   { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+  20%  { border-color: rgba(57,255,20,0.6); box-shadow: inset 0 0 20px rgba(57,255,20,0.15), 0 0 12px rgba(57,255,20,0.2); }
+  100% { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+}
+@keyframes logFlashClose {
+  0%   { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+  25%  { border-color: rgba(255,183,0,0.5); box-shadow: inset 0 0 16px rgba(255,183,0,0.1), 0 0 8px rgba(255,183,0,0.15); }
+  100% { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+}
+@keyframes logFlashFar {
+  0%   { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+  25%  { border-color: rgba(255,64,64,0.4); box-shadow: inset 0 0 16px rgba(255,64,64,0.1), 0 0 8px rgba(255,64,64,0.15); }
+  100% { border-color: rgba(30,58,30,0.5); box-shadow: inset 0 2px 12px rgba(0,0,0,0.6); }
+}

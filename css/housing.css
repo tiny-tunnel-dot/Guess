@@ -1,0 +1,175 @@
+/* ==========================================
+   DEVICE HOUSING
+   ========================================== */
+.device {
+  width: 560px;
+  max-width: calc(100vw - 30px);
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  transform: rotateX(3deg) rotateY(-1.5deg);
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  filter: drop-shadow(0 50px 80px rgba(0,0,0,0.9));
+}
+
+.device:hover {
+  transform: rotateX(1.5deg) rotateY(0deg);
+}
+
+.housing {
+  position: relative;
+  border-radius: 8px;
+  padding: 28px 26px 26px;
+  transform-style: preserve-3d;
+  background:
+    repeating-linear-gradient(
+      87deg,
+      transparent,
+      transparent 3px,
+      rgba(255,255,255,0.008) 3px,
+      rgba(255,255,255,0.008) 4px
+    ),
+    linear-gradient(
+      175deg,
+      #3a3830 0%,
+      #2e2c24 15%,
+      #262420 40%,
+      #201e18 70%,
+      #1a1810 100%
+    );
+  border: 1px solid #4a4840;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 2px 0 rgba(255,255,255,0.05),
+    inset 1px 0 0 rgba(255,255,255,0.08),
+    inset 0 -2px 0 rgba(0,0,0,0.4),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    inset -1px 0 0 rgba(0,0,0,0.3),
+    inset 0 0 40px rgba(0,0,0,0.3),
+    0 0 80px rgba(57,255,20,0.04),
+    0 0 120px rgba(57,255,20,0.02),
+    6px 16px 30px rgba(0,0,0,0.8),
+    0 40px 80px rgba(0,0,0,0.5);
+}
+
+.housing::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: -12px; bottom: -6px;
+  width: 12px;
+  background: linear-gradient(to right, #1a1810, #0e0d08);
+  transform: rotateY(90deg);
+  transform-origin: left center;
+  border-radius: 0 4px 4px 0;
+  pointer-events: none;
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+
+.housing::before {
+  content: '';
+  position: absolute;
+  left: 6px; right: -6px; bottom: -12px;
+  height: 12px;
+  background: linear-gradient(to bottom, #161410, #0a0908);
+  transform: rotateX(-90deg);
+  transform-origin: top center;
+  border-radius: 0 0 4px 4px;
+  pointer-events: none;
+}
+
+/* CORNER SCREWS */
+.screw {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 40% 35%,
+      #706e62 0%,
+      #555248 30%,
+      #3a3830 60%,
+      #2a2820 100%
+    );
+  border: 1px solid rgba(0,0,0,0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -1px 0 rgba(0,0,0,0.3),
+    0 1px 3px rgba(0,0,0,0.6);
+  z-index: 20;
+}
+
+.screw::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 8px; height: 1.5px;
+  background: var(--screw-slot);
+  transform: translate(-50%, -50%) rotate(35deg);
+  border-radius: 1px;
+}
+.screw::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 8px; height: 1.5px;
+  background: var(--screw-slot);
+  transform: translate(-50%, -50%) rotate(-55deg);
+  border-radius: 1px;
+}
+
+.screw-tl { top: 10px; left: 10px; cursor: pointer; transform: rotate(12deg); }
+.screw-tr { top: 10px; right: 10px; transform: rotate(-25deg); cursor: pointer; }
+.screw-bl { bottom: 10px; left: 10px; transform: rotate(45deg); }
+.screw-br { bottom: 10px; right: 10px; transform: rotate(8deg); }
+
+/* VENT SLITS */
+.vents {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 5;
+  opacity: 0.5;
+}
+
+.vent-slit {
+  width: 3px;
+  height: 14px;
+  background: #0a0908;
+  border-radius: 1px;
+  box-shadow:
+    inset 0 1px 0 rgba(0,0,0,0.8),
+    0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* POWER LED */
+
+/* Divider line etched into housing between screen and keypad */
+.housing-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(0,0,0,0.4) 15%,
+    rgba(0,0,0,0.5) 50%,
+    rgba(0,0,0,0.4) 85%,
+    transparent 100%
+  );
+  margin-bottom: 4px;
+  position: relative;
+}
+.housing-divider::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.04) 15%,
+    rgba(255,255,255,0.06) 50%,
+    rgba(255,255,255,0.04) 85%,
+    transparent 100%
+  );
+}

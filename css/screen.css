@@ -1,0 +1,532 @@
+/* ==========================================
+   CRT SCREEN -- recessed into housing
+   ========================================== */
+.screen-bezel {
+  position: relative;
+  border-radius: 8px;
+  padding: 10px;
+  background:
+    linear-gradient(160deg,
+      #232018 0%,
+      #1a1814 40%,
+      #141210 100%
+    );
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-left: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid rgba(0,0,0,0.6);
+  border-bottom: 1px solid rgba(0,0,0,0.6);
+  box-shadow:
+    /* Inset shadow on inner face -- depth without crushing corners */
+    inset 0 4px 12px rgba(0,0,0,0.8),
+    inset 4px 0 10px rgba(0,0,0,0.5),
+    inset -4px 0 10px rgba(0,0,0,0.5),
+    inset 0 -2px 8px rgba(0,0,0,0.4),
+    /* Subtle green ambient from screen */
+    0 0 20px rgba(57,255,20,0.06),
+    /* Outer shadow pressing it into the housing */
+    0 2px 8px rgba(0,0,0,0.7);
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+
+/* Inner recess ring */
+.screen-bezel::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.9),
+    inset 2px 0 6px rgba(0,0,0,0.6),
+    inset -2px 0 6px rgba(0,0,0,0.6),
+    inset 0 -1px 4px rgba(0,0,0,0.5);
+  pointer-events: none;
+  z-index: 60;
+}
+
+.terminal {
+  width: 100%;
+  border-radius: 4px / 6px;
+  background: var(--panel);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Idle dim transition */
+  transition: filter 1.5s ease, opacity 1.5s ease;
+}
+
+/* IDLE SCREEN DIMMING */
+/* CRT SCANLINE + NOISE -- now handled by <canvas id="crtCanvas"> */
+
+#crtCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  border-radius: 3px;
+}
+
+/* CRT PHOSPHOR GLOW -- emissive center warmth */
+.terminal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      rgba(57,255,20,0.04) 0%,
+      transparent 65%
+    );
+  pointer-events: none;
+  z-index: 51;
+  border-radius: 3px;
+}
+
+.crt-vignette {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background:
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 55%,
+      rgba(0,0,0,0.12) 70%,
+      rgba(0,0,0,0.3) 85%,
+      rgba(0,0,0,0.5) 100%
+    );
+  pointer-events: none;
+  z-index: 52;
+}
+
+/* crt-flicker removed -- now driven by canvas */
+
+.crt-reflection {
+  position: absolute;
+  top: -5%;
+  left: 10%;
+  width: 80%;
+  height: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.01) 40%,
+    transparent 100%
+  );
+  border-radius: 50% 50% 0 0;
+  pointer-events: none;
+  z-index: 54;
+  transform: scaleX(1.1);
+}
+
+.terminal-body {
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.terminal-bar {
+  background: linear-gradient(180deg, #1a2e1a 0%, #0f1f0f 100%);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--green-dim);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 2px 8px rgba(0,0,0,0.4);
+  position: relative;
+}
+
+.cheat-value {
+  position: absolute;
+  top: 10px;
+  left: 30px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: #ffffff;
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  user-select: none;
+  z-index: 25;
+  text-shadow: 0 0 6px rgba(255,255,255,0.4);
+}
+
+.cheat-value.visible { opacity: 1; }
+
+#reset-label {
+  position: absolute;
+  top: 13px;
+  right: 32px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--red);
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 25;
+  text-shadow: 0 0 6px rgba(255,64,64,0.5);
+  transition: opacity 0.2s ease;
+  user-select: none;
+}
+
+#reset-label.visible { opacity: 1; }
+
+.terminal-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+
+h1 {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--green);
+  text-shadow: 0 0 20px var(--green), 0 0 40px rgba(57,255,20,0.3);
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+
+.info-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.info-box {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--panel-light) 0%, var(--panel) 100%);
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1px 0 rgba(57,255,20,0.08),
+    inset 0 -2px 4px rgba(0,0,0,0.4),
+    0 2px 6px rgba(0,0,0,0.4);
+}
+
+.range-box {
+  padding: clamp(10px, 2vw, 16px) clamp(12px, 3vw, 24px);
+  text-align: center;
+  background: linear-gradient(180deg, rgba(10,14,10,0.95) 0%, rgba(6,10,6,0.98) 100%);
+  border: 1px solid rgba(57,255,20,0.15);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 12px rgba(0,0,0,0.6),
+    inset 0 0 4px rgba(57,255,20,0.04),
+    0 2px 8px rgba(0,0,0,0.5);
+}
+
+.range-readout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 2vw, 16px);
+}
+
+.range-num {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(28px, 6vw, 42px);
+  font-weight: bold;
+  color: var(--green);
+  text-shadow:
+    0 0 8px rgba(57,255,20,0.7),
+    0 0 20px rgba(57,255,20,0.35),
+    0 0 40px rgba(57,255,20,0.15);
+  letter-spacing: 2px;
+  min-width: 1.8em;
+  text-align: center;
+}
+
+.range-sep {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(18px, 3.5vw, 26px);
+  color: rgba(57,255,20,0.35);
+  text-shadow: 0 0 6px rgba(57,255,20,0.15);
+}
+
+.range-box .info-box-label {
+  margin-top: clamp(4px, 1vw, 8px);
+  font-size: clamp(8px, 1.5vw, 11px);
+  color: rgba(57,255,20,0.3);
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+.info-box-label {
+  font-size: 11px;
+  color: #b8d4b8;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+
+.info-box-value {
+  font-size: 22px;
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--green);
+  text-shadow: 0 0 10px rgba(57,255,20,0.5);
+  letter-spacing: 2px;
+}
+
+#log {
+  overflow-y: auto;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 185px;
+  max-height: 185px;
+  min-height: 185px;
+  flex-shrink: 0;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 3px;
+  border: 1px solid rgba(30,58,30,0.5);
+  box-shadow: inset 0 2px 12px rgba(0,0,0,0.6);
+  transition: opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.log-line {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 2px 0;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.log-line.system { color: var(--green); text-shadow: 0 0 10px rgba(57,255,20,0.6); }
+.log-line.guess  { color: var(--text); }
+.log-line.hint   { color: var(--amber); }
+.log-line.win    { color: var(--green); text-shadow: 0 0 10px var(--green); }
+
+.log-line.typing::after {
+  content: '▋';
+  color: var(--green);
+  animation: cursorBlink 1.1s step-end infinite;
+  margin-left: 1px;
+  text-shadow: 0 0 8px rgba(57,255,20,0.8);
+}
+
+/* ==========================================
+   USER SYSTEM SCREENS
+   ========================================== */
+
+#game-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Shared screen wrapper -- absolute overlay inside terminal-body.
+   Height is always driven by #game-ui; these screens just sit on top. */
+.user-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 0;
+  background: var(--panel);
+  z-index: 10;
+}
+
+.user-screen-label {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.user-screen-title {
+  font-size: 17px;
+  color: var(--green);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(57,255,20,0.5);
+}
+
+/* Callsign display -- the "> [A__]" line */
+.callsign-display {
+  font-size: 28px;
+  color: var(--green);
+  letter-spacing: 6px;
+  text-shadow: 0 0 16px rgba(57,255,20,0.6);
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.callsign-prompt-char {
+  color: var(--muted);
+}
+
+.callsign-char {
+  display: inline-block;
+  width: 22px;
+  text-align: center;
+  border-bottom: 2px solid var(--green-dim);
+  padding-bottom: 2px;
+  transition: border-color 0.15s ease;
+}
+
+.callsign-char.filled {
+  border-color: var(--green);
+  text-shadow: 0 0 12px rgba(57,255,20,0.7);
+}
+
+/* Blinking cursor on the active (next empty) slot */
+.callsign-char.cursor {
+  border-color: var(--green);
+  animation: callsignBlink 0.8s step-end infinite;
+}
+
+@keyframes callsignBlink {
+  0%, 100% { border-color: var(--green); }
+  50%       { border-color: transparent; }
+}
+
+/* ---- Arrow-based callsign letter selector ---- */
+
+.cs-tiles {
+  display: flex;
+  gap: clamp(10px, 3vw, 18px);
+  align-items: center;
+  justify-content: center;
+}
+
+.cs-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.cs-arrow {
+  width: 60px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  background: none;
+  border: 1px solid rgba(57,255,20,0.12);
+  border-radius: 4px;
+  padding: 0;
+  color: var(--green);
+  font-size: 26px;
+  opacity: 0.55;
+  transition: opacity 0.12s ease, text-shadow 0.12s ease, background 0.12s ease;
+}
+
+.cs-arrow:hover {
+  opacity: 0.9;
+  background: rgba(57,255,20,0.05);
+}
+
+.cs-arrow:active,
+.cs-arrow.flash {
+  opacity: 1;
+  text-shadow: 0 0 12px rgba(57,255,20,0.8);
+  background: rgba(57,255,20,0.08);
+}
+
+.cs-letter-box {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(32px, 7vw, 42px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #39ff14;
+  text-shadow:
+    0 0 8px rgba(57,255,20,0.7),
+    0 0 20px rgba(57,255,20,0.35),
+    0 0 40px rgba(57,255,20,0.15);
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.cs-slot.active .cs-letter-box {
+  text-shadow:
+    0 0 10px rgba(57,255,20,0.9),
+    0 0 25px rgba(57,255,20,0.5),
+    0 0 50px rgba(57,255,20,0.25);
+}
+
+.cs-enter {
+  margin-top: 28px;
+  padding: 0 28px;
+  height: 36px;
+  background: linear-gradient(180deg, #0f1f0f 0%, #080e08 100%);
+  border: 1px solid var(--green-dim);
+  border-radius: 3px;
+  color: var(--green);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    inset 0 -2px 4px rgba(0,0,0,0.5),
+    0 0 8px rgba(57,255,20,0.08);
+  transition: background 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+  user-select: none;
+}
+
+.cs-enter:hover {
+  background: linear-gradient(180deg, #162616 0%, #0d180d 100%);
+  border-color: var(--green);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -2px 4px rgba(0,0,0,0.5),
+    0 0 14px rgba(57,255,20,0.18);
+}
+
+.cs-enter:active {
+  background: linear-gradient(180deg, #080e08 0%, #0f1f0f 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.7),
+    0 0 6px rgba(57,255,20,0.1);
+  transform: translateY(1px);
+}
+
+/* Welcome back callsign display */
+.welcome-callsign {
+  font-size: 36px;
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--green);
+  letter-spacing: 8px;
+  text-shadow: 0 0 20px rgba(57,255,20,0.6), 0 0 40px rgba(57,255,20,0.2);
+  text-transform: uppercase;
+}
+
+/* ==========================================
+   SPLIT-FLAP CALLSIGN DISPLAY
+   ========================================== */
