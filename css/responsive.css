@@ -1,0 +1,161 @@
+/* ==========================================
+   RESPONSIVE — all @media queries
+   ========================================== */
+
+/* ── Effects: range takeover ── */
+@media (max-width: 500px) {
+  .range-box.takeover {
+    transform: scale(1.8) translateY(35px);
+  }
+}
+@media (max-width: 380px) {
+  .range-box.takeover {
+    transform: scale(1.5) translateY(28px);
+  }
+}
+
+/* ==========================================
+   MOBILE -- all phones (max-width: 500px)
+   Key rule: perspective stays on .device.
+   We kill the tilt so perspective is inert.
+   Body padding zeroed, device goes full-bleed.
+   ========================================== */
+@media (max-width: 500px) {
+  /* ── Base ── */
+  body {
+    padding: 0;
+    align-items: flex-start;
+  }
+
+  /* ── Housing ── */
+  .device {
+    width: 100%;
+    max-width: 100%;
+    /* Kill tilt -- frees up space, perspective on .device stays harmless */
+    transform: none !important;
+    filter: none;
+  }
+  .device:hover { transform: none !important; }
+  .housing {
+    border-radius: 0;
+    padding: 16px 12px 8px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Kill 3D depth faces -- invisible without tilt, just add overflow */
+  .housing::before, .housing::after { display: none; }
+  .vents { display: none; }
+  /* Bottom screws serve no purpose on full-bleed mobile */
+  .screw-bl, .screw-br { display: none; }
+  .screw { width: 10px; height: 10px; }
+  .screw::before, .screw::after { width: 6px; }
+  .screw-tl { top: 8px; left: 8px; }
+  .screw-tr { top: 8px; right: 8px; }
+  .housing-divider { margin-bottom: 6px; }
+
+  /* ── Screen ── */
+  .screen-bezel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-bottom: 8px;
+  }
+  .terminal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .terminal-bar { padding: 5px 10px; }
+  .terminal-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    padding: 8px 12px;
+  }
+  #game-ui {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  #cheatValue { top: 8px; left: 24px; font-size: 10px; }
+  .info-row { margin-bottom: 6px; }
+  .info-box { padding: 4px 10px; }
+  .info-box-label { font-size: 9px; }
+  .info-box-value { font-size: 15px; }
+  .range-box { padding: 8px 10px; }
+  .range-box .info-box-label { font-size: 8px; }
+  #log {
+    flex: 1;
+    height: auto;
+    max-height: calc(100dvh - 620px);
+    min-height: 120px;
+    overflow-y: auto;
+    padding: 5px 8px;
+    margin-bottom: 6px;
+  }
+  .log-line { font-size: 14px; }
+  h1 { font-size: 20px; }
+
+  /* ── Controls ── */
+  .bulb-strip { padding: 36px 0 36px; }
+  .bulb-strip-label { font-size: 14px; }
+  .keypad-well { padding: 8px; }
+  #numpad { gap: 5px; }
+  .np { height: 48px; }
+  .np .key-face { height: 38px; font-size: 20px; }
+  .np.enter.full { height: 50px; }
+  .np.enter.full .key-face { height: 40px; font-size: 13px; letter-spacing: 6px; }
+
+  /* ── Tutorial ── */
+  .tutorial-text-box {
+    width: 92%;
+    padding: 14px 14px 12px;
+  }
+  .tutorial-message {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .tutorial-tap {
+    font-size: 10px;
+    margin-top: 10px;
+  }
+}
+
+/* Tighter fit for shorter phones (iPhone SE, older 4.7") */
+@media (max-width: 500px) and (max-height: 750px) {
+  .housing { padding: 26px 10px 12px; }
+  .terminal-bar { padding: 4px 8px; }
+  .terminal-body { padding: 8px 10px; }
+  h1 { font-size: 14px; margin-bottom: 2px; }
+  .info-row { margin-bottom: 6px; }
+  .info-box { padding: 4px 8px; }
+  .info-box-label { font-size: 8px; }
+  .info-box-value { font-size: 14px; }
+  .range-box { padding: 6px 8px; }
+  .range-box .info-box-label { font-size: 7px; }
+  #log { padding: 4px 6px; margin-bottom: 6px; }
+  .log-line { font-size: 14px; line-height: 1.4; }
+  .screen-bezel { margin-bottom: 8px; }
+  .housing-divider { margin-bottom: 8px; }
+  .bulb-strip { padding: 28px 0 28px; }
+
+  .keypad-well { padding: 6px; }
+  #numpad { gap: 4px; }
+  .np { height: 44px; }
+  .np .key-face { height: 36px; font-size: 18px; }
+  .np.enter.full { height: 48px; }
+  .np.enter.full .key-face { height: 38px; font-size: 12px; letter-spacing: 5px; }
+}
+
+/* Landscape mobile -- cap log so it doesn't dominate */
+@media (max-width: 900px) and (orientation: landscape) {
+  #log { flex: none; height: 60px; max-height: 60px; min-height: 60px; flex-shrink: 0; }
+}
