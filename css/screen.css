@@ -286,9 +286,9 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  height: 185px;
-  max-height: 185px;
-  min-height: 185px;
+  height: 210px;
+  max-height: 210px;
+  min-height: 210px;
   flex-shrink: 0;
   padding: 8px 10px;
   background: rgba(0,0,0,0.3);
@@ -314,6 +314,80 @@ h1 {
 .log-line.guess  { color: var(--text); }
 .log-line.hint   { color: var(--amber); }
 .log-line.win    { color: var(--green); text-shadow: 0 0 10px var(--green); }
+
+/* ==========================================
+   GUESS HISTORY — colored digit cells
+   ========================================== */
+.log-line.guess-result {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  padding: 3px 0;
+}
+
+.guess-num {
+  font-size: 10px;
+  color: rgba(57,255,20,0.35);
+  min-width: 16px;
+  text-align: right;
+  margin-right: 4px;
+  letter-spacing: 0;
+}
+
+.digit-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 1px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.digit-locked {
+  background: rgba(57, 255, 20, 0.2);
+  color: var(--green);
+  border: 1px solid rgba(57, 255, 20, 0.4);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+}
+
+.digit-found {
+  background: rgba(255, 183, 0, 0.2);
+  color: var(--amber);
+  border: 1px solid rgba(255, 183, 0, 0.35);
+  text-shadow: 0 0 8px rgba(255, 183, 0, 0.5);
+}
+
+.digit-miss {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.guess-summary {
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-left: 6px;
+  color: var(--muted);
+}
+
+.sum-locked {
+  color: var(--green);
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.4);
+}
+
+.sum-found {
+  color: var(--amber);
+  text-shadow: 0 0 6px rgba(255, 183, 0, 0.4);
+}
+
+.sum-miss {
+  color: rgba(255, 255, 255, 0.3);
+}
 
 .log-line.typing::after {
   content: '▋';

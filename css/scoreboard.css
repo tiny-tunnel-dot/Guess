@@ -10,7 +10,7 @@
    So sb-digit height = clamp(25,4.5vw,40) + 7 = clamp(32, calc(4.5vw + 7px), 47) */
 .bulb-strip .scoreboard-housing {
   position: absolute;
-  left: calc(50% + 115px + clamp(4px, 1vw, 10px));
+  left: calc(50% + 132px + clamp(4px, 1vw, 10px));
   top: 50%;
   transform: translateY(-50%);
   width: auto;
